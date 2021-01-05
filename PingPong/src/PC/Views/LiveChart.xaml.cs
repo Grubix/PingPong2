@@ -6,11 +6,7 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace PingPong
-{
-    /// <summary>
-    /// Interaction logic for LiveChart.xaml
-    /// </summary>
+namespace PingPong {
     public partial class LiveChart : UserControl {
 
         private readonly Stopwatch stopWatch = new Stopwatch();

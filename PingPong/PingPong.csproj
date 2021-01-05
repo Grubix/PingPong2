@@ -7,13 +7,28 @@
     <ProjectGuid>{AA67FE29-80B6-4424-A9DE-83D3DEB61BA0}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <RootNamespace>PingPong</RootNamespace>
-    <AssemblyName>PingPong</AssemblyName>
+    <AssemblyName>Ping Pong</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -34,7 +49,16 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>PingPong.App</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MathNet.Numerics, Version=4.14.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MathNet.Numerics.4.14.0\lib\net461\MathNet.Numerics.dll</HintPath>
+    </Reference>
+    <Reference Include="NatNetML, Version=2.8.5602.27741, Culture=neutral, processorArchitecture=x86">
+      <HintPath>..\packages\OptiTrack.NatNet.2.8.0\lib\NatNetML.dll</HintPath>
+    </Reference>
     <Reference Include="OxyPlot, Version=2.0.0.0, Culture=neutral, PublicKeyToken=638079a8f0bd61e9, processorArchitecture=MSIL">
       <HintPath>..\packages\OxyPlot.Core.2.0.0\lib\net45\OxyPlot.dll</HintPath>
     </Reference>
@@ -44,7 +68,9 @@
     <Reference Include="ReachFramework" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Printing" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -59,33 +85,51 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <ApplicationDefinition Include="App.xaml">
+    <ApplicationDefinition Include="src\PC\Views\App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="LiveChart.xaml.cs">
+    <Compile Include="src\PC\Devices\IDevice.cs" />
+    <Compile Include="src\PC\Devices\KUKA\KUKARobot.cs" />
+    <Compile Include="src\PC\Devices\KUKA\RobotAxisPosition.cs" />
+    <Compile Include="src\PC\Devices\KUKA\RobotConfig.cs" />
+    <Compile Include="src\PC\Devices\KUKA\RobotLimits.cs" />
+    <Compile Include="src\PC\Devices\KUKA\RobotVector.cs" />
+    <Compile Include="src\PC\Devices\KUKA\RSI\InputFrame.cs" />
+    <Compile Include="src\PC\Devices\KUKA\RSI\OutputFrame.cs" />
+    <Compile Include="src\PC\Devices\KUKA\RSI\RSIAdapter.cs" />
+    <Compile Include="src\PC\Devices\KUKA\TrajectoryGenerator3.cs" />
+    <Compile Include="src\PC\Devices\KUKA\TrajectoryGenerator5.cs" />
+    <Compile Include="src\PC\Devices\KUKA\TrajectoryGenerator5v1.cs" />
+    <Compile Include="src\PC\Devices\KUKA\TrajectoryGenerator5v2.cs" />
+    <Compile Include="src\PC\Devices\OptiTrack\InputFrame.cs" />
+    <Compile Include="src\PC\Devices\OptiTrack\OptiTrackSystem.cs" />
+    <Compile Include="src\PC\Maths\PIDRegulator.cs" />
+    <Compile Include="src\PC\Maths\PolyFit.cs" />
+    <Compile Include="src\PC\Maths\Transformation.cs" />
+    <Compile Include="src\PC\Views\LiveChart.xaml.cs">
       <DependentUpon>LiveChart.xaml</DependentUpon>
     </Compile>
-    <Compile Include="RobotPanel.xaml.cs">
+    <Compile Include="src\PC\Views\RobotPanel.xaml.cs">
       <DependentUpon>RobotPanel.xaml</DependentUpon>
     </Compile>
-    <Page Include="LiveChart.xaml">
+    <Page Include="src\PC\Views\LiveChart.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="MainWindow.xaml">
+    <Page Include="src\PC\Views\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Compile Include="App.xaml.cs">
+    <Compile Include="src\PC\Views\App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.xaml.cs">
+    <Compile Include="src\PC\Views\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="RobotPanel.xaml">
+    <Page Include="src\PC\Views\RobotPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -118,9 +162,21 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="src\Docs\" />
     <Folder Include="src\KUKA\" />
     <Folder Include="src\OptiTrack\" />
-    <Folder Include="src\PC\" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.7.2 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

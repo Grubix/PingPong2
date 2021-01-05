@@ -7,9 +7,6 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 
 namespace PingPong {
-    /// <summary>
-    /// Interaction logic for RobotPanel.xaml
-    /// </summary>
     public partial class RobotPanel : UserControl {
 
         private bool isPlotFrozen = false;
