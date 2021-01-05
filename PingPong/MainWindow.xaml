@@ -1,0 +1,36 @@
+﻿<Window x:Class="PingPong.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PingPong"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="700" Width="1450">
+    <TabControl Padding="5" Grid.IsSharedSizeScope="True" Background="#FFF1F1F1">
+        <TabItem Header="Robot 1">
+            <TabItem.Background>
+                <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
+                    <GradientStop Color="#FFF0F0F0" Offset="0"/>
+                    <GradientStop Color="#FFE5E5E5" Offset="1"/>
+                </LinearGradientBrush>
+            </TabItem.Background>
+            <Grid Background="#FFE5E5E5">
+                <local:RobotPanel/>
+            </Grid>
+        </TabItem>
+        <TabItem Header="Robot 2">
+            <Grid Background="#FFE5E5E5">
+                <local:RobotPanel/>
+            </Grid>
+        </TabItem>
+        <TabItem Header="OptiTrack">
+            <Grid Background="#FFE5E5E5"/>
+        </TabItem>
+        <TabItem Header="Ping app">
+            <Grid Background="#FFE5E5E5"/>
+        </TabItem>
+        <TabItem Header="PingPong app">
+            <Grid Background="#FFE5E5E5"/>
+        </TabItem>
+    </TabControl>
+</Window>
