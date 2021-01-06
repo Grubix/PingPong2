@@ -23,9 +23,15 @@
                 <Grid Grid.Column="0" Grid.Row="0">
                     <ScrollViewer UseLayoutRounding="False" VerticalScrollBarVisibility="Hidden">
                         <ItemsControl>
-                            <Expander Header="Robot data" Padding="0,5" IsExpanded="True">
+                            <Expander Padding="0,5" IsExpanded="True">
+                                <Expander.Header>
+                                    <TextBlock Text="Robot data" FontWeight="Bold" />
+                                </Expander.Header>
                                 <StackPanel>
-                                    <Expander Header="Actual position" Padding="10,0,0,0" Margin="0,-5,0,0" IsExpanded="True">
+                                    <Expander Padding="10,0,0,0" Margin="0,-5,0,0" IsExpanded="True">
+                                        <Expander.Header>
+                                            <TextBlock Text="Actual position" FontWeight="SemiBold" />
+                                        </Expander.Header>
                                         <Grid Margin="0,0,0,2">
                                             <Grid.RowDefinitions>
                                                 <RowDefinition/>
@@ -48,7 +54,10 @@
                                         </Grid>
                                     </Expander>
                                     <Separator Margin="10,2,0,2"/>
-                                    <Expander Header="Target position" Padding="10,0,0,0" Margin="0,0,0,0" IsExpanded="True">
+                                    <Expander Padding="10,0,0,0" Margin="0,0,0,0" IsExpanded="True">
+                                        <Expander.Header>
+                                            <TextBlock Text="Target position" FontWeight="SemiBold" />
+                                        </Expander.Header>
                                         <Grid Margin="0,0,0,2">
                                             <Grid.RowDefinitions>
                                                 <RowDefinition/>
@@ -74,9 +83,15 @@
                             </Expander>
                             <Separator/>
                             <Separator Margin="0,0,0,2"/>
-                            <Expander Header="Configuration" Padding="0,5" IsExpanded="True">
+                            <Expander Padding="0,5" IsExpanded="True">
+                                <Expander.Header>
+                                    <TextBlock Text="Configuration" FontWeight="Bold" />
+                                </Expander.Header>
                                 <StackPanel>
-                                    <Expander Header="Connection" Padding="10,0,0,0" Margin="0,-5,0,0" IsExpanded="True">
+                                    <Expander Padding="10,0,0,0" Margin="0,-5,0,0" IsExpanded="True">
+                                        <Expander.Header>
+                                            <TextBlock Text="Connection" FontWeight="SemiBold" />
+                                        </Expander.Header>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.RowDefinitions>
                                                 <RowDefinition/>
@@ -93,7 +108,10 @@
                                         </Grid>
                                     </Expander>
                                     <Separator Margin="10,2,0,2"/>
-                                    <Expander Header="Workspace limits" Padding="10,0,0,0" IsExpanded="True">
+                                    <Expander Padding="10,0,0,0" IsExpanded="True">
+                                        <Expander.Header>
+                                            <TextBlock Text="Workspace limits" FontWeight="SemiBold" />
+                                        </Expander.Header>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.RowDefinitions>
                                                 <RowDefinition/>
@@ -116,7 +134,10 @@
                                         </Grid>
                                     </Expander>
                                     <Separator Margin="10,2,0,2"/>
-                                    <Expander Header="Correction limits" Padding="10,0,0,0" IsExpanded="True">
+                                    <Expander Padding="10,0,0,0" IsExpanded="True">
+                                        <Expander.Header>
+                                            <TextBlock Text="Correction limits" FontWeight="SemiBold" />
+                                        </Expander.Header>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.RowDefinitions>
                                                 <RowDefinition/>
@@ -133,7 +154,10 @@
                                         </Grid>
                                     </Expander>
                                     <Separator Margin="10,2,0,2"/>
-                                    <Expander Header="Axis limits" Padding="10,0,0,0">
+                                    <Expander Padding="10,0,0,0">
+                                        <Expander.Header>
+                                            <TextBlock Text="Axis limits" FontWeight="SemiBold" />
+                                        </Expander.Header>
                                         <Grid Margin="0,2,0,0">
                                             <Grid.RowDefinitions>
                                                 <RowDefinition/>
@@ -170,7 +194,10 @@
                                         </Grid>
                                     </Expander>
                                     <Separator Margin="10,2,0,2"/>
-                                    <Expander Header="Transformation" Padding="10,0,0,0">
+                                    <Expander Padding="10,0,0,0">
+                                        <Expander.Header>
+                                            <TextBlock Text="Transformation" FontWeight="SemiBold" />
+                                        </Expander.Header>
                                         <Grid>
                                             <Grid.RowDefinitions>
                                                 <RowDefinition/>
@@ -242,7 +269,7 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <StackPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Left" Orientation="Horizontal">
-                <Button Content="Freeze" Width="75" Height="22"/>
+                <Button Content="Freeze" Width="75" Height="22" x:Name="freezeBtn"/>
                 <Button Content="Reset zoom" Width="75" Height="22" Margin="5,0,0,0"/>
             </StackPanel>
             <TabControl Grid.Row="1" TabStripPlacement="Bottom" BorderBrush="#FFACACAC" Margin="0,5,0,0" Padding="0">

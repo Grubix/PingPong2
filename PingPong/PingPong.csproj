@@ -107,12 +107,19 @@
     <Compile Include="src\PC\Maths\PIDRegulator.cs" />
     <Compile Include="src\PC\Maths\PolyFit.cs" />
     <Compile Include="src\PC\Maths\Transformation.cs" />
+    <Compile Include="src\PC\Views\CalibrationWindow.xaml.cs">
+      <DependentUpon>CalibrationWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="src\PC\Views\LiveChart.xaml.cs">
       <DependentUpon>LiveChart.xaml</DependentUpon>
     </Compile>
     <Compile Include="src\PC\Views\RobotPanel.xaml.cs">
       <DependentUpon>RobotPanel.xaml</DependentUpon>
     </Compile>
+    <Page Include="src\PC\Views\CalibrationWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="src\PC\Views\LiveChart.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

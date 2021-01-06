@@ -18,7 +18,7 @@
         </StackPanel>
         <oxy:Plot x:Name="chart" Grid.Row="1" PlotMargins="Auto,Auto,10,Auto" LegendItemSpacing="36" LegendFont="DejaVu Sans Mono" LegendFontSize="10.5" >
             <oxy:Plot.Axes>
-                <oxy:LinearAxis Position="Bottom" Minimum="0" Maximum="5000" IsManipulationEnabled="True" Title="Sample" />
+                <oxy:LinearAxis Position="Bottom" Minimum="0" Maximum="5000" IsManipulationEnabled="True" Title="Sample" IsZoomEnabled="False" IsPanEnabled="False" />
                 <oxy:LinearAxis Position="Left" IsManipulationEnabled="False" IsPanEnabled="False" IsZoomEnabled="False"/>
             </oxy:Plot.Axes>
         </oxy:Plot>

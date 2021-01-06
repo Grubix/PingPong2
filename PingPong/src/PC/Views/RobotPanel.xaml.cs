@@ -1,7 +1,5 @@
-﻿using OxyPlot;
-using OxyPlot.Wpf;
+﻿using PingPong.KUKA;
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Controls;
@@ -10,6 +8,17 @@ namespace PingPong {
     public partial class RobotPanel : UserControl {
 
         private bool isPlotFrozen = false;
+
+        private KUKARobot robot;
+
+        public KUKARobot Robot {
+            get {
+                return robot;
+            }
+            set {
+                //TODO: 
+            }
+        }
 
         public RobotPanel() {
             InitializeComponent();
@@ -36,6 +45,36 @@ namespace PingPong {
                     });
                 }
             });
+
+            freezeBtn.Click += (s, e) => {
+                if (isPlotFrozen) {
+                    positionChart.BlockZoomingAndPanning();
+                    positionErrorChart.BlockZoomingAndPanning();
+                    velocityChart.BlockZoomingAndPanning();
+                    accelerationChart.BlockZoomingAndPanning();
+
+                    positionChart.Clear();
+                    positionErrorChart.Clear();
+                    velocityChart.Clear();
+                    accelerationChart.Clear();
+
+                    positionChart.ResetZoom();
+                    positionErrorChart.ResetZoom();
+                    velocityChart.ResetZoom();
+                    accelerationChart.ResetZoom();
+
+                    isPlotFrozen = false;
+                    freezeBtn.Content = "Freeze";
+                } else {
+                    positionChart.UnblockZoomingAndPanning();
+                    positionErrorChart.UnblockZoomingAndPanning();
+                    velocityChart.UnblockZoomingAndPanning();
+                    accelerationChart.UnblockZoomingAndPanning();
+
+                    isPlotFrozen = true;
+                    freezeBtn.Content = "Unfreeze";
+                }
+            };
         }
 
         private void InitializePositionChart() {

@@ -150,13 +150,18 @@ namespace PingPong.KUKA {
             }
         }
 
-        public TrajectoryGenerator5(RobotVector homePosition) {
-            targetPositionReached = true;
-            targetPosition = homePosition;
-            targetVelocity = RobotVector.Zero;
-            positionError = RobotVector.Zero;
-            targetDuration = 0.0;
-            timeLeft = 0.0;
+        public TrajectoryGenerator5() {
+        }
+
+        public void Restart(RobotVector homePosition) {
+            lock (syncLock) {
+                targetPositionReached = true;
+                targetPosition = homePosition;
+                targetVelocity = RobotVector.Zero;
+                positionError = RobotVector.Zero;
+                targetDuration = 0.0;
+                timeLeft = 0.0;
+            }
         }
 
         public void SetTargetPosition(RobotVector targetPosition, RobotVector targetVelocity, double targetDuration) {

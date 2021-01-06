@@ -82,7 +82,7 @@ namespace PingPong.KUKA {
 
         private readonly Polynominal polyC = new Polynominal();
 
-        private readonly RobotVector homePosition;
+        private RobotVector homePosition;
 
         private RobotVector reachedPosition;
 
@@ -158,15 +158,20 @@ namespace PingPong.KUKA {
             }
         }
 
-        public TrajectoryGenerator5v2(RobotVector homePosition) {
-            this.homePosition = homePosition;
-            targetPositionReached = true;
-            reachedPosition = homePosition;
-            targetPosition = homePosition;
-            targetVelocity = RobotVector.Zero;
-            positionError = RobotVector.Zero;
-            targetDuration = 0.0;
-            elapsedTime = 0.0;
+        public TrajectoryGenerator5v2() {
+        }
+
+        public void Reset(RobotVector homePosition) {
+            lock (syncLock) {
+                this.homePosition = homePosition;
+                targetPositionReached = true;
+                reachedPosition = homePosition;
+                targetPosition = homePosition;
+                targetVelocity = RobotVector.Zero;
+                positionError = RobotVector.Zero;
+                targetDuration = 0.0;
+                elapsedTime = 0.0;
+            }
         }
 
         public void SetTargetPosition(RobotVector currentPosition, RobotVector targetPosition, RobotVector targetVelocity, double targetDuration) {

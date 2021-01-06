@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PingPong"
         mc:Ignorable="d"
-        Title="MainWindow" Height="700" Width="1450">
+        Title="PingPong v2.0 [K.B / W.M / B.B]" Height="700" Width="1450" WindowStartupLocation="CenterScreen">
     <TabControl Padding="5" Grid.IsSharedSizeScope="True" Background="#FFF1F1F1">
         <TabItem Header="Robot 1">
             <TabItem.Background>

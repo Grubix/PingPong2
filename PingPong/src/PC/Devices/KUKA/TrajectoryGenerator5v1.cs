@@ -78,7 +78,7 @@ namespace PingPong.KUKA {
 
         private readonly object syncLock = new object();
 
-        private readonly RobotVector homePosition;
+        private RobotVector homePosition;
 
         private RobotVector reachedPosition;
 
@@ -154,15 +154,20 @@ namespace PingPong.KUKA {
             }
         }
 
-        public TrajectoryGenerator5v1(RobotVector homePosition) {
-            this.homePosition = homePosition;
-            targetPositionReached = true;
-            reachedPosition = homePosition;
-            targetPosition = homePosition;
-            targetVelocity = RobotVector.Zero;
-            positionError = RobotVector.Zero;
-            targetDuration = 0.0;
-            timeLeft = 0.0;
+        public TrajectoryGenerator5v1() {
+        }
+
+        public void Reset(RobotVector homePosition) {
+            lock (syncLock) {
+                this.homePosition = homePosition;
+                targetPositionReached = true;
+                reachedPosition = homePosition;
+                targetPosition = homePosition;
+                targetVelocity = RobotVector.Zero;
+                positionError = RobotVector.Zero;
+                targetDuration = 0.0;
+                timeLeft = 0.0;
+            }
         }
 
         public void SetTargetPosition(RobotVector targetPosition, RobotVector targetVelocity, double targetDuration) {

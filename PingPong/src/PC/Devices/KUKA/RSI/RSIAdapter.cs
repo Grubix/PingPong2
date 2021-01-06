@@ -10,7 +10,7 @@ namespace PingPong.KUKA {
     /// </summary>
     public class RSIAdapter {
 
-        private readonly UdpClient client;
+        private UdpClient client;
 
         private IPEndPoint remoteEndPoint;
 
@@ -27,18 +27,15 @@ namespace PingPong.KUKA {
             }
         }
 
-        public int Port { get; }
-
-        public RSIAdapter(int port) {
-            client = new UdpClient(new IPEndPoint(IPAddress.Any, port));
-            Port = port;
+        public RSIAdapter() {
         }
 
         /// <summary>
         /// Connects to robot and returns the first received frame
         /// </summary>
         /// <returns>first received frame</returns>
-        public async Task<InputFrame> Connect() {
+        public async Task<InputFrame> Connect(int port) {
+            client = new UdpClient(new IPEndPoint(IPAddress.Any, port));
             UdpReceiveResult result = await client.ReceiveAsync();
             remoteEndPoint = result.RemoteEndPoint;
             byte[] receivedBytes = result.Buffer;

@@ -17,7 +17,7 @@ namespace PingPong.KUKA {
 
         private readonly RSIAdapter rsiAdapter;
 
-        private TrajectoryGenerator5 generator;
+        private readonly TrajectoryGenerator5 generator;
 
         private bool isInitialized = false;
 
@@ -28,6 +28,24 @@ namespace PingPong.KUKA {
         private RobotVector position;
 
         private RobotAxisPosition axisPosition;
+
+        private RobotConfig config;
+
+        /// <summary>
+        /// Robot config
+        /// </summary>
+        public RobotConfig Config {
+            get {
+                return config;
+            }
+            set {
+                if (isInitialized) {
+                    throw new InvalidOperationException("Robot is already initialized");
+                } else {
+                    config = value;
+                }
+            }
+        }
 
         /// <summary>
         /// Robot Ip adress (Robot Sensor Interface - RSI)
@@ -43,14 +61,18 @@ namespace PingPong.KUKA {
         /// </summary>
         public int Port { 
             get {
-                return rsiAdapter.Port;
+                return Config.Port;
             } 
         }
 
         /// <summary>
         /// Robot limits
         /// </summary>
-        public RobotLimits Limits { get; }
+        public RobotLimits Limits { 
+            get {
+                return Config.Limits;
+            }
+        }
 
         /// <summary>
         /// Robot home position
@@ -58,13 +80,22 @@ namespace PingPong.KUKA {
         public RobotVector HomePosition { get; private set; }
 
         /// <summary>
-        /// Robot current position
+        /// Robot actual position
         /// </summary>
         public RobotVector Position {
             get {
                 lock (receivedDataSyncLock) {
                     return position;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Robot actual position error
+        /// </summary>
+        public RobotVector PositionError {
+            get {
+                return generator.PositionError;
             }
         }
 
@@ -135,11 +166,10 @@ namespace PingPong.KUKA {
         /// </summary>
         public event Action<OutputFrame> FrameSent;
 
-        /// <param name="port">Port defined in RSI_EthernetConfig.xml</param>
-        /// <param name="limits">robot limits</param>
-        public KUKARobot(int port, RobotLimits limits) {
-            rsiAdapter = new RSIAdapter(port);
-            Limits = limits;
+        public KUKARobot(RobotConfig config) {
+            rsiAdapter = new RSIAdapter();
+            generator = new TrajectoryGenerator5();
+            Config = config;
 
             worker = new BackgroundWorker() {
                 WorkerSupportsCancellation = true
@@ -147,8 +177,8 @@ namespace PingPong.KUKA {
 
             worker.DoWork += async (sender, args) => {
                 // Connect with the robot
-                InputFrame receivedFrame = await rsiAdapter.Connect();
-                generator = new TrajectoryGenerator5(receivedFrame.Position);
+                InputFrame receivedFrame = await rsiAdapter.Connect(config.Port);
+                generator.Restart(receivedFrame.Position);
 
                 lock (receivedDataSyncLock) {
                     IPOC = receivedFrame.IPOC;
@@ -156,7 +186,7 @@ namespace PingPong.KUKA {
                     HomePosition = receivedFrame.Position;
                 }
 
-                // Send first response (prevent connection timeout)
+                // Send first response
                 rsiAdapter.SendData(new OutputFrame() {
                     Correction = new RobotVector(),
                     IPOC = IPOC
@@ -174,6 +204,11 @@ namespace PingPong.KUKA {
                 isInitialized = false;
                 rsiAdapter.Disconnect();
             };
+        }
+
+        /// <param name="port">Port defined in RSI_EthernetConfig.xml</param>
+        /// <param name="limits">robot limits</param>
+        public KUKARobot(int port, RobotLimits limits) : this(new RobotConfig(port, limits)) {
         }
 
         /// <summary>
@@ -195,7 +230,7 @@ namespace PingPong.KUKA {
                     $"{Environment.NewLine}{receivedFrame.Position}");
             }
 
-            //TODO: mozna dorobic sprawdzanie korekcji, ale dodatkowo przy sprawdzeniu czy IsTargetPositonReached
+            //TODO: mozna dorobic sprawdzanie korekcji, ale dodatkowo przy sprawdzeniu czy IsTargetPositonReached zeby nie wywalal przy jakims drobnym syfie jak robot stoi
 
             lock (receivedDataSyncLock) {
                 IPOC = receivedFrame.IPOC;
