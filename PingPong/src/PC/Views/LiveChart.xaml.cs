@@ -19,7 +19,7 @@ namespace PingPong {
 
         private int clearCounter = 0;
 
-        private int refreshDelay = 100;
+        private int refreshDelay = 80;
 
         private int maxSamples = 5000;
 
@@ -63,6 +63,8 @@ namespace PingPong {
             InitializeComponent();
             chart.Axes[0].Minimum = 0;
             chart.Axes[0].Maximum = MaxSamples;
+            chart.Axes[0].AbsoluteMinimum = 0;
+
         }
 
         public void AddSeries(string title, string name, bool visible) {
@@ -141,8 +143,12 @@ namespace PingPong {
                     if (currentSample > (clearCounter + 1) * maxSamples) {
                         clearCounter++;
 
-                        chart.Axes[0].Minimum = clearCounter * maxSamples;
+                        chart.Axes[0].Minimum = chart.Axes[0].AbsoluteMinimum = clearCounter * maxSamples;
                         chart.Axes[0].Maximum = (clearCounter + 1) * maxSamples;
+
+                        for (int i = 0; i < data.Length; i++) {
+                            ((List<DataPoint>)chart.Series[i].ItemsSource).Clear();
+                        }
                     }
                 }
 

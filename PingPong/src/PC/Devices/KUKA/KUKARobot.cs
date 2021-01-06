@@ -208,7 +208,7 @@ namespace PingPong.KUKA {
 
         /// <param name="port">Port defined in RSI_EthernetConfig.xml</param>
         /// <param name="limits">robot limits</param>
-        public KUKARobot(int port, RobotLimits limits) : this(new RobotConfig(port, limits)) {
+        public KUKARobot(int port, RobotLimits limits) : this(new RobotConfig(port, limits, null)) {
         }
 
         /// <summary>

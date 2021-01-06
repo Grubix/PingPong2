@@ -99,6 +99,23 @@ namespace PingPong.Maths {
             });
         }
 
+        public Transformation() {
+            Rotation = Matrix<double>.Build.DenseOfArray(new double[,] {
+                { 1.0, 0.0, 0.0 },
+                { 0.0, 1.0, 0.0 },
+                { 0.0, 0.0, 1.0 },
+            });
+            Translation = Vector<double>.Build.DenseOfArray(new double[] {
+                0.0, 0.0, 0.0
+            });
+            Matrix = Matrix<double>.Build.DenseOfArray(new double[,] {
+                { 1.0, 0.0, 0.0, 0.0 },
+                { 0.0, 1.0, 0.0, 0.0 },
+                { 0.0, 0.0, 1.0, 0.0 },
+                { 0.0, 0.0, 0.0, 1.0 }
+            });
+        }
+
         /// <summary>
         /// Converts vector in A coordinate system to point B coordinate system
         /// </summary>
