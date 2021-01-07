@@ -64,7 +64,6 @@ namespace PingPong {
             chart.Axes[0].Minimum = 0;
             chart.Axes[0].Maximum = MaxSamples;
             chart.Axes[0].AbsoluteMinimum = 0;
-
         }
 
         public void AddSeries(string title, string name, bool visible) {
@@ -113,7 +112,7 @@ namespace PingPong {
 
         public void Update(double[] data) {
             if (data.Length != chart.Series.Count) {
-                throw new ArgumentException("Array length");
+                throw new ArgumentException("Array length err");
             }
 
             lock (syncLock) {

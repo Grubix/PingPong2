@@ -5,10 +5,10 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:PingPong"
              mc:Ignorable="d" 
-             d:DesignHeight="864.5" d:DesignWidth="1198" Background="#FFF1F1F1">
+             d:DesignHeight="706.5" d:DesignWidth="1408" Background="#FFF1F1F1">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition MinWidth="240" Width="240" MaxWidth="300"/>
+            <ColumnDefinition MinWidth="250" Width="250" MaxWidth="300"/>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
@@ -43,8 +43,8 @@
                                                 <ColumnDefinition/>
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
-                                            <Label Content="XYZ" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right" Margin="0"/>
-                                            <Label Content="ABC" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right"/>
+                                            <Label Content="XYZ [mm]" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right" Margin="0"/>
+                                            <Label Content="ABC [deg]" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right"/>
                                             <TextBox Grid.Column="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" IsReadOnly="True" MaxLines="1" Text="0.0" x:Name="actualPositionX"/>
                                             <TextBox Grid.Column="2" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" IsReadOnly="True" MaxLines="1" Text="0.0" x:Name="actualPositionY"/>
                                             <TextBox Grid.Column="3" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" IsReadOnly="True" MaxLines="1" Text="0.0" x:Name="actualPositionZ"/>
@@ -69,8 +69,8 @@
                                                 <ColumnDefinition/>
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
-                                            <Label Content="XYZ" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right" Margin="0"/>
-                                            <Label Content="ABC" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right"/>
+                                            <Label Content="XYZ [mm]" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right" Margin="0"/>
+                                            <Label Content="ABC [deg]" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right"/>
                                             <TextBox Grid.Column="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" IsReadOnly="True" MaxLines="1" Text="0.0" x:Name="targetPositionX"/>
                                             <TextBox Grid.Column="2" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" IsReadOnly="True" MaxLines="1" Text="0.0" x:Name="targetPositionY"/>
                                             <TextBox Grid.Column="3" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" IsReadOnly="True" MaxLines="1" Text="0.0" x:Name="targetPositionZ"/>
@@ -104,7 +104,7 @@
                                             <Label Content="Ip adress" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right" Margin="0"/>
                                             <Label Content="Port" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right"/>
                                             <TextBox Grid.Column="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" IsReadOnly="True" Text="0.0.0.0" x:Name="ipAdress"/>
-                                            <TextBox Grid.Column="1" Grid.Row="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="0000" x:Name="port"/>
+                                            <TextBox Grid.Column="1" Grid.Row="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="0000" x:Name="connectionPort"/>
                                         </Grid>
                                     </Expander>
                                     <Separator Margin="10,2,0,2"/>
@@ -123,11 +123,11 @@
                                                 <ColumnDefinition/>
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
-                                            <Label Content="Low. XYZ" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right"/>
+                                            <Label Content="L. XYZ [mm]" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right"/>
                                             <TextBox Grid.Column="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" Text="0.0" x:Name="workspaceLowerX"/>
                                             <TextBox Grid.Column="2" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" Text="0.0" x:Name="workspaceLowerY"/>
                                             <TextBox Grid.Column="3" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" Text="0.0" x:Name="workspaceLowerZ"/>
-                                            <Label Content="Upp. XYZ" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right"/>
+                                            <Label Content="U. XYZ [mm]" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right"/>
                                             <TextBox Grid.Column="1" Grid.Row="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="0.0" x:Name="workspaceUpperX"/>
                                             <TextBox Grid.Column="2" Grid.Row="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" Text="0.0"  x:Name="workspaceUpperY"/>
                                             <TextBox Grid.Column="3" Grid.Row="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" Text="0.0"  x:Name="workspaceUpperZ"/>
@@ -242,6 +242,7 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition/>
                         <RowDefinition/>
+                        <RowDefinition/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
@@ -249,9 +250,11 @@
                     </Grid.ColumnDefinitions>
                     <Separator Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="-5,0,-5,5"/>
                     <Button Content="Connect" Grid.Column="0" Height="22" Margin="0,0,2.5,0" Grid.Row="1" x:Name="connectBtn"/>
-                    <Button Content="Calibrate" Grid.Column="1" Height="22" Margin="2.5,0,0,0" Grid.Row="1" x:Name="calibrateBtn"/>
-                    <Button Content="Load config" Grid.Column="0" Height="22" Margin="0,5,2.5,0" Grid.Row="2" x:Name="loadConfigBtn"/>
-                    <Button Content="Save config" Grid.Column="1" Height="22" Margin="2.5,5,0,0" Grid.Row="2" x:Name="saveConfigBtn"/>
+                    <Button Content="Disconnect" Grid.Column="1" Height="22" Margin="2.5,0,0,0" Grid.Row="1" x:Name="disconnectBtn" IsEnabled="False"/>
+                    <Button Content="Calibrate" Grid.Column="0" Height="22" Margin="0,5,2.5,0" Grid.Row="2" x:Name="calibrateBtn" IsEnabled="False"/>
+                    <Button Content="Manual mode" Grid.Column="1" Height="22" Margin="2.5,5,0,0" Grid.Row="2" x:Name="manualModeBtn" IsEnabled="False"/>
+                    <Button Content="Load config" Grid.Column="0" Height="22" Margin="0,5,2.5,0" Grid.Row="3" x:Name="loadConfigBtn"/>
+                    <Button Content="Save config" Grid.Column="1" Height="22" Margin="2.5,5,0,0" Grid.Row="3" x:Name="saveConfigBtn"/>
                 </Grid>
             </Grid>
         </Border>

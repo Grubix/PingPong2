@@ -157,6 +157,11 @@ namespace PingPong.KUKA {
         public event Action Initialized;
 
         /// <summary>
+        /// TODO
+        /// </summary>
+        public event Action Uninitialized;
+
+        /// <summary>
         /// Occurs when <see cref="InputFrame"/> frame is received
         /// </summary>
         public event Action<InputFrame> FrameReceived;
@@ -203,12 +208,9 @@ namespace PingPong.KUKA {
 
                 isInitialized = false;
                 rsiAdapter.Disconnect();
-            };
-        }
 
-        /// <param name="port">Port defined in RSI_EthernetConfig.xml</param>
-        /// <param name="limits">robot limits</param>
-        public KUKARobot(int port, RobotLimits limits) : this(new RobotConfig(port, limits, null)) {
+                Uninitialized?.Invoke();
+            };
         }
 
         /// <summary>
@@ -357,6 +359,10 @@ namespace PingPong.KUKA {
         }
 
         public void Uninitialize() {
+            if (!isInitialized) {
+                return;
+            }
+
             if (!worker.CancellationPending) {
                 worker.CancelAsync();
             }

@@ -48,7 +48,6 @@ namespace PingPong.KUKA {
         /// </summary>
         public void Disconnect() {
             client.Close();
-            remoteEndPoint = null;
         }
 
         /// <summary>

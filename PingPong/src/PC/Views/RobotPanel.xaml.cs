@@ -1,4 +1,6 @@
-﻿using PingPong.KUKA;
+﻿using MathNet.Numerics.LinearAlgebra;
+using PingPong.KUKA;
+using PingPong.Maths;
 using System;
 using System.IO;
 using System.Threading;
@@ -11,7 +13,7 @@ namespace PingPong {
 
         private bool isPlotFrozen = false;
 
-        private KUKARobot robot;
+        public KUKARobot Robot { get; private set; }
 
         public RobotPanel() {
             InitializeComponent();
@@ -31,57 +33,74 @@ namespace PingPong {
                         Math.Sin(i / 500.0) / 4.0,
                         Math.Cos(i / 500.0) / 3.0,
                         Math.Sin(i / 750.0) / 2.0,
-                        Math.Cos(i / 750.0) / 1.0
+                        Math.Cos(i / 750.0) / 1.0 + Math.Sin(i / 50.0) / 20.0
                     });
                 }
             });
 
-            //TODO: MEGA WAZNE, moze freezowanie powinno byz dostepne tylko dla robota disconected ?? scrolowanie i zoomowanie mega obciaza procka
-            //TODO: alternatywnie klikniecie na freeza moze powodowac disconecta
-            freezeBtn.Click += (s, e) => {
-                if (isPlotFrozen) {
-                    positionChart.BlockZoomingAndPanning();
-                    positionErrorChart.BlockZoomingAndPanning();
-                    velocityChart.BlockZoomingAndPanning();
-                    accelerationChart.BlockZoomingAndPanning();
+            connectBtn.Click += Connect;
+            freezeBtn.Click += FreezeOrUnfreeze;
+            loadConfigBtn.Click += LoadConfig;
 
-                    positionChart.Clear();
-                    positionErrorChart.Clear();
-                    velocityChart.Clear();
-                    accelerationChart.Clear();
-
-                    positionChart.ResetZoom();
-                    positionErrorChart.ResetZoom();
-                    velocityChart.ResetZoom();
-                    accelerationChart.ResetZoom();
-
-                    isPlotFrozen = false;
-                    freezeBtn.Content = "Freeze";
-                    resetZoomBtn.IsEnabled = false;
-                } else {
-                    positionChart.UnblockZoomingAndPanning();
-                    positionErrorChart.UnblockZoomingAndPanning();
-                    velocityChart.UnblockZoomingAndPanning();
-                    accelerationChart.UnblockZoomingAndPanning();
-
-                    isPlotFrozen = true;
-                    freezeBtn.Content = "Unfreeze";
-                    resetZoomBtn.IsEnabled = true;
+            disconnectBtn.Click += (s, e) => {
+                if (Robot != null) {
+                    if (Robot.IsInitialized()) {
+                        Robot.Uninitialize();
+                    } else {
+                        connectBtn.IsEnabled = true;
+                        disconnectBtn.IsEnabled = false;
+                        loadConfigBtn.IsEnabled = true;
+                        saveConfigBtn.IsEnabled = true;
+                    }
                 }
             };
-
             resetZoomBtn.Click += (s, e) => {
                 positionChart.ResetZoom();
                 positionErrorChart.ResetZoom();
                 velocityChart.ResetZoom();
                 accelerationChart.ResetZoom();
             };
+            saveConfigBtn.Click += (s, e) => {
+                CreateConfiguration().SaveToFile();
+            };
+        }
 
-            loadConfigBtn.Click += LoadConfig;
+        private void InitializeCharts() {
+            positionChart.YAxisTitle = "Position (actual)";
+            positionChart.AddSeries("Position X [mm]", "X", true);
+            positionChart.AddSeries("Position Y [mm]", "Y", true);
+            positionChart.AddSeries("Position Z [mm]", "Z", true);
+            positionChart.AddSeries("Position A [deg]", "A", false);
+            positionChart.AddSeries("Position B [deg]", "B", false);
+            positionChart.AddSeries("Position C [deg]", "C", false);
+
+            positionErrorChart.YAxisTitle = "Position error";
+            positionErrorChart.AddSeries("Error X [mm]", "X", true);
+            positionErrorChart.AddSeries("Error Y [mm]", "Y", true);
+            positionErrorChart.AddSeries("Error Z [mm]", "Z", true);
+            positionErrorChart.AddSeries("Error A [deg]", "A", false);
+            positionErrorChart.AddSeries("Error B [deg]", "B", false);
+            positionErrorChart.AddSeries("Error C [deg]", "C", false);
+
+            velocityChart.YAxisTitle = "Velocity (theoretical)";
+            velocityChart.AddSeries("Velocity X [mm/s]", "X", true);
+            velocityChart.AddSeries("Velocity Y [mm/s]", "Y", true);
+            velocityChart.AddSeries("Velocity Z [mm/s]", "Z", true);
+            velocityChart.AddSeries("Velocity A [deg/s]", "A", false);
+            velocityChart.AddSeries("Velocity B [deg/s]", "B", false);
+            velocityChart.AddSeries("Velocity C [deg/s]", "C", false);
+
+            accelerationChart.YAxisTitle = "Acceleration (theoretical)";
+            accelerationChart.AddSeries("Acceleration X [mm/s]", "X", true);
+            accelerationChart.AddSeries("Acceleration Y [mm/s]", "Y", true);
+            accelerationChart.AddSeries("Acceleration Z [mm/s]", "Z", true);
+            accelerationChart.AddSeries("Acceleration A [deg/s]", "A", false);
+            accelerationChart.AddSeries("Acceleration B [deg/s]", "B", false);
+            accelerationChart.AddSeries("Acceleration C [deg/s]", "C", false);
         }
 
         private void LoadConfig(object sender, RoutedEventArgs e) {
-            var fileDialog = new Microsoft.Win32.OpenFileDialog {
+            var openFileDialog = new Microsoft.Win32.OpenFileDialog {
                 InitialDirectory = Directory.GetCurrentDirectory(),
                 Title = "Select configuration file",
                 CheckFileExists = true,
@@ -94,19 +113,18 @@ namespace PingPong {
                 Multiselect = false
             };
 
-
-            if ((bool)fileDialog.ShowDialog() == true) {
+            if ((bool)openFileDialog.ShowDialog() == true) {
                 Stream fileStream;
                 StreamReader streamReader;
 
                 try {
-                    if ((fileStream = fileDialog.OpenFile()) != null) {
+                    if ((fileStream = openFileDialog.OpenFile()) != null) {
                         using (fileStream)
                         using (streamReader = new StreamReader(fileStream)) {
                             string jsonString = streamReader.ReadToEnd();
                             RobotConfig config = new RobotConfig(jsonString);
 
-                            port.Text = config.Port.ToString();
+                            connectionPort.Text = config.Port.ToString();
 
                             workspaceLowerX.Text = config.Limits.LowerWorkspacePoint.X.ToString();
                             workspaceLowerY.Text = config.Limits.LowerWorkspacePoint.Y.ToString();
@@ -165,46 +183,116 @@ namespace PingPong {
             }
         }
 
-        private void InitializeCharts() {
-            positionChart.YAxisTitle = "Position (actual)";
-            positionChart.AddSeries("Position X [mm]", "X", true);
-            positionChart.AddSeries("Position Y [mm]", "Y", true);
-            positionChart.AddSeries("Position Z [mm]", "Z", true);
-            positionChart.AddSeries("Position A [deg]", "A", false);
-            positionChart.AddSeries("Position B [deg]", "B", false);
-            positionChart.AddSeries("Position C [deg]", "C", false);
+        private void FreezeOrUnfreeze(object sender, RoutedEventArgs e) {
+            //TODO: MEGA WAZNE!!! freezowanie (a raczej zoomowanie i scrolowanie wykresu)
+            //TODO: moze powodowac opoznienia komunikacji z robotem co moze byc calkiem niebezpieczne,
+            //TODO: przykladowo opozniajac odbieranie ramek i tym samym spradzanie limitow robota i cyk robot za 20k rozwalony <3
 
-            positionErrorChart.YAxisTitle = "Position error";
-            positionErrorChart.AddSeries("Error X [mm]", "X", true);
-            positionErrorChart.AddSeries("Error Y [mm]", "Y", true);
-            positionErrorChart.AddSeries("Error Z [mm]", "Z", true);
-            positionErrorChart.AddSeries("Error A [deg]", "A", false);
-            positionErrorChart.AddSeries("Error B [deg]", "B", false);
-            positionErrorChart.AddSeries("Error C [deg]", "C", false);
+            if (isPlotFrozen) {
+                positionChart.BlockZoomingAndPanning();
+                positionErrorChart.BlockZoomingAndPanning();
+                velocityChart.BlockZoomingAndPanning();
+                accelerationChart.BlockZoomingAndPanning();
 
-            velocityChart.YAxisTitle = "Velocity (theoretical)";
-            velocityChart.AddSeries("Velocity X [mm/s]", "X", true);
-            velocityChart.AddSeries("Velocity Y [mm/s]", "Y", true);
-            velocityChart.AddSeries("Velocity Z [mm/s]", "Z", true);
-            velocityChart.AddSeries("Velocity A [deg/s]", "A", false);
-            velocityChart.AddSeries("Velocity B [deg/s]", "B", false);
-            velocityChart.AddSeries("Velocity C [deg/s]", "C", false);
+                positionChart.Clear();
+                positionErrorChart.Clear();
+                velocityChart.Clear();
+                accelerationChart.Clear();
 
-            accelerationChart.YAxisTitle = "Acceleration (theoretical)";
-            accelerationChart.AddSeries("Acceleration X [mm/s]", "X", true);
-            accelerationChart.AddSeries("Acceleration Y [mm/s]", "Y", true);
-            accelerationChart.AddSeries("Acceleration Z [mm/s]", "Z", true);
-            accelerationChart.AddSeries("Acceleration A [deg/s]", "A", false);
-            accelerationChart.AddSeries("Acceleration B [deg/s]", "B", false);
-            accelerationChart.AddSeries("Acceleration C [deg/s]", "C", false);
+                positionChart.ResetZoom();
+                positionErrorChart.ResetZoom();
+                velocityChart.ResetZoom();
+                accelerationChart.ResetZoom();
+
+                isPlotFrozen = false;
+                freezeBtn.Content = "Freeze";
+                resetZoomBtn.IsEnabled = false;
+            } else {
+                positionChart.UnblockZoomingAndPanning();
+                positionErrorChart.UnblockZoomingAndPanning();
+                velocityChart.UnblockZoomingAndPanning();
+                accelerationChart.UnblockZoomingAndPanning();
+
+                isPlotFrozen = true;
+                freezeBtn.Content = "Unfreeze";
+                resetZoomBtn.IsEnabled = true;
+            }
         }
 
-        public void Connect() {
-            //TODO: tworzenie / updatowanie instacji w zależności od konfiguracji
+        private void Connect(object sender, RoutedEventArgs e) {
+            try {
+                if (Robot == null) {
+                    Robot = new KUKARobot(CreateConfiguration());
+
+                    Robot.Initialized += () => {
+                        Dispatcher.Invoke(() => {
+                            calibrateBtn.IsEnabled = true;
+                            manualModeBtn.IsEnabled = true;
+                            ipAdress.Text = Robot.Ip;
+                        });
+                    };
+
+                    Robot.Uninitialized += () => {
+                        Dispatcher.Invoke(() => {
+                            connectBtn.IsEnabled = true;
+                            disconnectBtn.IsEnabled = false;
+                            loadConfigBtn.IsEnabled = true;
+                            saveConfigBtn.IsEnabled = true;
+                        });
+                    };
+                } else {
+                    if (Robot.IsInitialized()) {
+                        return;
+                    }
+
+                    Robot.Config = CreateConfiguration();
+                }
+
+                connectBtn.IsEnabled = false;
+                disconnectBtn.IsEnabled = true;
+                loadConfigBtn.IsEnabled = false;
+                saveConfigBtn.IsEnabled = false;
+                Robot.Initialize();
+            } catch (Exception ex) {
+                MessageBox.Show($"Robot initialization failed. Original error: \"{ex.Message}\"",
+                        "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private RobotConfig CreateConfiguration() {
+            int port = int.Parse(connectionPort.Text);
+
+            RobotLimits limits = new RobotLimits(
+                (double.Parse(workspaceLowerX.Text), double.Parse(workspaceLowerY.Text), double.Parse(workspaceLowerZ.Text)),
+                (double.Parse(workspaceUpperX.Text), double.Parse(workspaceUpperY.Text), double.Parse(workspaceUpperZ.Text)),
+                (double.Parse(a1LowerLimit.Text), double.Parse(a1UpperLimit.Text)),
+                (double.Parse(a2LowerLimit.Text), double.Parse(a2UpperLimit.Text)),
+                (double.Parse(a3LowerLimit.Text), double.Parse(a3UpperLimit.Text)),
+                (double.Parse(a4LowerLimit.Text), double.Parse(a4UpperLimit.Text)),
+                (double.Parse(a5LowerLimit.Text), double.Parse(a5UpperLimit.Text)),
+                (double.Parse(a6LowerLimit.Text), double.Parse(a6UpperLimit.Text)),
+                (double.Parse(correctionLimitXYZ.Text), double.Parse(correctionLimitABC.Text))
+            );
+
+            var rotation = Matrix<double>.Build.DenseOfArray(new double[,] {
+                { double.Parse(t00.Text), double.Parse(t01.Text), double.Parse(t02.Text) },
+                { double.Parse(t10.Text), double.Parse(t11.Text), double.Parse(t12.Text) },
+                { double.Parse(t20.Text), double.Parse(t21.Text), double.Parse(t22.Text) },
+            });
+
+            var translation = Vector<double>.Build.DenseOfArray(new double[] {
+                double.Parse(t03.Text), double.Parse(t13.Text), double.Parse(t23.Text)
+            });
+
+            Console.WriteLine(port);
+
+            Transformation transformation = new Transformation(rotation, translation);
+
+            return new RobotConfig(port, limits, transformation);
         }
 
         public void SetRobot(KUKARobot robot) {
-            this.robot = robot;
+            this.Robot = robot;
 
             //TODO: ip, limits;
 
@@ -256,10 +344,6 @@ namespace PingPong {
                     acceleration.X, acceleration.Y, acceleration.Z, acceleration.A, acceleration.B, acceleration.C
                 });
             };
-        }
-
-        private RobotConfig CreateConfiguration() {
-            return null;
         }
 
     }

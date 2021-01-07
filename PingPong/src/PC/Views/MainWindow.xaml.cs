@@ -1,19 +1,22 @@
-﻿using PingPong.KUKA;
-using PingPong.OptiTrack;
+﻿using System.Globalization;
+using System.Threading;
 using System.Windows;
 
-namespace PingPong
-{
+namespace PingPong {
     public partial class MainWindow : Window {
-
-        private KUKARobot robot1;
-
-        private KUKARobot robot2;
-
-        private OptiTrackSystem optiTrack;
 
         public MainWindow() {
             InitializeComponent();
+
+            CultureInfo culuteInfo = new CultureInfo("en-US");
+            culuteInfo.NumberFormat.NumberDecimalSeparator = ".";
+
+            Thread.CurrentThread.CurrentCulture = culuteInfo;
+            Thread.CurrentThread.CurrentUICulture = Thread.CurrentThread.CurrentCulture;
+
+            Closing += (s, e) => {
+                //TODO: disconect robotów i optitracka przed zamknieciem okna
+            };
         }
 
     }

@@ -16,17 +16,18 @@ namespace PingPong.KUKA {
         public int Port { get; }
 
         /// <summary>
-        /// robot limits
+        /// Robot limits
         /// </summary>
         public RobotLimits Limits { get; }
 
         /// <summary>
-        /// 
+        /// OptiTrack transformation
         /// </summary>
         public Transformation Transformation { get; }
 
-        /// <param name="port">Port defined in RSI_EthernetConfig.xml</param>
+        /// <param name="port">port defined in RSI_EthernetConfig.xml</param>
         /// <param name="limits">robot limits</param>
+        /// <param name="transformation">optitrack transformation</param>
         public RobotConfig(int port, RobotLimits limits, Transformation transformation) {
             Port = port;
             Limits = limits;
@@ -100,14 +101,14 @@ namespace PingPong.KUKA {
                 ""limits"": {{
                     ""lowerWorkspacePoint"": [{wx0}, {wy0}, {wz0}],
                     ""upperWorkspacePoint"": [{wx1}, {wy1}, {wz1}],
+                    ""maxCorrectionXYZ"": {Limits.CorrectionLimit.XYZ},
+                    ""maxCorrectionABC"": {Limits.CorrectionLimit.ABC},
                     ""A1"": [{Limits.A1AxisLimit.Min}, {Limits.A1AxisLimit.Max}],
                     ""A2"": [{Limits.A2AxisLimit.Min}, {Limits.A2AxisLimit.Max}],
                     ""A3"": [{Limits.A3AxisLimit.Min}, {Limits.A3AxisLimit.Max}],
                     ""A4"": [{Limits.A4AxisLimit.Min}, {Limits.A4AxisLimit.Max}],
                     ""A5"": [{Limits.A5AxisLimit.Min}, {Limits.A5AxisLimit.Max}],
-                    ""A6"": [{Limits.A6AxisLimit.Min}, {Limits.A6AxisLimit.Max}],
-                    ""maxCorrectionXYZ"": {Limits.CorrectionLimit.XYZ},
-                    ""maxCorrectionABC"": {Limits.CorrectionLimit.ABC}
+                    ""A6"": [{Limits.A6AxisLimit.Min}, {Limits.A6AxisLimit.Max}]
                 }},
                 ""transformation"": [
                     [{Transformation[0, 0]}, {Transformation[0, 1]}, {Transformation[0, 2]}, {Transformation[0, 3]}],
@@ -120,7 +121,7 @@ namespace PingPong.KUKA {
             //TODO: C# ogolnie jest spoko, ale to jest jakies uposledzone i nwm jak to zrobic inaczej ¯\_(ツ)_/¯
             jsonString = Regex.Replace(jsonString, @"\n( {4}){3}", "\n");
 
-            SaveFileDialog saveFileDialog1 = new SaveFileDialog {
+            SaveFileDialog saveFileDialog = new SaveFileDialog {
                 InitialDirectory = Directory.GetCurrentDirectory(),
                 CheckPathExists = true,
                 FilterIndex = 2,
@@ -130,8 +131,8 @@ namespace PingPong.KUKA {
                 FileName = "robot.config.json"
             };
 
-            if((bool)saveFileDialog1.ShowDialog() == true && saveFileDialog1.FileName != "") {
-                File.WriteAllText(saveFileDialog1.FileName, jsonString);
+            if((bool)saveFileDialog.ShowDialog() == true && saveFileDialog.FileName != "") {
+                File.WriteAllText(saveFileDialog.FileName, jsonString);
             }
         }
 

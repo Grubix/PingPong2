@@ -71,7 +71,7 @@ namespace PingPong.OptiTrack {
             int currentSample = 0;
 
             void checkSample(InputFrame inputFrame) {
-                position += inputFrame.Position;
+                position += inputFrame.BallPosition;
                 currentSample++;
 
                 if (currentSample >= samples) {

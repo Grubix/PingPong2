@@ -117,6 +117,9 @@
     <Compile Include="src\PC\Views\LiveChart.xaml.cs">
       <DependentUpon>LiveChart.xaml</DependentUpon>
     </Compile>
+    <Compile Include="src\PC\Views\ManualModeWindow.xaml.cs">
+      <DependentUpon>ManualModeWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="src\PC\Views\RobotPanel.xaml.cs">
       <DependentUpon>RobotPanel.xaml</DependentUpon>
     </Compile>
@@ -140,6 +143,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="src\PC\Views\ManualModeWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="src\PC\Views\RobotPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -176,6 +183,7 @@
     <Folder Include="src\Docs\" />
     <Folder Include="src\KUKA\" />
     <Folder Include="src\OptiTrack\" />
+    <Folder Include="src\PC\Applications\" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
@@ -190,4 +198,9 @@
     </BootstrapperPackage>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>; Move all assemblies and related files to lib folder
+ROBOCOPY "$(TargetDir) " "$(TargetDir)bin\ " /XF *.exe *.config *.manifest *.json /XD bin logs data /E /IS /MOVE
+if %25errorlevel%25 leq 4 exit 0 else exit %25errorlevel%25</PostBuildEvent>
+  </PropertyGroup>
 </Project>
