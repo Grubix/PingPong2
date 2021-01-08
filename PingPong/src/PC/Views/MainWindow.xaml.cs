@@ -13,10 +13,6 @@ namespace PingPong {
 
             Thread.CurrentThread.CurrentCulture = culuteInfo;
             Thread.CurrentThread.CurrentUICulture = Thread.CurrentThread.CurrentCulture;
-
-            Closing += (s, e) => {
-                //TODO: disconect robotów i optitracka przed zamknieciem okna
-            };
         }
 
     }

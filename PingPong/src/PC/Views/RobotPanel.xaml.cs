@@ -13,7 +13,7 @@ namespace PingPong {
 
         private bool isPlotFrozen = false;
 
-        public KUKARobot Robot { get; private set; }
+        public KUKARobot Robot { get; } = new KUKARobot();
 
         public RobotPanel() {
             InitializeComponent();
@@ -97,6 +97,65 @@ namespace PingPong {
             accelerationChart.AddSeries("Acceleration A [deg/s]", "A", false);
             accelerationChart.AddSeries("Acceleration B [deg/s]", "B", false);
             accelerationChart.AddSeries("Acceleration C [deg/s]", "C", false);
+        }
+
+        private void InitializeRobot() {
+            Robot.Initialized += () => {
+                Dispatcher.Invoke(() => {
+                    calibrateBtn.IsEnabled = true;
+                    manualModeBtn.IsEnabled = true;
+                    ipAdress.Text = Robot.Ip;
+                });
+            };
+
+            Robot.Uninitialized += () => {
+                Dispatcher.Invoke(() => {
+                    connectBtn.IsEnabled = true;
+                    disconnectBtn.IsEnabled = false;
+                    loadConfigBtn.IsEnabled = true;
+                    saveConfigBtn.IsEnabled = true;
+                });
+            };
+
+            Robot.FrameReceived += frame => {
+                RobotVector position = Robot.Position;
+                RobotVector positionError = Robot.PositionError;
+                RobotVector velocity = Robot.Velocity;
+                RobotVector acceleration = Robot.Acceleration;
+                RobotVector targetPosition = Robot.TargetPosition;
+
+                Dispatcher.Invoke(() => {
+                    actualPositionX.Text = position.X.ToString("F3");
+                    actualPositionY.Text = position.Y.ToString("F3");
+                    actualPositionZ.Text = position.Z.ToString("F3");
+                    actualPositionA.Text = position.A.ToString("F3");
+                    actualPositionB.Text = position.B.ToString("F3");
+                    actualPositionC.Text = position.C.ToString("F3");
+
+                    targetPositionX.Text = targetPosition.X.ToString("F3");
+                    targetPositionY.Text = targetPosition.Y.ToString("F3");
+                    targetPositionZ.Text = targetPosition.Z.ToString("F3");
+                    targetPositionA.Text = targetPosition.A.ToString("F3");
+                    targetPositionB.Text = targetPosition.B.ToString("F3");
+                    targetPositionC.Text = targetPosition.C.ToString("F3");
+                });
+
+                positionChart.Update(new double[] {
+                    position.X, position.Y, position.Z, position.A, position.B, position.C
+                });
+
+                positionErrorChart.Update(new double[] {
+                    positionError.X, positionError.Y, positionError.Z, positionError.A, positionError.B, positionError.C
+                });
+
+                velocityChart.Update(new double[] {
+                    velocity.X, velocity.Y, velocity.Z, velocity.A, velocity.B, velocity.C
+                });
+
+                accelerationChart.Update(new double[] {
+                    acceleration.X, acceleration.Y, acceleration.Z, acceleration.A, acceleration.B, acceleration.C
+                });
+            };
         }
 
         private void LoadConfig(object sender, RoutedEventArgs e) {
@@ -188,21 +247,18 @@ namespace PingPong {
             //TODO: moze powodowac opoznienia komunikacji z robotem co moze byc calkiem niebezpieczne,
             //TODO: przykladowo opozniajac odbieranie ramek i tym samym spradzanie limitow robota i cyk robot za 20k rozwalony <3
 
-            if (isPlotFrozen) {
-                positionChart.BlockZoomingAndPanning();
-                positionErrorChart.BlockZoomingAndPanning();
-                velocityChart.BlockZoomingAndPanning();
-                accelerationChart.BlockZoomingAndPanning();
+            //TODO: moze po kliknieciu w freeza zrobic diskonekta z robotami?
 
+            if (isPlotFrozen) {
                 positionChart.Clear();
                 positionErrorChart.Clear();
                 velocityChart.Clear();
                 accelerationChart.Clear();
 
-                positionChart.ResetZoom();
-                positionErrorChart.ResetZoom();
-                velocityChart.ResetZoom();
-                accelerationChart.ResetZoom();
+                positionChart.BlockZoomingAndPanning();
+                positionErrorChart.BlockZoomingAndPanning();
+                velocityChart.BlockZoomingAndPanning();
+                accelerationChart.BlockZoomingAndPanning();
 
                 isPlotFrozen = false;
                 freezeBtn.Content = "Freeze";
@@ -221,37 +277,16 @@ namespace PingPong {
 
         private void Connect(object sender, RoutedEventArgs e) {
             try {
-                if (Robot == null) {
-                    Robot = new KUKARobot(CreateConfiguration());
-
-                    Robot.Initialized += () => {
-                        Dispatcher.Invoke(() => {
-                            calibrateBtn.IsEnabled = true;
-                            manualModeBtn.IsEnabled = true;
-                            ipAdress.Text = Robot.Ip;
-                        });
-                    };
-
-                    Robot.Uninitialized += () => {
-                        Dispatcher.Invoke(() => {
-                            connectBtn.IsEnabled = true;
-                            disconnectBtn.IsEnabled = false;
-                            loadConfigBtn.IsEnabled = true;
-                            saveConfigBtn.IsEnabled = true;
-                        });
-                    };
-                } else {
-                    if (Robot.IsInitialized()) {
-                        return;
-                    }
-
-                    Robot.Config = CreateConfiguration();
+                if (Robot.IsInitialized()) {
+                    return;
                 }
 
                 connectBtn.IsEnabled = false;
                 disconnectBtn.IsEnabled = true;
                 loadConfigBtn.IsEnabled = false;
                 saveConfigBtn.IsEnabled = false;
+
+                Robot.Config = CreateConfiguration();
                 Robot.Initialize();
             } catch (Exception ex) {
                 MessageBox.Show($"Robot initialization failed. Original error: \"{ex.Message}\"",
@@ -284,66 +319,9 @@ namespace PingPong {
                 double.Parse(t03.Text), double.Parse(t13.Text), double.Parse(t23.Text)
             });
 
-            Console.WriteLine(port);
-
             Transformation transformation = new Transformation(rotation, translation);
 
             return new RobotConfig(port, limits, transformation);
-        }
-
-        public void SetRobot(KUKARobot robot) {
-            this.Robot = robot;
-
-            //TODO: ip, limits;
-
-            //TODO: on initialize -> ip, port
-
-            robot.Initialized += () => {
-                connectBtn.Content = "Disconnect";
-                calibrateBtn.IsEnabled = false;
-                loadConfigBtn.IsEnabled = false;
-                saveConfigBtn.IsEnabled = false;
-            };
-
-            robot.FrameReceived += frame => {
-                RobotVector position = robot.Position;
-                RobotVector positionError = robot.PositionError;
-                RobotVector velocity = robot.Velocity;
-                RobotVector acceleration = robot.Acceleration;
-                RobotVector targetPosition = robot.TargetPosition;
-
-                Dispatcher.Invoke(() => {
-                    actualPositionX.Text = position.X.ToString("F3");
-                    actualPositionY.Text = position.Y.ToString("F3");
-                    actualPositionZ.Text = position.Z.ToString("F3");
-                    actualPositionA.Text = position.A.ToString("F3");
-                    actualPositionB.Text = position.B.ToString("F3");
-                    actualPositionC.Text = position.C.ToString("F3");
-
-                    targetPositionX.Text = targetPosition.X.ToString("F3");
-                    targetPositionY.Text = targetPosition.Y.ToString("F3");
-                    targetPositionZ.Text = targetPosition.Z.ToString("F3");
-                    targetPositionA.Text = targetPosition.A.ToString("F3");
-                    targetPositionB.Text = targetPosition.B.ToString("F3");
-                    targetPositionC.Text = targetPosition.C.ToString("F3");
-                });
-
-                positionChart.Update(new double[] {
-                    position.X, position.Y, position.Z, position.A, position.B, position.C
-                });
-
-                positionErrorChart.Update(new double[] {
-                    positionError.X, positionError.Y, positionError.Z, positionError.A, positionError.B, positionError.C
-                });
-
-                velocityChart.Update(new double[] {
-                    velocity.X, velocity.Y, velocity.Z, velocity.A, velocity.B, velocity.C
-                });
-
-                accelerationChart.Update(new double[] {
-                    acceleration.X, acceleration.Y, acceleration.Z, acceleration.A, acceleration.B, acceleration.C
-                });
-            };
         }
 
     }

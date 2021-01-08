@@ -8,19 +8,27 @@ namespace PingPong.OptiTrack {
 
         private readonly NatNetClientML natNetClient;
 
-        private readonly ServerDescription serverDescription;
-
         private bool isInitialized = false;
 
         private double frameTimestamp;
 
         public event Action Initialized;
 
+        public event Action Uninitialized;
+
         public event Action<InputFrame> FrameReceived;
+
+        public ServerDescription ServerDescription { get; }
 
         public OptiTrackSystem(int connectionType = 0) {
             natNetClient = new NatNetClientML(connectionType);
-            serverDescription = new ServerDescription();
+            ServerDescription = new ServerDescription();
+        }
+
+        private void ProcessFrame(FrameOfMocapData data, NatNetClientML client) {
+            double frameDeltaTime = data.fTimestamp - frameTimestamp;
+            frameTimestamp = data.fTimestamp;
+            FrameReceived?.Invoke(new InputFrame(data, frameDeltaTime));
         }
 
         public void Initialize() {
@@ -34,7 +42,7 @@ namespace PingPong.OptiTrack {
                 throw new InvalidOperationException("OptiTrack system initialization failed. Is Motive application running?");
             }
 
-            status = natNetClient.GetServerDescription(serverDescription);
+            status = natNetClient.GetServerDescription(ServerDescription);
 
             if (status != 0) {
                 throw new InvalidOperationException("Connection failed. Is Motive application running?");
@@ -43,11 +51,7 @@ namespace PingPong.OptiTrack {
             isInitialized = true;
             Initialized?.Invoke();
 
-            natNetClient.OnFrameReady += (data, client) => {
-                double frameDeltaTime = data.fTimestamp - frameTimestamp;
-                frameTimestamp = data.fTimestamp;
-                FrameReceived?.Invoke(new InputFrame(data, frameDeltaTime));
-            };
+            natNetClient.OnFrameReady += ProcessFrame;
         }
 
         public bool IsInitialized() {
@@ -55,8 +59,13 @@ namespace PingPong.OptiTrack {
         }
 
         public void Uninitialize() {
-            isInitialized = false;
-            natNetClient.Uninitialize();
+            if (isInitialized) {
+                isInitialized = false;
+                natNetClient.OnFrameReady -= ProcessFrame;
+                natNetClient.Uninitialize();
+
+                Uninitialized?.Invoke();
+            }
         }
 
         // TODO: async, token source

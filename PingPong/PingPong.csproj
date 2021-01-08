@@ -120,6 +120,9 @@
     <Compile Include="src\PC\Views\ManualModeWindow.xaml.cs">
       <DependentUpon>ManualModeWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="src\PC\Views\OptiTrackPanel.xaml.cs">
+      <DependentUpon>OptiTrackPanel.xaml</DependentUpon>
+    </Compile>
     <Compile Include="src\PC\Views\RobotPanel.xaml.cs">
       <DependentUpon>RobotPanel.xaml</DependentUpon>
     </Compile>
@@ -144,6 +147,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="src\PC\Views\ManualModeWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="src\PC\Views\OptiTrackPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

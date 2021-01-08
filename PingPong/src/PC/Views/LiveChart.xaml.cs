@@ -9,7 +9,7 @@ using System.Windows.Controls;
 namespace PingPong {
     public partial class LiveChart : UserControl {
 
-        private readonly object syncLock = new object();
+        private readonly object updateSyncLock = new object();
 
         private readonly Stopwatch stopWatch = new Stopwatch();
 
@@ -25,12 +25,12 @@ namespace PingPong {
 
         public int RefreshDelay {
             get {
-                lock (syncLock) {
+                lock (updateSyncLock) {
                     return refreshDelay;
                 }
             }
             set {
-                lock (syncLock) {
+                lock (updateSyncLock) {
                     refreshDelay = value;
                 }
             }
@@ -38,12 +38,12 @@ namespace PingPong {
 
         public int MaxSamples {
             get {
-                lock (syncLock) {
+                lock (updateSyncLock) {
                     return maxSamples;
                 }
             }
             set {
-                lock (syncLock) {
+                lock (updateSyncLock) {
                     maxSamples = value;
                 }
                 Clear();
@@ -115,61 +115,61 @@ namespace PingPong {
                 throw new ArgumentException("Array length err");
             }
 
-            lock (syncLock) {
-                stopWatch.Stop();
+            stopWatch.Stop();
 
-                deltaTime += stopWatch.ElapsedMilliseconds;
+            deltaTime += stopWatch.ElapsedMilliseconds;
 
-                stopWatch.Reset();
-                stopWatch.Start();
+            stopWatch.Reset();
+            stopWatch.Start();
 
-                if (deltaTime < RefreshDelay) {
-                    currentSample++;
-                    return;
-                } else {
-                    deltaTime = 0;
-                }
+            if (deltaTime >= RefreshDelay) {
+                deltaTime = 0;
 
-                for (int i = 0; i < data.Length; i++) {
-                    ((List<DataPoint>)chart.Series[i].ItemsSource).Add(new DataPoint(currentSample, data[i]));
-                }
-
-                currentSample++;
-            }
-
-            Dispatcher.Invoke(() => {
-                lock (syncLock) {
-                    if (currentSample > (clearCounter + 1) * maxSamples) {
-                        clearCounter++;
-
-                        chart.Axes[0].Minimum = chart.Axes[0].AbsoluteMinimum = clearCounter * maxSamples;
-                        chart.Axes[0].Maximum = (clearCounter + 1) * maxSamples;
-
-                        for (int i = 0; i < data.Length; i++) {
-                            ((List<DataPoint>)chart.Series[i].ItemsSource).Clear();
-                        }
+                lock (updateSyncLock) {
+                    for (int i = 0; i < data.Length; i++) {
+                        ((List<DataPoint>)chart.Series[i].ItemsSource).Add(new DataPoint(currentSample, data[i]));
                     }
                 }
 
-                chart.InvalidatePlot(true);
-            });
+                Dispatcher.Invoke(() => {
+                    lock (updateSyncLock) {
+                        if (currentSample > (clearCounter + 1) * maxSamples) {
+                            clearCounter++;
+
+                            chart.Axes[0].Minimum = chart.Axes[0].AbsoluteMinimum = clearCounter * maxSamples;
+                            chart.Axes[0].Maximum = (clearCounter + 1) * maxSamples;
+
+                            for (int i = 0; i < data.Length; i++) {
+                                ((List<DataPoint>)chart.Series[i].ItemsSource).Clear();
+                            }
+                        }
+
+                        chart.InvalidatePlot();
+                    }
+                });
+            }
+
+            lock (updateSyncLock) {
+                currentSample++;
+            }
         }
 
         public void Clear() {
-            lock (syncLock) {
+            lock (updateSyncLock) {
                 foreach (var series in chart.Series) {
                     ((List<DataPoint>)series.ItemsSource).Clear();
                 }
 
                 currentSample = 0;
                 clearCounter = 0;
+
+                chart.Axes[0].Minimum = 0;
+                chart.Axes[0].AbsoluteMinimum = 0;
+                chart.Axes[0].Maximum = maxSamples;
+                chart.ResetAllAxes();
+
+                chart.InvalidatePlot();
             }
-
-            chart.Axes[0].Minimum = 0;
-            chart.Axes[0].Maximum = maxSamples;
-            chart.ResetAllAxes();
-
-            chart.InvalidatePlot(true);
         }
 
         public void BlockZoomingAndPanning() {

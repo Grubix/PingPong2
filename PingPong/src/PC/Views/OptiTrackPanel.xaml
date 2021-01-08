@@ -1,0 +1,171 @@
+﻿<UserControl x:Class="PingPong.OptiTrackPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:PingPong"
+             mc:Ignorable="d" 
+             xmlns:oxy="http://oxyplot.org/wpf"
+             d:DesignHeight="582" d:DesignWidth="1112" Background="#FFE5E5E5">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition MinWidth="250" Width="250" MaxWidth="300"/>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Border BorderBrush="#FFACACAC" BorderThickness="1" Background="White">
+            <Grid Margin="5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Column="0" Grid.Row="0">
+                    <ScrollViewer UseLayoutRounding="False" VerticalScrollBarVisibility="Hidden">
+                        <ItemsControl>
+                            <Expander Padding="0,5" IsExpanded="True">
+                                <Expander.Header>
+                                    <TextBlock Text="Ball data" FontWeight="Bold" />
+                                </Expander.Header>
+                                <StackPanel>
+                                    <Expander Padding="10,0,0,0" Margin="0,-5,0,0" IsExpanded="True">
+                                        <Expander.Header>
+                                            <TextBlock Text="Actual position (optiTrack base)" FontWeight="SemiBold" />
+                                        </Expander.Header>
+                                        <Grid Margin="0,0,0,2">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Content="XYZ [mm]" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right" Margin="0"/>
+                                            <TextBox Grid.Column="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" IsReadOnly="True" MaxLines="1" Text="0.0" x:Name="actualPositionX"/>
+                                            <TextBox Grid.Column="2" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" IsReadOnly="True" MaxLines="1" Text="0.0" x:Name="actualPositionY"/>
+                                            <TextBox Grid.Column="3" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" IsReadOnly="True" MaxLines="1" Text="0.0" x:Name="actualPositionZ"/>
+                                        </Grid>
+                                    </Expander>
+                                    <Separator Margin="10,2,0,2"/>
+                                    <Expander Padding="10,0,0,0" IsExpanded="True">
+                                        <Expander.Header>
+                                            <TextBlock Text="Actual position (robot 1 base)" FontWeight="SemiBold" />
+                                        </Expander.Header>
+                                        <Grid Margin="0,0,0,2">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Content="XYZ [mm]" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right" Margin="0"/>
+                                            <TextBox Grid.Column="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" IsReadOnly="True" MaxLines="1" Text="0.0" x:Name="robot1ActualPositionX"/>
+                                            <TextBox Grid.Column="2" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" IsReadOnly="True" MaxLines="1" Text="0.0" x:Name="robot1ActualPositionY"/>
+                                            <TextBox Grid.Column="3" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" IsReadOnly="True" MaxLines="1" Text="0.0" x:Name="robot1ActualPositionZ"/>
+                                        </Grid>
+                                    </Expander>
+                                    <Separator Margin="10,2,0,2"/>
+                                    <Expander Padding="10,0,0,0" IsExpanded="True">
+                                        <Expander.Header>
+                                            <TextBlock Text="Actual position (robot 2 base)" FontWeight="SemiBold" />
+                                        </Expander.Header>
+                                        <Grid Margin="0,0,0,2">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Content="XYZ [mm]" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right" Margin="0"/>
+                                            <TextBox Grid.Column="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" IsReadOnly="True" MaxLines="1" Text="0.0" x:Name="robot2ActualPositionX"/>
+                                            <TextBox Grid.Column="2" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" IsReadOnly="True" MaxLines="1" Text="0.0" x:Name="robot2ActualPositionY"/>
+                                            <TextBox Grid.Column="3" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" IsReadOnly="True" MaxLines="1" Text="0.0" x:Name="robot2ActualPositionZ"/>
+                                        </Grid>
+                                    </Expander>
+                                </StackPanel>
+                            </Expander>
+                            <Separator/>
+                            <Separator Margin="0,0,0,2"/>
+                            <Expander Padding="0,5" IsExpanded="True">
+                                <Expander.Header>
+                                    <TextBlock Text="Configuration" FontWeight="Bold" />
+                                </Expander.Header>
+
+                                <Grid Margin="0,-5,0,0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Content="Host app" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right" Margin="0"/>
+                                    <TextBox Grid.Column="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" IsReadOnly="True" Text="TODO" x:Name="ipAdress" VerticalAlignment="Center"/>
+                                    <Label Content="Host name" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Column="1" Grid.Row="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="TODO" VerticalAlignment="Center"/>
+                                    <Label Content="Host adress" Grid.Column="0" Grid.Row="2" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Column="1" Grid.Row="2" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="TODO" VerticalAlignment="Center"/>
+                                    <Label Content="NatNet version" Grid.Column="0" Grid.Row="3" HorizontalAlignment="Right"/>
+                                    <TextBox Grid.Column="1" Grid.Row="3" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="TODO" VerticalAlignment="Center"/>
+                                </Grid>
+                            </Expander>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
+                <Grid Grid.Row="2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Separator Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="-5,0,-5,5"/>
+                    <Button Content="Connect" Grid.Column="0" Height="22" Margin="0,0,2.5,0" Grid.Row="1" x:Name="connectBtn"/>
+                    <Button Content="Disconnect" Grid.Column="1" Height="22" Margin="2.5,0,0,0" Grid.Row="1" x:Name="disconnectBtn" IsEnabled="False"/>
+                </Grid>
+            </Grid>
+        </Border>
+        <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" Background="#FFF1F1F1" />
+        <Grid Grid.Column="2" Background="#FFF1F1F1" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <StackPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Left" Orientation="Horizontal">
+                <Button Content="Freeze" Width="75" Height="22" x:Name="freezeBtn"/>
+                <Button Content="Reset zoom" Width="75" Height="22" Margin="5,0,0,0" x:Name="resetZoomBtn" IsEnabled="False"/>
+            </StackPanel>
+            <TabControl Grid.Row="1" TabStripPlacement="Bottom" BorderBrush="#FFACACAC" Margin="0,5,0,0" Padding="0">
+                <TabItem Header="Position (opriTrack base)">
+                    <Grid Background="#FFE5E5E5">
+                        <local:LiveChart Margin="0" x:Name="positionChart"/>
+                    </Grid>
+                </TabItem>
+                <TabItem Header="Position (robot1 base)">
+                    <Grid Background="#FFE5E5E5">
+                        <local:LiveChart Margin="0" x:Name="robot1PositionChart"/>
+                    </Grid>
+                </TabItem>
+                <TabItem Header="Position (robot2 base)">
+                    <Grid Background="#FFE5E5E5">
+                        <local:LiveChart Margin="0" x:Name="robot2PositionChart"/>
+                    </Grid>
+                </TabItem>
+            </TabControl>
+        </Grid>
+    </Grid>
+</UserControl>

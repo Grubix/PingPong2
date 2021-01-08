@@ -61,7 +61,11 @@ namespace PingPong.KUKA {
         /// </summary>
         public int Port { 
             get {
-                return Config.Port;
+                if (config != null) {
+                    return config.Port;
+                } else {
+                    return 0;
+                }
             } 
         }
 
@@ -70,7 +74,11 @@ namespace PingPong.KUKA {
         /// </summary>
         public RobotLimits Limits { 
             get {
-                return Config.Limits;
+                if (config != null) {
+                    return config.Limits;
+                } else {
+                    return null;
+                }
             }
         }
 
@@ -149,8 +157,16 @@ namespace PingPong.KUKA {
         /// <summary>
         /// Transformation from OptiTrack coordinate system to this robot coordinate system
         /// </summary>
-        public Transformation OptiTrackTransformation { get; set; }
-
+        public Transformation OptiTrackTransformation {
+            get {
+                if (config != null) {
+                    return config.Transformation;
+                } else {
+                    return null;
+                }
+            }
+        }
+        
         /// <summary>
         /// Occurs when the robot is initialized (connection has been established)
         /// </summary>
@@ -182,7 +198,7 @@ namespace PingPong.KUKA {
 
             worker.DoWork += async (sender, args) => {
                 // Connect with the robot
-                InputFrame receivedFrame = await rsiAdapter.Connect(config.Port);
+                InputFrame receivedFrame = await rsiAdapter.Connect(Config.Port);
                 generator.Restart(receivedFrame.Position);
 
                 lock (receivedDataSyncLock) {
@@ -211,6 +227,9 @@ namespace PingPong.KUKA {
 
                 Uninitialized?.Invoke();
             };
+        }
+
+        public KUKARobot() : this(null) {
         }
 
         /// <summary>
@@ -351,19 +370,17 @@ namespace PingPong.KUKA {
         }
 
         public void Initialize() {
-            if (isInitialized) {
-                return;
-            }
+            if (!isInitialized) {
+                if (config == null) {
+                    throw new InvalidOperationException("Robot configuration is not set.");
+                }
 
-            worker.RunWorkerAsync();
+                worker.RunWorkerAsync();
+            }
         }
 
         public void Uninitialize() {
-            if (!isInitialized) {
-                return;
-            }
-
-            if (!worker.CancellationPending) {
+            if (isInitialized && worker.CancellationPending) {
                 worker.CancelAsync();
             }
         }

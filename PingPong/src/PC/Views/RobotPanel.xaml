@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:PingPong"
              mc:Ignorable="d" 
-             d:DesignHeight="706.5" d:DesignWidth="1408" Background="#FFF1F1F1">
+             d:DesignHeight="705.5" d:DesignWidth="1408" Background="#FFF1F1F1">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition MinWidth="250" Width="250" MaxWidth="300"/>
@@ -103,8 +103,8 @@
                                             </Grid.ColumnDefinitions>
                                             <Label Content="Ip adress" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right" Margin="0"/>
                                             <Label Content="Port" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right"/>
-                                            <TextBox Grid.Column="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" IsReadOnly="True" Text="0.0.0.0" x:Name="ipAdress"/>
-                                            <TextBox Grid.Column="1" Grid.Row="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="0000" x:Name="connectionPort"/>
+                                            <TextBox Grid.Column="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" IsReadOnly="True" Text="0.0.0.0" x:Name="ipAdress" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Column="1" Grid.Row="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="0000" x:Name="connectionPort" VerticalAlignment="Center"/>
                                         </Grid>
                                     </Expander>
                                     <Separator Margin="10,2,0,2"/>
@@ -124,13 +124,13 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="L. XYZ [mm]" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right"/>
-                                            <TextBox Grid.Column="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" Text="0.0" x:Name="workspaceLowerX"/>
-                                            <TextBox Grid.Column="2" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" Text="0.0" x:Name="workspaceLowerY"/>
-                                            <TextBox Grid.Column="3" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" Text="0.0" x:Name="workspaceLowerZ"/>
+                                            <TextBox Grid.Column="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" Text="0.0" x:Name="workspaceLowerX" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Column="2" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" Text="0.0" x:Name="workspaceLowerY" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Column="3" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" Text="0.0" x:Name="workspaceLowerZ" VerticalAlignment="Center"/>
                                             <Label Content="U. XYZ [mm]" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right"/>
-                                            <TextBox Grid.Column="1" Grid.Row="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="0.0" x:Name="workspaceUpperX"/>
-                                            <TextBox Grid.Column="2" Grid.Row="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" Text="0.0"  x:Name="workspaceUpperY"/>
-                                            <TextBox Grid.Column="3" Grid.Row="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" Text="0.0"  x:Name="workspaceUpperZ"/>
+                                            <TextBox Grid.Column="1" Grid.Row="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="0.0" x:Name="workspaceUpperX" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Column="2" Grid.Row="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" Text="0.0"  x:Name="workspaceUpperY" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Column="3" Grid.Row="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" Text="0.0"  x:Name="workspaceUpperZ" VerticalAlignment="Center"/>
                                         </Grid>
                                     </Expander>
                                     <Separator Margin="10,2,0,2"/>
@@ -148,9 +148,9 @@
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
                                             <Label Content="Max XYZ [mm]" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right"/>
-                                            <TextBox Grid.Column="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" Text="0.0" x:Name="correctionLimitXYZ"/>
+                                            <TextBox Grid.Column="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" Text="0.0" x:Name="correctionLimitXYZ" VerticalAlignment="Center"/>
                                             <Label Content="Max ABC [deg]" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right"/>
-                                            <TextBox Grid.Column="1" Grid.Row="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="0.0"  x:Name="correctionLimitABC"/>
+                                            <TextBox Grid.Column="1" Grid.Row="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="0.0"  x:Name="correctionLimitABC" VerticalAlignment="Center"/>
                                         </Grid>
                                     </Expander>
                                     <Separator Margin="10,2,0,2"/>
@@ -174,23 +174,23 @@
                                             </Grid.ColumnDefinitions>
 
                                             <Label Content="A1 (min, max)" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right"/>
-                                            <TextBox Grid.Column="1" Grid.Row="0" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="-360.0" x:Name="a1LowerLimit"/>
-                                            <TextBox Grid.Column="2" Grid.Row="0" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="360.0" x:Name="a1UpperLimit"/>
+                                            <TextBox Grid.Column="1" Grid.Row="0" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="-360.0" x:Name="a1LowerLimit" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Column="2" Grid.Row="0" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="360.0" x:Name="a1UpperLimit" VerticalAlignment="Center"/>
                                             <Label Content="A2 (min, max)" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right"/>
-                                            <TextBox Grid.Column="1" Grid.Row="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="-360.0" x:Name="a2LowerLimit"/>
-                                            <TextBox Grid.Column="2" Grid.Row="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="360.0" x:Name="a2UpperLimit"/>
+                                            <TextBox Grid.Column="1" Grid.Row="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="-360.0" x:Name="a2LowerLimit" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Column="2" Grid.Row="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="360.0" x:Name="a2UpperLimit" VerticalAlignment="Center"/>
                                             <Label Content="A3 (min, max)" Grid.Column="0" Grid.Row="2" HorizontalAlignment="Right"/>
-                                            <TextBox Grid.Column="1" Grid.Row="2" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="-360.0" x:Name="a3LowerLimit"/>
-                                            <TextBox Grid.Column="2" Grid.Row="2" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="360.0" x:Name="a3UpperLimit"/>
+                                            <TextBox Grid.Column="1" Grid.Row="2" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="-360.0" x:Name="a3LowerLimit" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Column="2" Grid.Row="2" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="360.0" x:Name="a3UpperLimit" VerticalAlignment="Center"/>
                                             <Label Content="A4 (min, max)" Grid.Column="0" Grid.Row="3" HorizontalAlignment="Right"/>
-                                            <TextBox Grid.Column="1" Grid.Row="3" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="-360.0" x:Name="a4LowerLimit"/>
-                                            <TextBox Grid.Column="2" Grid.Row="3" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="360.0" x:Name="a4UpperLimit"/>
+                                            <TextBox Grid.Column="1" Grid.Row="3" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="-360.0" x:Name="a4LowerLimit" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Column="2" Grid.Row="3" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="360.0" x:Name="a4UpperLimit" VerticalAlignment="Center"/>
                                             <Label Content="A5 (min, max)" Grid.Column="0" Grid.Row="4" HorizontalAlignment="Right"/>
-                                            <TextBox Grid.Column="1" Grid.Row="4" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="-360.0" x:Name="a5LowerLimit"/>
-                                            <TextBox Grid.Column="2" Grid.Row="4" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="360.0" x:Name="a5UpperLimit"/>
+                                            <TextBox Grid.Column="1" Grid.Row="4" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="-360.0" x:Name="a5LowerLimit" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Column="2" Grid.Row="4" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="360.0" x:Name="a5UpperLimit" VerticalAlignment="Center"/>
                                             <Label Content="A6 (min, max)" Grid.Column="0" Grid.Row="5" HorizontalAlignment="Right"/>
-                                            <TextBox Grid.Column="1" Grid.Row="5" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="-360.0" x:Name="a6LowerLimit"/>
-                                            <TextBox Grid.Column="2" Grid.Row="5" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="360.0" x:Name="a6UpperLimit"/>
+                                            <TextBox Grid.Column="1" Grid.Row="5" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="-360.0" x:Name="a6LowerLimit" VerticalAlignment="Center"/>
+                                            <TextBox Grid.Column="2" Grid.Row="5" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="360.0" x:Name="a6UpperLimit" VerticalAlignment="Center"/>
                                         </Grid>
                                     </Expander>
                                     <Separator Margin="10,2,0,2"/>
@@ -211,25 +211,25 @@
                                                 <ColumnDefinition/>
                                                 <ColumnDefinition/>
                                             </Grid.ColumnDefinitions>
-                                            <TextBox Text="1.0" Grid.Row="0" Grid.Column="0" Margin="0,2.5,2.5,2.5" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" x:Name="t00" IsReadOnly="True"/>
-                                            <TextBox Text="0.0" Grid.Row="0" Grid.Column="1" Margin="2.5" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"  x:Name="t01" IsReadOnly="True"/>
-                                            <TextBox Text="0.0" Grid.Row="0" Grid.Column="2" Margin="2.5" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"  x:Name="t02" IsReadOnly="True"/>
-                                            <TextBox Text="0.0" Grid.Row="0" Grid.Column="3" Margin="2.5,2.5,0,2.5" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"  x:Name="t03" IsReadOnly="True"/>
+                                            <TextBox Text="1.0" Grid.Row="0" Grid.Column="0" Margin="0,2.5,2.5,2.5" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" x:Name="t00" IsReadOnly="True" VerticalAlignment="Center"/>
+                                            <TextBox Text="0.0" Grid.Row="0" Grid.Column="1" Margin="2.5" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"  x:Name="t01" IsReadOnly="True" VerticalAlignment="Center"/>
+                                            <TextBox Text="0.0" Grid.Row="0" Grid.Column="2" Margin="2.5" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"  x:Name="t02" IsReadOnly="True" VerticalAlignment="Center"/>
+                                            <TextBox Text="0.0" Grid.Row="0" Grid.Column="3" Margin="2.5,2.5,0,2.5" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"  x:Name="t03" IsReadOnly="True" VerticalAlignment="Center"/>
 
-                                            <TextBox Text="0.0" Grid.Row="1" Grid.Column="0" Margin="0,2.5,2.5,2.5" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"  x:Name="t10" IsReadOnly="True"/>
-                                            <TextBox Text="1.0" Grid.Row="1" Grid.Column="1" Margin="2.5" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"  x:Name="t11" IsReadOnly="True"/>
-                                            <TextBox Text="0.0" Grid.Row="1" Grid.Column="2" Margin="2.5" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"  x:Name="t12" IsReadOnly="True"/>
-                                            <TextBox Text="0.0" Grid.Row="1" Grid.Column="3" Margin="2.5,2.5,0,2.5" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"  x:Name="t13" IsReadOnly="True"/>
+                                            <TextBox Text="0.0" Grid.Row="1" Grid.Column="0" Margin="0,2.5,2.5,2.5" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"  x:Name="t10" IsReadOnly="True" VerticalAlignment="Center"/>
+                                            <TextBox Text="1.0" Grid.Row="1" Grid.Column="1" Margin="2.5" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"  x:Name="t11" IsReadOnly="True" VerticalAlignment="Center"/>
+                                            <TextBox Text="0.0" Grid.Row="1" Grid.Column="2" Margin="2.5" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"  x:Name="t12" IsReadOnly="True" VerticalAlignment="Center"/>
+                                            <TextBox Text="0.0" Grid.Row="1" Grid.Column="3" Margin="2.5,2.5,0,2.5" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"  x:Name="t13" IsReadOnly="True" VerticalAlignment="Center"/>
 
-                                            <TextBox Text="0.0" Grid.Row="2" Grid.Column="0" Margin="0,2.5,2.5,2.5" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" x:Name="t20" IsReadOnly="True"/>
-                                            <TextBox Text="0.0" Grid.Row="2" Grid.Column="1" Margin="2.5" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" x:Name="t21" IsReadOnly="True"/>
-                                            <TextBox Text="1.0" Grid.Row="2" Grid.Column="2" Margin="2.5" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" x:Name="t22" IsReadOnly="True"/>
-                                            <TextBox Text="0.0" Grid.Row="2" Grid.Column="3" Margin="2.5,2.5,0,2.5" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" x:Name="t23" IsReadOnly="True"/>
+                                            <TextBox Text="0.0" Grid.Row="2" Grid.Column="0" Margin="0,2.5,2.5,2.5" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" x:Name="t20" IsReadOnly="True" VerticalAlignment="Center"/>
+                                            <TextBox Text="0.0" Grid.Row="2" Grid.Column="1" Margin="2.5" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" x:Name="t21" IsReadOnly="True" VerticalAlignment="Center"/>
+                                            <TextBox Text="1.0" Grid.Row="2" Grid.Column="2" Margin="2.5" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" x:Name="t22" IsReadOnly="True" VerticalAlignment="Center"/>
+                                            <TextBox Text="0.0" Grid.Row="2" Grid.Column="3" Margin="2.5,2.5,0,2.5" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" x:Name="t23" IsReadOnly="True" VerticalAlignment="Center"/>
 
-                                            <TextBox Text="0.0" Grid.Row="3" Grid.Column="0" Margin="0,2.5,2.5,0" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" x:Name="t30" IsReadOnly="True"/>
-                                            <TextBox Text="0.0" Grid.Row="3" Grid.Column="1" Margin="2.5,2.5,2.5,0" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" x:Name="t31" IsReadOnly="True"/>
-                                            <TextBox Text="0.0" Grid.Row="3" Grid.Column="2" Margin="2.5,2.5,2.5,0" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" x:Name="t32" IsReadOnly="True"/>
-                                            <TextBox Text="1.0" Grid.Row="3" Grid.Column="3" Margin="2.5,2.5,0,0" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" x:Name="t33" IsReadOnly="True"/>
+                                            <TextBox Text="0.0" Grid.Row="3" Grid.Column="0" Margin="0,2.5,2.5,0" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" x:Name="t30" IsReadOnly="True" VerticalAlignment="Center"/>
+                                            <TextBox Text="0.0" Grid.Row="3" Grid.Column="1" Margin="2.5,2.5,2.5,0" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" x:Name="t31" IsReadOnly="True" VerticalAlignment="Center"/>
+                                            <TextBox Text="0.0" Grid.Row="3" Grid.Column="2" Margin="2.5,2.5,2.5,0" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" x:Name="t32" IsReadOnly="True" VerticalAlignment="Center"/>
+                                            <TextBox Text="1.0" Grid.Row="3" Grid.Column="3" Margin="2.5,2.5,0,0" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" x:Name="t33" IsReadOnly="True" VerticalAlignment="Center"/>
                                         </Grid>
                                     </Expander>
                                 </StackPanel>

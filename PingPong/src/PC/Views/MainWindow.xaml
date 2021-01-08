@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PingPong"
         mc:Ignorable="d"
-        Title="PingPong v2.0 [K.Borowicz / W.Mila / B.Babiaczyk]" Height="720" Width="1480" WindowStartupLocation="CenterScreen">
+        Title="PingPong v2.0 [K.Borowicz / W.Mila / B.Babiaczyk]" Height="740" Width="1480" WindowStartupLocation="CenterScreen" MinHeight="740" MinWidth="1480">
     <TabControl Padding="5" Grid.IsSharedSizeScope="True" Background="#FFF1F1F1">
         <TabItem Header="Robot 1">
             <TabItem.Background>
@@ -24,7 +24,13 @@
             </Grid>
         </TabItem>
         <TabItem Header="OptiTrack">
-            <Grid Background="#FFE5E5E5"/>
+            <Grid Background="#FFE5E5E5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="166*"/>
+                    <RowDefinition Height="489*"/>
+                </Grid.RowDefinitions>
+                <local:OptiTrackPanel Grid.RowSpan="2"/>
+            </Grid>
         </TabItem>
         <TabItem Header="Ping app">
             <Grid Background="#FFE5E5E5"/>
