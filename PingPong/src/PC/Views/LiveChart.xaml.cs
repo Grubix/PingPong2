@@ -18,11 +18,13 @@ namespace PingPong {
 
         private int currentSample = 0;
 
+        private int lastUpdateSample = 0;
+
         private int clearCounter = 0;
 
         private int refreshDelay = 80;
 
-        private int maxSamples = 6000;
+        private int maxSamples = 5000;
 
         public int RefreshDelay {
             get {
@@ -51,6 +53,19 @@ namespace PingPong {
             }
         }
 
+        public bool IsReady {
+            get {
+                stopWatch.Stop();
+
+                deltaTime += stopWatch.ElapsedMilliseconds;
+
+                stopWatch.Reset();
+                stopWatch.Start();
+
+                return deltaTime >= RefreshDelay;
+            }
+        }
+
         public string YAxisTitle {
             get {
                 return chart.Axes[1].Title;
@@ -63,8 +78,10 @@ namespace PingPong {
         public LiveChart() {
             InitializeComponent();
             chart.Axes[0].Minimum = 0;
-            chart.Axes[0].Maximum = MaxSamples;
+            chart.Axes[0].Maximum = maxSamples;
             chart.Axes[0].AbsoluteMinimum = 0;
+            chart.Axes[0].AbsoluteMaximum = maxSamples;
+            chart.Axes[0].MinimumRange = 10;
         }
 
         public void AddSeries(string title, string name, bool visible) {
@@ -116,14 +133,7 @@ namespace PingPong {
                 throw new ArgumentException("Array length err");
             }
 
-            stopWatch.Stop();
-
-            deltaTime += stopWatch.ElapsedMilliseconds;
-
-            stopWatch.Reset();
-            stopWatch.Start();
-
-            if (deltaTime >= RefreshDelay) {
+            if (IsReady) {
                 deltaTime = 0;
 
                 lock (updateSyncLock) {
@@ -138,18 +148,23 @@ namespace PingPong {
                             clearCounter++;
 
                             chart.Axes[0].Minimum = chart.Axes[0].AbsoluteMinimum = clearCounter * maxSamples;
-                            chart.Axes[0].Maximum = (clearCounter + 1) * maxSamples;
+                            chart.Axes[0].Maximum = chart.Axes[0].AbsoluteMaximum = (clearCounter + 1) * maxSamples;
 
                             for (int i = 0; i < data.Length; i++) {
                                 ((List<DataPoint>)chart.Series[i].ItemsSource).Clear();
                             }
                         }
 
+                        lastUpdateSample = currentSample;
                         chart.InvalidatePlot();
                     }
                 });
             }
 
+            Tick();
+        }
+
+        public void Tick() {
             lock (updateSyncLock) {
                 currentSample++;
             }
@@ -162,31 +177,40 @@ namespace PingPong {
                 }
 
                 currentSample = 0;
+                lastUpdateSample = 0;
                 clearCounter = 0;
 
                 chart.Axes[0].Minimum = 0;
-                chart.Axes[0].AbsoluteMinimum = 0;
                 chart.Axes[0].Maximum = maxSamples;
+                chart.Axes[0].AbsoluteMinimum = 0;
+                chart.Axes[0].AbsoluteMaximum = maxSamples;
                 chart.ResetAllAxes();
-
                 chart.InvalidatePlot();
             }
         }
 
-        public void BlockZoomingAndPanning() {
+        public void ResetZoom() {
+            chart.Axes[0].Minimum = chart.Axes[0].AbsoluteMinimum = clearCounter * maxSamples;
+            chart.Axes[0].Maximum = chart.Axes[0].AbsoluteMaximum = (clearCounter + 1) * maxSamples;
+            chart.ResetAllAxes();
+            chart.InvalidatePlot();
+        }
+
+        public void FitToData() {
+            chart.Axes[0].Maximum = lastUpdateSample;
+            chart.ResetAllAxes();
+            chart.InvalidatePlot();
+        }
+
+        public void BlockZoomAndPan() {
             chart.Axes[0].IsZoomEnabled = false;
             chart.Axes[0].IsPanEnabled = false;
             chart.InvalidatePlot();
         }
 
-        public void UnblockZoomingAndPanning() {
+        public void UnblockZoomAndPan() {
             chart.Axes[0].IsZoomEnabled = true;
             chart.Axes[0].IsPanEnabled = true;
-            chart.InvalidatePlot();
-        }
-
-        public void ResetZoom() {
-            chart.ResetAllAxes();
             chart.InvalidatePlot();
         }
 

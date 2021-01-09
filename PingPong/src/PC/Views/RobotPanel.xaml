@@ -54,6 +54,7 @@
                                         </Grid>
                                     </Expander>
                                     <Separator Margin="10,2,0,2"/>
+                                    <Separator Margin="10,0,0,2"/>
                                     <Expander Padding="10,0,0,0" Margin="0,0,0,0" IsExpanded="True">
                                         <Expander.Header>
                                             <TextBlock Text="Target position" FontWeight="SemiBold" />
@@ -81,7 +82,7 @@
                                     </Expander>
                                 </StackPanel>
                             </Expander>
-                            <Separator/>
+                            <Separator Margin="0,2,0,2"/>
                             <Separator Margin="0,0,0,2"/>
                             <Expander Padding="0,5" IsExpanded="True">
                                 <Expander.Header>
@@ -108,6 +109,7 @@
                                         </Grid>
                                     </Expander>
                                     <Separator Margin="10,2,0,2"/>
+                                    <Separator Margin="10,0,0,2"/>
                                     <Expander Padding="10,0,0,0" IsExpanded="True">
                                         <Expander.Header>
                                             <TextBlock Text="Workspace limits" FontWeight="SemiBold" />
@@ -134,6 +136,7 @@
                                         </Grid>
                                     </Expander>
                                     <Separator Margin="10,2,0,2"/>
+                                    <Separator Margin="10,0,0,2"/>
                                     <Expander Padding="10,0,0,0" IsExpanded="True">
                                         <Expander.Header>
                                             <TextBlock Text="Correction limits" FontWeight="SemiBold" />
@@ -154,6 +157,7 @@
                                         </Grid>
                                     </Expander>
                                     <Separator Margin="10,2,0,2"/>
+                                    <Separator Margin="10,0,0,2"/>
                                     <Expander Padding="10,0,0,0">
                                         <Expander.Header>
                                             <TextBlock Text="Axis limits" FontWeight="SemiBold" />
@@ -194,6 +198,7 @@
                                         </Grid>
                                     </Expander>
                                     <Separator Margin="10,2,0,2"/>
+                                    <Separator Margin="10,0,0,2"/>
                                     <Expander Padding="10,0,0,0">
                                         <Expander.Header>
                                             <TextBlock Text="Transformation" FontWeight="SemiBold" />
@@ -268,6 +273,7 @@
             <StackPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Left" Orientation="Horizontal">
                 <Button Content="Freeze" Width="75" Height="22" x:Name="freezeBtn"/>
                 <Button Content="Reset zoom" Width="75" Height="22" Margin="5,0,0,0" x:Name="resetZoomBtn" IsEnabled="False"/>
+                <Button Content="Fit to data" Width="75" Height="22" Margin="5,0,0,0" x:Name="fitToDataBtn" IsEnabled="False"/>
             </StackPanel>
             <TabControl Grid.Row="1" TabStripPlacement="Bottom" BorderBrush="#FFACACAC" Margin="0,5,0,0" Padding="0" x:Name="tabControl">
                 <TabItem Header="Position" x:Name="positionTab">

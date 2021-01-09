@@ -29,6 +29,11 @@
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <AllowedReferenceRelatedFileExtensions>
+      <!-- Prevent default XML and PDB files copied to output in RELEASE. Only *.allowedextension files will be included, which doesn't exist in my case. -->
+      *.pdb;
+      *.xml
+    </AllowedReferenceRelatedFileExtensions>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -48,6 +53,8 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>
+    </DocumentationFile>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>PingPong.App</StartupObject>
@@ -93,6 +100,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="src\PC\Applications\Ping.cs" />
+    <Compile Include="src\PC\Applications\PingPong.cs" />
     <Compile Include="src\PC\Devices\IDevice.cs" />
     <Compile Include="src\PC\Devices\KUKA\KUKARobot.cs" />
     <Compile Include="src\PC\Devices\KUKA\RobotAxisPosition.cs" />
@@ -190,7 +199,6 @@
     <Folder Include="src\Docs\" />
     <Folder Include="src\KUKA\" />
     <Folder Include="src\OptiTrack\" />
-    <Folder Include="src\PC\Applications\" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">

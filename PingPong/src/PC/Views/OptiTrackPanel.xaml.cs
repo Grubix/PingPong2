@@ -70,7 +70,7 @@ namespace PingPong {
 
         private void UpdateOptiTrackBasePositionChart(OptiTrack.InputFrame frame) {
             positionChart.Update(new double[] {
-                frame.BallPosition[0], frame.BallPosition[0], frame.BallPosition[0]
+                frame.BallPosition[0], frame.BallPosition[1], frame.BallPosition[2]
             });
         }
 
@@ -78,7 +78,7 @@ namespace PingPong {
             var robot1BasePosition = robot1Transformation.Convert(frame.BallPosition);
 
             robot1PositionChart.Update(new double[] {
-                robot1BasePosition[0], robot1BasePosition[0], robot1BasePosition[0]
+                robot1BasePosition[0], robot1BasePosition[1], robot1BasePosition[2]
             });
         }
 
@@ -86,7 +86,7 @@ namespace PingPong {
             var robot2BasePosition = robot2Transformation.Convert(frame.BallPosition);
 
             robot1PositionChart.Update(new double[] {
-                robot2BasePosition[0], robot2BasePosition[0], robot2BasePosition[0]
+                robot2BasePosition[0], robot2BasePosition[1], robot2BasePosition[2]
             });
         }
 

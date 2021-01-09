@@ -151,19 +151,13 @@
             </StackPanel>
             <TabControl Grid.Row="1" TabStripPlacement="Bottom" BorderBrush="#FFACACAC" Margin="0,5,0,0" Padding="0">
                 <TabItem Header="Position (opriTrack base)">
-                    <Grid Background="#FFE5E5E5">
-                        <local:LiveChart Margin="0" x:Name="positionChart"/>
-                    </Grid>
+                    <local:LiveChart Margin="0" x:Name="positionChart"/>
                 </TabItem>
                 <TabItem Header="Position (robot1 base)">
-                    <Grid Background="#FFE5E5E5">
-                        <local:LiveChart Margin="0" x:Name="robot1PositionChart"/>
-                    </Grid>
+                    <local:LiveChart Margin="0" x:Name="robot1PositionChart"/>
                 </TabItem>
                 <TabItem Header="Position (robot2 base)">
-                    <Grid Background="#FFE5E5E5">
-                        <local:LiveChart Margin="0" x:Name="robot2PositionChart"/>
-                    </Grid>
+                    <local:LiveChart Margin="0" x:Name="robot2PositionChart"/>
                 </TabItem>
             </TabControl>
         </Grid>
