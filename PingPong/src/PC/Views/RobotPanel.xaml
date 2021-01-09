@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:PingPong"
              mc:Ignorable="d" 
-             d:DesignHeight="705.5" d:DesignWidth="1408" Background="#FFF1F1F1">
+             d:DesignHeight="705.5" d:DesignWidth="1408" Background="#FFF1F1F1" Focusable="True">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition MinWidth="250" Width="250" MaxWidth="300"/>
@@ -234,6 +234,7 @@
                                     </Expander>
                                 </StackPanel>
                             </Expander>
+
                         </ItemsControl>
                     </ScrollViewer>
                 </Grid>
@@ -259,7 +260,7 @@
             </Grid>
         </Border>
         <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" Background="#FFF1F1F1" />
-        <Grid Grid.Column="2">
+        <Grid Grid.Column="2" >
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
@@ -268,26 +269,18 @@
                 <Button Content="Freeze" Width="75" Height="22" x:Name="freezeBtn"/>
                 <Button Content="Reset zoom" Width="75" Height="22" Margin="5,0,0,0" x:Name="resetZoomBtn" IsEnabled="False"/>
             </StackPanel>
-            <TabControl Grid.Row="1" TabStripPlacement="Bottom" BorderBrush="#FFACACAC" Margin="0,5,0,0" Padding="0">
-                <TabItem Header="Position">
-                    <Grid Background="#FFE5E5E5">
-                        <local:LiveChart Margin="0" x:Name="positionChart"/>
-                    </Grid>
+            <TabControl Grid.Row="1" TabStripPlacement="Bottom" BorderBrush="#FFACACAC" Margin="0,5,0,0" Padding="0" x:Name="tabControl">
+                <TabItem Header="Position" x:Name="positionTab">
+                    <local:LiveChart Margin="0" x:Name="positionChart"/>
                 </TabItem>
                 <TabItem Header="Position error">
-                    <Grid Background="#FFE5E5E5">
-                        <local:LiveChart Margin="0" x:Name="positionErrorChart"/>
-                    </Grid>
+                    <local:LiveChart Margin="0" x:Name="positionErrorChart"/>
                 </TabItem>
                 <TabItem Header="Velocity">
-                    <Grid Background="#FFE5E5E5">
-                        <local:LiveChart Margin="0" x:Name="velocityChart"/>
-                    </Grid>
+                    <local:LiveChart Margin="0" x:Name="velocityChart"/>
                 </TabItem>
                 <TabItem Header="Acceleration">
-                    <Grid Background="#FFE5E5E5">
-                        <local:LiveChart Margin="0" x:Name="accelerationChart"/>
-                    </Grid>
+                    <local:LiveChart Margin="0" x:Name="accelerationChart"/>
                 </TabItem>
             </TabControl>
         </Grid>

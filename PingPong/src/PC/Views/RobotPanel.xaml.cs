@@ -7,53 +7,62 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace PingPong {
     public partial class RobotPanel : UserControl {
 
         private bool isPlotFrozen = false;
 
+        private ManualModeWindow manualModeWindow;
+
+        private CalibrationWindow calibrationWindow;
+
+        private LiveChart activeChart;
+
         public KUKARobot Robot { get; } = new KUKARobot();
+
+        public MainWindow MainWindowHandle { get; set; }
 
         public RobotPanel() {
             InitializeComponent();
+            InitializeControls();
             InitializeCharts();
+            InitializeRobot();
+
+            RobotVector actualPosition = new RobotVector();
+            RobotVector targetPosition = new RobotVector(100, 0, 0);
+            TrajectoryGenerator5v1 generator = new TrajectoryGenerator5v1();
+
+            generator.Restart(actualPosition);
+            generator.SetTargetPosition(targetPosition, new RobotVector(50, 0, 0), 10);
+
+            Random rand = new Random();
 
             Task.Run(() => {
-                for (int i = 0; i < 20000; i++) {
+                for (int i = 0; i < 15000; i++) {
+                    actualPosition = generator.GetNextAbsoluteCorrection(actualPosition);
+
                     Thread.Sleep(4);
 
                     if (isPlotFrozen) {
                         continue;
                     }
 
-                    positionChart.Update(new double[] {
-                        Math.Sin(i / 250.0) / 6.0,
-                        Math.Cos(i / 250.0) / 5.0,
-                        Math.Sin(i / 500.0) / 4.0,
-                        Math.Cos(i / 500.0) / 3.0,
-                        Math.Sin(i / 750.0) / 2.0,
-                        Math.Cos(i / 750.0) / 1.0 + Math.Sin(i / 50.0) / 20.0
-                    });
+                    positionChart.Update(actualPosition.ToArray());
+                    positionErrorChart.Update(generator.PositionError.ToArray());
+                    velocityChart.Update(generator.Velocity.ToArray());
+                    accelerationChart.Update(generator.Acceleration.ToArray());
                 }
             });
+        }
 
+        private void InitializeControls() {
             connectBtn.Click += Connect;
             freezeBtn.Click += FreezeOrUnfreeze;
             loadConfigBtn.Click += LoadConfig;
+            disconnectBtn.Click += Disconnect;
 
-            disconnectBtn.Click += (s, e) => {
-                if (Robot != null) {
-                    if (Robot.IsInitialized()) {
-                        Robot.Uninitialize();
-                    } else {
-                        connectBtn.IsEnabled = true;
-                        disconnectBtn.IsEnabled = false;
-                        loadConfigBtn.IsEnabled = true;
-                        saveConfigBtn.IsEnabled = true;
-                    }
-                }
-            };
             resetZoomBtn.Click += (s, e) => {
                 positionChart.ResetZoom();
                 positionErrorChart.ResetZoom();
@@ -62,6 +71,41 @@ namespace PingPong {
             };
             saveConfigBtn.Click += (s, e) => {
                 CreateConfiguration().SaveToFile();
+            };
+            manualModeBtn.Click += (s, e) => {
+                if (manualModeWindow == null) {
+                    manualModeWindow = new ManualModeWindow(Robot) {
+                        Owner = MainWindowHandle
+                    };
+
+                    manualModeWindow.Closed += (se, ev) => manualModeWindow = null;
+                    manualModeWindow.Show();
+                } else {
+                    manualModeWindow.Activate();
+                }
+            };
+            calibrateBtn.Click += (s, e) => {
+                if (calibrationWindow == null) {
+                    calibrationWindow = new CalibrationWindow(Robot, null) { //TODO: DODAC OPTITRACKA
+                        Owner = MainWindowHandle
+                    };
+
+                    calibrationWindow.Closed += (se, ev) => calibrationWindow = null;
+                    calibrationWindow.Show();
+                } else {
+                    calibrationWindow.Activate();
+                }
+            };
+
+            Loaded += (s, e) => Focus();
+            activeChart = positionChart;
+            tabControl.SelectionChanged += (s, e) => {
+                activeChart = (LiveChart)tabControl.SelectedContent;
+            };
+            KeyDown += (s, e) => {
+                if (isPlotFrozen && !Robot.IsInitialized() && e.Key == Key.S && Keyboard.IsKeyDown(Key.LeftCtrl)) {
+                    activeChart.SaveToImage(800, (int)(800 * 9.0 / 16.0));
+                }
             };
         }
 
@@ -91,12 +135,12 @@ namespace PingPong {
             velocityChart.AddSeries("Velocity C [deg/s]", "C", false);
 
             accelerationChart.YAxisTitle = "Acceleration (theoretical)";
-            accelerationChart.AddSeries("Acceleration X [mm/s]", "X", true);
-            accelerationChart.AddSeries("Acceleration Y [mm/s]", "Y", true);
-            accelerationChart.AddSeries("Acceleration Z [mm/s]", "Z", true);
-            accelerationChart.AddSeries("Acceleration A [deg/s]", "A", false);
-            accelerationChart.AddSeries("Acceleration B [deg/s]", "B", false);
-            accelerationChart.AddSeries("Acceleration C [deg/s]", "C", false);
+            accelerationChart.AddSeries("Acceleration X [mm/s²]", "X", true);
+            accelerationChart.AddSeries("Acceleration Y [mm/s²]", "Y", true);
+            accelerationChart.AddSeries("Acceleration Z [mm/s²]", "Z", true);
+            accelerationChart.AddSeries("Acceleration A [deg/s²]", "A", false);
+            accelerationChart.AddSeries("Acceleration B [deg/s²]", "B", false);
+            accelerationChart.AddSeries("Acceleration C [deg/s²]", "C", false);
         }
 
         private void InitializeRobot() {
@@ -140,6 +184,7 @@ namespace PingPong {
                     targetPositionC.Text = targetPosition.C.ToString("F3");
                 });
 
+                //TODO: mozna by zoptymalizowac zeby nie tworzyc bez sensu tych tablic, bo wykres i tak sie nie zupdatuje
                 positionChart.Update(new double[] {
                     position.X, position.Y, position.Z, position.A, position.B, position.C
                 });
@@ -156,6 +201,39 @@ namespace PingPong {
                     acceleration.X, acceleration.Y, acceleration.Z, acceleration.A, acceleration.B, acceleration.C
                 });
             };
+        }
+
+        private void FreezeOrUnfreeze(object sender, RoutedEventArgs e) {
+            //TODO: MEGA WAZNE!!! freezowanie (a raczej zoomowanie i scrolowanie wykresu)
+            //TODO: moze powodowac opoznienia komunikacji z robotem co moze byc calkiem niebezpieczne,
+            //TODO: przykladowo opozniajac odbieranie ramek i tym samym spradzanie limitow robota i cyk robot za 20k rozwalony <3
+
+            //TODO: moze po kliknieciu w freeza zrobic diskonekta z robotami?
+
+            if (isPlotFrozen) {
+                positionChart.Clear();
+                positionErrorChart.Clear();
+                velocityChart.Clear();
+                accelerationChart.Clear();
+
+                positionChart.BlockZoomingAndPanning();
+                positionErrorChart.BlockZoomingAndPanning();
+                velocityChart.BlockZoomingAndPanning();
+                accelerationChart.BlockZoomingAndPanning();
+
+                isPlotFrozen = false;
+                freezeBtn.Content = "Freeze";
+                resetZoomBtn.IsEnabled = false;
+            } else {
+                positionChart.UnblockZoomingAndPanning();
+                positionErrorChart.UnblockZoomingAndPanning();
+                velocityChart.UnblockZoomingAndPanning();
+                accelerationChart.UnblockZoomingAndPanning();
+
+                isPlotFrozen = true;
+                freezeBtn.Content = "Unfreeze";
+                resetZoomBtn.IsEnabled = true;
+            }
         }
 
         private void LoadConfig(object sender, RoutedEventArgs e) {
@@ -236,42 +314,8 @@ namespace PingPong {
                         }
                     }
                 } catch (Exception ex) {
-                    MessageBox.Show($"Could not load configuration file. Original error: \"{ex.Message}\"",
-                        "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MainWindow.ShowErrorDialog("Could not load configuration file.", ex);
                 }
-            }
-        }
-
-        private void FreezeOrUnfreeze(object sender, RoutedEventArgs e) {
-            //TODO: MEGA WAZNE!!! freezowanie (a raczej zoomowanie i scrolowanie wykresu)
-            //TODO: moze powodowac opoznienia komunikacji z robotem co moze byc calkiem niebezpieczne,
-            //TODO: przykladowo opozniajac odbieranie ramek i tym samym spradzanie limitow robota i cyk robot za 20k rozwalony <3
-
-            //TODO: moze po kliknieciu w freeza zrobic diskonekta z robotami?
-
-            if (isPlotFrozen) {
-                positionChart.Clear();
-                positionErrorChart.Clear();
-                velocityChart.Clear();
-                accelerationChart.Clear();
-
-                positionChart.BlockZoomingAndPanning();
-                positionErrorChart.BlockZoomingAndPanning();
-                velocityChart.BlockZoomingAndPanning();
-                accelerationChart.BlockZoomingAndPanning();
-
-                isPlotFrozen = false;
-                freezeBtn.Content = "Freeze";
-                resetZoomBtn.IsEnabled = false;
-            } else {
-                positionChart.UnblockZoomingAndPanning();
-                positionErrorChart.UnblockZoomingAndPanning();
-                velocityChart.UnblockZoomingAndPanning();
-                accelerationChart.UnblockZoomingAndPanning();
-
-                isPlotFrozen = true;
-                freezeBtn.Content = "Unfreeze";
-                resetZoomBtn.IsEnabled = true;
             }
         }
 
@@ -281,16 +325,26 @@ namespace PingPong {
                     return;
                 }
 
+                Robot.Config = CreateConfiguration();
                 connectBtn.IsEnabled = false;
                 disconnectBtn.IsEnabled = true;
                 loadConfigBtn.IsEnabled = false;
                 saveConfigBtn.IsEnabled = false;
 
-                Robot.Config = CreateConfiguration();
                 Robot.Initialize();
             } catch (Exception ex) {
-                MessageBox.Show($"Robot initialization failed. Original error: \"{ex.Message}\"",
-                        "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MainWindow.ShowErrorDialog("Robot initialization failed.", ex);
+            }
+        }
+
+        private void Disconnect(object sender, RoutedEventArgs e) {
+            if (Robot.IsInitialized()) {
+                Robot.Uninitialize();
+            } else {
+                connectBtn.IsEnabled = true;
+                disconnectBtn.IsEnabled = false;
+                loadConfigBtn.IsEnabled = true;
+                saveConfigBtn.IsEnabled = true;
             }
         }
 

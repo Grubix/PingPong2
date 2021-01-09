@@ -1,6 +1,9 @@
 ﻿using System;
 
 namespace PingPong.KUKA {
+    /// <summary>
+    /// WERSJA ABSOLUTNA Z WYKORZYSTANIEM SPRZEZENIA Z KUKI
+    /// </summary>
     class TrajectoryGenerator5v1 {
 
         private class Polynominal {
@@ -157,7 +160,7 @@ namespace PingPong.KUKA {
         public TrajectoryGenerator5v1() {
         }
 
-        public void Reset(RobotVector homePosition) {
+        public void Restart(RobotVector homePosition) {
             lock (syncLock) {
                 this.homePosition = homePosition;
                 targetPositionReached = true;

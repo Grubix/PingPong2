@@ -192,6 +192,9 @@ namespace PingPong.KUKA {
             generator = new TrajectoryGenerator5();
             Config = config;
 
+            position = RobotVector.Zero;
+            axisPosition = RobotAxisPosition.Zero;
+
             worker = new BackgroundWorker() {
                 WorkerSupportsCancellation = true
             };
@@ -332,15 +335,15 @@ namespace PingPong.KUKA {
 
             ManualResetEvent targetPositionReached = new ManualResetEvent(false);
 
-            void checkPosition(InputFrame frameReceived) {
+            void processFrame(InputFrame frameReceived) {
                 if (generator.IsTargetPositionReached) {
                     targetPositionReached.Set();
                 }
             };
 
-            FrameReceived += checkPosition;
+            FrameReceived += processFrame;
             targetPositionReached.WaitOne();
-            FrameReceived -= checkPosition;
+            FrameReceived -= processFrame;
 
             lock (forceMoveSyncLock) {
                 forceMoveMode = false;

@@ -79,17 +79,17 @@ namespace PingPong.OptiTrack {
 
             int currentSample = 0;
 
-            void checkSample(InputFrame inputFrame) {
+            void processFrame(InputFrame inputFrame) {
                 position += inputFrame.BallPosition;
                 currentSample++;
 
                 if (currentSample >= samples) {
-                    FrameReceived -= checkSample;
+                    FrameReceived -= processFrame;
                     getSamplesEvent.Set();
                 }
             }
 
-            FrameReceived += checkSample;
+            FrameReceived += processFrame;
             getSamplesEvent.WaitOne();
 
             return position / samples;

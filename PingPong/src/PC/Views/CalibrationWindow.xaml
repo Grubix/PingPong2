@@ -1,12 +1,61 @@
-﻿<Window x:Class="PingPong.src.PC.Views.CalibrationWindow"
+﻿<Window x:Class="PingPong.CalibrationWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:PingPong.src.PC.Views"
+        xmlns:local="clr-namespace:PingPong"
         mc:Ignorable="d"
-        Title="CalibrationWindow" Height="450" Width="800">
-    <Grid>
-        
-    </Grid>
+        Title="Calibration" SizeToContent="WidthAndHeight" Background="#FFF1F1F1" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize">
+    <StackPanel MinWidth="230">
+        <Label Content="Robot ip adress: "/>
+        <Border Grid.Row="1" Grid.Column="0" BorderBrush="#FFA0A0A0" BorderThickness="1" Margin="5,0,5,5" Padding="5" Background="White">
+            <StackPanel>
+                <Grid Margin="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox Text="1.0" Grid.Row="0" Grid.Column="0" Margin="0,2.5,2.5,2.5" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" x:Name="t00" IsReadOnly="True" VerticalAlignment="Center"/>
+                    <TextBox Text="0.0" Grid.Row="0" Grid.Column="1" Margin="2.5" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"  x:Name="t01" IsReadOnly="True" VerticalAlignment="Center"/>
+                    <TextBox Text="0.0" Grid.Row="0" Grid.Column="2" Margin="2.5" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"  x:Name="t02" IsReadOnly="True" VerticalAlignment="Center"/>
+                    <TextBox Text="0.0" Grid.Row="0" Grid.Column="3" Margin="2.5,2.5,0,2.5" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"  x:Name="t03" IsReadOnly="True" VerticalAlignment="Center"/>
+
+                    <TextBox Text="0.0" Grid.Row="1" Grid.Column="0" Margin="0,2.5,2.5,2.5" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"  x:Name="t10" IsReadOnly="True" VerticalAlignment="Center"/>
+                    <TextBox Text="1.0" Grid.Row="1" Grid.Column="1" Margin="2.5" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"  x:Name="t11" IsReadOnly="True" VerticalAlignment="Center"/>
+                    <TextBox Text="0.0" Grid.Row="1" Grid.Column="2" Margin="2.5" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"  x:Name="t12" IsReadOnly="True" VerticalAlignment="Center"/>
+                    <TextBox Text="0.0" Grid.Row="1" Grid.Column="3" Margin="2.5,2.5,0,2.5" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"  x:Name="t13" IsReadOnly="True" VerticalAlignment="Center"/>
+
+                    <TextBox Text="0.0" Grid.Row="2" Grid.Column="0" Margin="0,2.5,2.5,2.5" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" x:Name="t20" IsReadOnly="True" VerticalAlignment="Center"/>
+                    <TextBox Text="0.0" Grid.Row="2" Grid.Column="1" Margin="2.5" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" x:Name="t21" IsReadOnly="True" VerticalAlignment="Center"/>
+                    <TextBox Text="1.0" Grid.Row="2" Grid.Column="2" Margin="2.5" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" x:Name="t22" IsReadOnly="True" VerticalAlignment="Center"/>
+                    <TextBox Text="0.0" Grid.Row="2" Grid.Column="3" Margin="2.5,2.5,0,2.5" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" x:Name="t23" IsReadOnly="True" VerticalAlignment="Center"/>
+
+                    <TextBox Text="0.0" Grid.Row="3" Grid.Column="0" Margin="0,2.5,2.5,0" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" x:Name="t30" IsReadOnly="True" VerticalAlignment="Center"/>
+                    <TextBox Text="0.0" Grid.Row="3" Grid.Column="1" Margin="2.5,2.5,2.5,0" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" x:Name="t31" IsReadOnly="True" VerticalAlignment="Center"/>
+                    <TextBox Text="0.0" Grid.Row="3" Grid.Column="2" Margin="2.5,2.5,2.5,0" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" x:Name="t32" IsReadOnly="True" VerticalAlignment="Center"/>
+                    <TextBox Text="1.0" Grid.Row="3" Grid.Column="3" Margin="2.5,2.5,0,0" Height="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" x:Name="t33" IsReadOnly="True" VerticalAlignment="Center"/>
+                </Grid>
+                <Grid>
+                    <ProgressBar Height="22" Margin="0,5,0,0" x:Name="progressBar" BorderBrush="#FFABADB3" UseLayoutRounding="False"/>
+                    <Label Content="0%" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" x:Name="progressBarLabel" Margin="0,1,0,0" Padding="5,5,5,2"/>
+                </Grid>
+                <Grid Margin="0,5,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Button Content="Start" Height="22" x:Name="startBtn" Margin="0,0,2.5,0"/>
+                    <Button Grid.Column="1" Content="Stop" Height="22" x:Name="stopBtn" Margin="2.5,0,0,0"/>
+                </Grid>
+            </StackPanel>
+        </Border>
+    </StackPanel>
 </Window>

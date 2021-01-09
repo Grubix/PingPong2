@@ -1,12 +1,137 @@
-﻿<Window x:Class="PingPong.src.PC.Views.ManualModeWindow"
+﻿<Window x:Class="PingPong.ManualModeWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:PingPong.src.PC.Views"
+        xmlns:local="clr-namespace:PingPong"
         mc:Ignorable="d"
-        Title="ManualModeWindow" Height="450" Width="800">
-    <Grid>
-        
+        Title="Manual mode" SizeToContent="WidthAndHeight" Background="#FFF1F1F1" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize">
+
+    <Grid MinWidth="410">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Label Grid.ColumnSpan="2" Grid.Row="0" Content="Robot ip adress: " x:Name="robotIpAdress"/>
+        <Border Grid.Row="1" Grid.Column="0" BorderBrush="#FFA0A0A0" BorderThickness="1" Margin="5,0,3,5" Padding="5" Background="White">
+            <StackPanel>
+                <Grid Margin="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Label Content="X [mm]" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <TextBox Text="0.0" Grid.Row="0" Grid.Column="1" Margin="0" Height="22" VerticalAlignment="Center" VerticalContentAlignment="Center" x:Name="moveToX"/>
+
+                    <Label Content="Y [mm]" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <TextBox Text="0.0" Grid.Row="1" Grid.Column="1" Margin="0" Height="22" VerticalAlignment="Center" VerticalContentAlignment="Center" x:Name="moveToY"/>
+
+                    <Label Content="Z [mm]" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <TextBox Text="0.0" Grid.Row="2" Grid.Column="1" Margin="0" Height="22" VerticalAlignment="Center" VerticalContentAlignment="Center" x:Name="moveToZ"/>
+
+                    <Label Content="A [deg]" Grid.Row="0" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5,0,0,0"/>
+                    <TextBox Text="0.0" Grid.Row="0" Grid.Column="3" Margin="0" Height="22" VerticalAlignment="Center" VerticalContentAlignment="Center" x:Name="moveToA"/>
+
+                    <Label Content="B [deg]" Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5,0,0,0"/>
+                    <TextBox Text="0.0" Grid.Row="1" Grid.Column="3" Margin="0" Height="22" VerticalAlignment="Center" VerticalContentAlignment="Center" x:Name="moveToB"/>
+
+                    <Label Content="C [deg]" Grid.Row="2" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5,0,0,0"/>
+                    <TextBox Text="0.0" Grid.Row="2" Grid.Column="3" Margin="0" Height="22" VerticalAlignment="Center" VerticalContentAlignment="Center" x:Name="moveToC"/>
+
+                    <Grid Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Label Content="Movement time [s]" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        <TextBox Grid.Column="1" Text="5.0" Margin="5,0,0,0" Height="22" VerticalAlignment="Center" VerticalContentAlignment="Center" x:Name="moveToTime"/>
+                    </Grid>
+                </Grid>
+                <Separator Margin="0,5" />
+                <Grid Margin="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Button Content="Move to" Grid.Column="0" Margin="0,0,2.5,0" x:Name="moveToBtn" Height="22"></Button>
+                    <Button Content="Reset" Grid.Column="1" Margin="2.5,0,0,0" x:Name="moveToResetBtn" Height="22"></Button>
+                </Grid>
+            </StackPanel>
+        </Border>
+        <Border Grid.Row="1" Grid.Column="1" BorderBrush="#FFA0A0A0" BorderThickness="1" Margin="2,0,5,5" Padding="5" Background="White">
+            <StackPanel>
+                <Grid Margin="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Label Content="X [mm]" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <TextBox Text="0.0" Grid.Row="0" Grid.Column="1" Margin="0" Height="22" VerticalAlignment="Center" VerticalContentAlignment="Center" x:Name="shiftX"/>
+
+                    <Label Content="Y [mm]" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <TextBox Text="0.0" Grid.Row="1" Grid.Column="1" Margin="0" Height="22" VerticalAlignment="Center" VerticalContentAlignment="Center" x:Name="shiftY"/>
+
+                    <Label Content="Z [mm]" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <TextBox Text="0.0" Grid.Row="2" Grid.Column="1" Margin="0" Height="22" VerticalAlignment="Center" VerticalContentAlignment="Center" x:Name="shiftZ"/>
+
+                    <Label Content="A [deg]" Grid.Row="0" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5,0,0,0"/>
+                    <TextBox Text="0.0" Grid.Row="0" Grid.Column="3" Margin="0" Height="22" VerticalAlignment="Center" VerticalContentAlignment="Center" x:Name="shiftA"/>
+
+                    <Label Content="B [deg]" Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5,0,0,0"/>
+                    <TextBox Text="0.0" Grid.Row="1" Grid.Column="3" Margin="0" Height="22" VerticalAlignment="Center" VerticalContentAlignment="Center" x:Name="shiftB"/>
+
+                    <Label Content="C [deg]" Grid.Row="2" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5,0,0,0"/>
+                    <TextBox Text="0.0" Grid.Row="2" Grid.Column="3" Margin="0" Height="22" VerticalAlignment="Center" VerticalContentAlignment="Center" x:Name="shiftC"/>
+
+                    <Grid Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Label Content="Movement time [s]" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        <TextBox Grid.Column="1" Text="5.0" Margin="5,0,0,0" Height="22" VerticalAlignment="Center" VerticalContentAlignment="Center" x:Name="shiftTime"/>
+                    </Grid>
+                </Grid>
+                <Separator Margin="0,5" />
+                <Grid Margin="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Button Content="Shift" Grid.Column="0" Margin="0,0,2.5,0" x:Name="shiftBtn" Height="22"></Button>
+                    <Button Content="Reset" Grid.Column="1" Margin="2.5,0,0,0" x:Name="shiftResetBtn" Height="22"></Button>
+                </Grid>
+            </StackPanel>
+        </Border>
     </Grid>
 </Window>

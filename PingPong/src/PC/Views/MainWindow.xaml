@@ -14,23 +14,13 @@
                     <GradientStop Color="#FFE5E5E5" Offset="1"/>
                 </LinearGradientBrush>
             </TabItem.Background>
-            <Grid Background="#FFE5E5E5">
-                <local:RobotPanel/>
-            </Grid>
+            <local:RobotPanel x:Name="robot1Panel"/>
         </TabItem>
         <TabItem Header="Robot 2">
-            <Grid Background="#FFE5E5E5">
-                <local:RobotPanel/>
-            </Grid>
+            <local:RobotPanel x:Name="robot2Panel"/>
         </TabItem>
         <TabItem Header="OptiTrack">
-            <Grid Background="#FFE5E5E5">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="166*"/>
-                    <RowDefinition Height="489*"/>
-                </Grid.RowDefinitions>
-                <local:OptiTrackPanel Grid.RowSpan="2"/>
-            </Grid>
+            <local:OptiTrackPanel x:Name="optiTrackPanel"/>
         </TabItem>
         <TabItem Header="Ping app">
             <Grid Background="#FFE5E5E5"/>

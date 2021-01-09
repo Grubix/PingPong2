@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:PingPong"
              mc:Ignorable="d" 
              xmlns:oxy="http://oxyplot.org/wpf"
-             d:DesignHeight="582" d:DesignWidth="1112" Background="#FFE5E5E5">
+             d:DesignHeight="582" d:DesignWidth="1112" Background="#FFE5E5E5" Focusable="True">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition MinWidth="250" Width="250" MaxWidth="300"/>
@@ -140,7 +140,7 @@
             </Grid>
         </Border>
         <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" Background="#FFF1F1F1" />
-        <Grid Grid.Column="2" Background="#FFF1F1F1" >
+        <Grid Grid.Column="2" Background="#FFF1F1F1"  >
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>

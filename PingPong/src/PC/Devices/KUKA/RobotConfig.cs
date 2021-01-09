@@ -1,10 +1,10 @@
 ﻿using MathNet.Numerics.LinearAlgebra;
-using Microsoft.Win32;
 using Newtonsoft.Json.Linq;
 using PingPong.Maths;
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
 
 namespace PingPong.KUKA {
     public class RobotConfig {
@@ -130,7 +130,7 @@ namespace PingPong.KUKA {
                 FileName = "robot.config.json"
             };
 
-            if((bool)saveFileDialog.ShowDialog() == true && saveFileDialog.FileName != "") {
+            if(saveFileDialog.ShowDialog() == DialogResult.OK && saveFileDialog.FileName != "") {
                 File.WriteAllText(saveFileDialog.FileName, jsonString);
             }
         }

@@ -18,8 +18,8 @@
         </StackPanel>
         <oxy:Plot x:Name="chart" Grid.Row="1" PlotMargins="Auto,Auto,10,Auto" LegendItemSpacing="36" LegendFont="DejaVu Sans Mono" LegendFontSize="10.5" >
             <oxy:Plot.Axes>
-                <oxy:LinearAxis Position="Bottom" Minimum="0" Maximum="5000" IsManipulationEnabled="True" Title="Sample" IsZoomEnabled="False" IsPanEnabled="False" MaximumRange="15000" />
-                <oxy:LinearAxis Position="Left" IsManipulationEnabled="False" IsPanEnabled="False" IsZoomEnabled="False" MajorGridlineColor="#3F000000" MajorGridlineStyle="Solid"/>
+                <oxy:LinearAxis Position="Bottom" Minimum="0" Maximum="5000" IsManipulationEnabled="True" Title="Sample" IsZoomEnabled="False" IsPanEnabled="False" MaximumRange="15000" MajorGridlineStyle="Dash" />
+                <oxy:LinearAxis Position="Left" IsManipulationEnabled="False" IsPanEnabled="False" IsZoomEnabled="False" MajorGridlineColor="#3F000000" MajorGridlineStyle="Dash"/>
             </oxy:Plot.Axes>
         </oxy:Plot>
     </Grid>

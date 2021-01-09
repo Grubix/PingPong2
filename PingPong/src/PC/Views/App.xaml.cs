@@ -2,5 +2,6 @@
 
 namespace PingPong {
     public partial class App : Application {
+
     }
 }

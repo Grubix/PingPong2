@@ -37,12 +37,12 @@
                 b1 = 2.0 * N * Ts * Ts * Ki - 8.0 * (Kp + N * Kd);
                 b2 = (4.0 - 2.0 * N * Ts) * Kp + (N * Ts * Ts - 2.0 * Ts) * Ki + 4.0 * N * Kd;
             } else {
-                b0 = Ts * Ts * Ki + 4.0 * Kd + 2.0 * Ts * Kp;
-                b1 = 2.0 * Ts * Ts * Ki - 8.0 * Kd;
-                b2 = Ts * Ts * Ki + 4.0 * Kd - 2.0 * Ts * Kp;
                 a0 = 2.0 * Ts;
                 a1 = 0.0;
                 a2 = -2.0 * Ts;
+                b0 = Ts * Ts * Ki + 4.0 * Kd + 2.0 * Ts * Kp;
+                b1 = 2.0 * Ts * Ts * Ki - 8.0 * Kd;
+                b2 = Ts * Ts * Ki + 4.0 * Kd - 2.0 * Ts * Kp;
             }
 
             ku1 = a1 / a0;
@@ -62,7 +62,7 @@
 
             u0 = ke0 * e0 + ke1 * e1 + ke2 * e2 - ku1 * u1 - ku2 * u2;
 
-            //TODO: limity wyjscia, anti windup ?
+            //TODO: limity wyjscia, anti windup, cos?
 
             return (u0, e0);
         }

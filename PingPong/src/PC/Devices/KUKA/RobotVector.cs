@@ -72,6 +72,12 @@ namespace PingPong.KUKA {
                 Math.Abs(C - vectorToCompare.C) <= abcTolerance;
         }
 
+        public double[] ToArray() {
+            return new double[] {
+                X, Y, Z, A, B, C
+            };
+        }
+
         public override string ToString() {
             return $"[X={X:F3}, Y={Y:F3}, Z={Z:F3}, A={A:F3}, B={B:F3}, C={C:F3}]";
         }

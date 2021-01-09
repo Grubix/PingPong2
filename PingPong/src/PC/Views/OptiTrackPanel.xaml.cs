@@ -55,8 +55,7 @@ namespace PingPong {
                 connectBtn.IsEnabled = false;
                 disconnectBtn.IsEnabled = true;
             } catch (InvalidOperationException ex) {
-                MessageBox.Show($"OptiTrack system initialization failed. Original error: \"{ex.Message}\"",
-                        "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MainWindow.ShowErrorDialog("OptiTrack system initialization failed.", ex);
             }
         }
 

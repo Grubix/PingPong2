@@ -3,6 +3,7 @@ using OxyPlot.Wpf;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -21,7 +22,7 @@ namespace PingPong {
 
         private int refreshDelay = 80;
 
-        private int maxSamples = 5000;
+        private int maxSamples = 6000;
 
         public int RefreshDelay {
             get {
@@ -187,6 +188,31 @@ namespace PingPong {
         public void ResetZoom() {
             chart.ResetAllAxes();
             chart.InvalidatePlot();
+        }
+
+        public void SaveToImage(int width, int height) {
+           var saveFileDialog = new System.Windows.Forms.SaveFileDialog {
+                InitialDirectory = Directory.GetCurrentDirectory(),
+                CheckPathExists = true,
+                FilterIndex = 2,
+                Title = "Save chart screenshot",
+                DefaultExt = "png",
+                Filter = "png files |*.png",
+                FileName = YAxisTitle + ".png"
+            };
+
+            if (saveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK && saveFileDialog.FileName != "") {
+                using (MemoryStream imageStream = new MemoryStream()) {
+                    var pngExporter = new PngExporter {
+                        Width = width,
+                        Height = height,
+                        Background = OxyColors.White
+                    };
+
+                    pngExporter.Export(chart.ActualModel, imageStream);
+                    File.WriteAllBytes(saveFileDialog.FileName, imageStream.ToArray());
+                }
+            }
         }
 
     }
