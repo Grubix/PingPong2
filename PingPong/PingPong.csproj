@@ -100,8 +100,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="src\PC\Applications\Ping.cs" />
-    <Compile Include="src\PC\Applications\PingPong.cs" />
+    <Compile Include="src\PC\Applications\IApplication.cs" />
+    <Compile Include="src\PC\Applications\PingApplication.cs" />
+    <Compile Include="src\PC\Applications\PingPongApplication.cs" />
     <Compile Include="src\PC\Devices\IDevice.cs" />
     <Compile Include="src\PC\Devices\KUKA\KUKARobot.cs" />
     <Compile Include="src\PC\Devices\KUKA\RobotAxisPosition.cs" />
@@ -132,6 +133,9 @@
     <Compile Include="src\PC\Views\OptiTrackPanel.xaml.cs">
       <DependentUpon>OptiTrackPanel.xaml</DependentUpon>
     </Compile>
+    <Compile Include="src\PC\Views\PingPongPanel.xaml.cs">
+      <DependentUpon>PingPongPanel.xaml</DependentUpon>
+    </Compile>
     <Compile Include="src\PC\Views\RobotPanel.xaml.cs">
       <DependentUpon>RobotPanel.xaml</DependentUpon>
     </Compile>
@@ -160,6 +164,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="src\PC\Views\OptiTrackPanel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="src\PC\Views\PingPongPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

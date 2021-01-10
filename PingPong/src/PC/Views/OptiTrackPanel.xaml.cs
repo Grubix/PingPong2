@@ -2,15 +2,23 @@
 using PingPong.Maths;
 using PingPong.OptiTrack;
 using System;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace PingPong {
     public partial class OptiTrackPanel : UserControl {
 
-        private Transformation robot1Transformation, robot2Transformation;
+        private bool isPlotFrozen;
 
-        public OptiTrackSystem OptiTrack { get; } = new OptiTrackSystem();
+        private Transformation robot1Transformation;
+
+        private Transformation robot2Transformation;
+
+        private LiveChart activeChart;
+
+        public OptiTrackSystem OptiTrack { get; }
 
         public KUKARobot Robot1 { get; set; }
 
@@ -18,23 +26,86 @@ namespace PingPong {
 
         public OptiTrackPanel() {
             InitializeComponent();
+            InitializeCharts();
 
-            positionChart.YAxisTitle = "Position (optiTrack base)";
-            positionChart.AddSeries("Position X [mm]", "X", true);
-            positionChart.AddSeries("Position Y [mm]", "Y", true);
-            positionChart.AddSeries("Position Z [mm]", "Z", true);
-
-            robot1PositionChart.YAxisTitle = "Position (robot1 base)";
-            robot1PositionChart.AddSeries("Position X [mm]", "X", true);
-            robot1PositionChart.AddSeries("Position Y [mm]", "Y", true);
-            robot1PositionChart.AddSeries("Position Z [mm]", "Z", true);
-
-            robot2PositionChart.YAxisTitle = "Position (robot2 base)";
-            robot2PositionChart.AddSeries("Position X [mm]", "X", true);
-            robot2PositionChart.AddSeries("Position Y [mm]", "Y", true);
-            robot2PositionChart.AddSeries("Position Z [mm]", "Z", true);
+            OptiTrack = new OptiTrackSystem();
+            OptiTrack.Initialized += () => {
+                hostApp.Text = OptiTrack.ServerDescription.HostApp;
+                hostName.Text = OptiTrack.ServerDescription.HostComputerName;
+                hostAdress.Text = OptiTrack.ServerDescription.HostComputerAddress.ToString(); //TODO:
+                natnetVersion.Text = OptiTrack.ServerDescription.NatNetVersion.ToString(); //TODO:
+            };
 
             connectBtn.Click += Connect;
+            disconnectBtn.Click += Disconnect;
+            freezeBtn.Click += FreezeCharts;
+            fitToDataBtn.Click += FitChartsToData;
+            resetZoomBtn.Click += ResetChartsZoom;
+            screenshotBtn.Click += TakeChartScreenshot;
+
+            // CTRL + S -> save active chart to png image
+            activeChart = positionChart;
+            Loaded += (s, e) => Focus();
+            activeChart = positionChart;
+            tabControl.SelectionChanged += (s, e) => {
+                activeChart = (LiveChart)tabControl.SelectedContent;
+            };
+            KeyDown += (s, e) => {
+                if (e.Key == Key.S && Keyboard.IsKeyDown(Key.LeftCtrl)) {
+                    TakeChartScreenshot(null, null);
+                }
+            };
+        }
+
+        private void UpdateOptiTrackBasePositionChart(OptiTrack.InputFrame frame) {
+            if (positionChart.IsReady) {
+                positionChart.Update(new double[] {
+                    frame.BallPosition[0], frame.BallPosition[1], frame.BallPosition[2]
+                });
+            } else {
+                positionChart.Tick();
+            }
+        }
+
+        private void UpdateRobot1BasePositionChart(OptiTrack.InputFrame frame) {
+            var robot1BasePosition = robot1Transformation.Convert(frame.BallPosition);
+
+            if (robot1PositionChart.IsReady) {
+                robot1PositionChart.Update(new double[] {
+                    robot1BasePosition[0], robot1BasePosition[1], robot1BasePosition[2]
+                });
+            } else {
+                robot1PositionChart.Tick();
+            }
+        }
+
+        private void UpdateRobot2BasePositionChart(OptiTrack.InputFrame frame) {
+            var robot2BasePosition = robot2Transformation.Convert(frame.BallPosition);
+
+            if (robot2PositionChart.IsReady) {
+                robot2PositionChart.Update(new double[] {
+                    robot2BasePosition[0], robot2BasePosition[1], robot2BasePosition[2]
+                });
+            } else {
+                robot2PositionChart.Tick();
+            }
+        }
+
+        private void InitializeCharts() {
+            positionChart.YAxisTitle = "Position (optiTrack base)";
+            positionChart.AddSeries("Ball position X [mm]", "X", true);
+            positionChart.AddSeries("Ball position Y [mm]", "Y", true);
+            positionChart.AddSeries("Ball position Z [mm]", "Z", true);
+
+            robot1PositionChart.YAxisTitle = "Position (robot1 base)";
+            robot1PositionChart.AddSeries("Ball position X [mm]", "X", true);
+            robot1PositionChart.AddSeries("Ball position Y [mm]", "Y", true);
+            robot1PositionChart.AddSeries("Ball position Z [mm]", "Z", true);
+
+            robot2PositionChart.YAxisTitle = "Position (robot2 base)";
+            robot2PositionChart.AddSeries("Ball position X [mm]", "X", true);
+            robot2PositionChart.AddSeries("Ball position Y [mm]", "Y", true);
+            robot2PositionChart.AddSeries("Ball position Z [mm]", "Z", true);
         }
 
         private void Connect(object sender, RoutedEventArgs e) {
@@ -60,34 +131,84 @@ namespace PingPong {
         }
 
         private void Disconnect(object sender, RoutedEventArgs e) {
-            connectBtn.IsEnabled = true;
-            disconnectBtn.IsEnabled = false;
-
             OptiTrack.FrameReceived -= UpdateOptiTrackBasePositionChart;
             OptiTrack.FrameReceived -= UpdateRobot1BasePositionChart;
             OptiTrack.FrameReceived -= UpdateRobot2BasePositionChart;
+
+            connectBtn.IsEnabled = true;
+            disconnectBtn.IsEnabled = false;
         }
 
-        private void UpdateOptiTrackBasePositionChart(OptiTrack.InputFrame frame) {
-            positionChart.Update(new double[] {
-                frame.BallPosition[0], frame.BallPosition[1], frame.BallPosition[2]
-            });
+        private void FreezeCharts(object sender, RoutedEventArgs e) {
+            if (isPlotFrozen) {
+                positionChart.Clear();
+                robot1PositionChart.Clear();
+                robot2PositionChart.Clear();
+
+                positionChart.BlockZoomAndPan();
+                robot1PositionChart.BlockZoomAndPan();
+                robot2PositionChart.BlockZoomAndPan();
+
+                isPlotFrozen = false;
+                freezeBtn.Content = "Freeze";
+                resetZoomBtn.IsEnabled = false;
+                fitToDataBtn.IsEnabled = false;
+                screenshotBtn.IsEnabled = false;
+            } else {
+                positionChart.UnblockZoomAndPan();
+                robot1PositionChart.UnblockZoomAndPan();
+                robot2PositionChart.UnblockZoomAndPan();
+
+                isPlotFrozen = true;
+                freezeBtn.Content = "Unfreeze";
+                resetZoomBtn.IsEnabled = true;
+                fitToDataBtn.IsEnabled = true;
+                screenshotBtn.IsEnabled = true;
+            }
         }
 
-        private void UpdateRobot1BasePositionChart(OptiTrack.InputFrame frame) {
-            var robot1BasePosition = robot1Transformation.Convert(frame.BallPosition);
-
-            robot1PositionChart.Update(new double[] {
-                robot1BasePosition[0], robot1BasePosition[1], robot1BasePosition[2]
-            });
+        private void FitChartsToData(object sender, RoutedEventArgs e) {
+            positionChart.FitToData();
+            robot1PositionChart.FitToData();
+            robot2PositionChart.FitToData();
         }
 
-        private void UpdateRobot2BasePositionChart(OptiTrack.InputFrame frame) {
-            var robot2BasePosition = robot2Transformation.Convert(frame.BallPosition);
+        private void ResetChartsZoom(object sender, RoutedEventArgs e) {
+            positionChart.ResetZoom();
+            robot1PositionChart.ResetZoom();
+            robot2PositionChart.ResetZoom();
+        }
 
-            robot1PositionChart.Update(new double[] {
-                robot2BasePosition[0], robot2BasePosition[1], robot2BasePosition[2]
-            });
+        private void TakeChartScreenshot(object sender, RoutedEventArgs e) {
+            if (!isPlotFrozen || Robot1.IsInitialized() || Robot2.IsInitialized()) {
+                return;
+            }
+
+            string fileName = activeChart.YAxisTitle;
+
+            if (string.IsNullOrEmpty(fileName)) {
+                fileName = "screenshot.png";
+            } else {
+                fileName = fileName.ToLower().Replace(" ", "_") + ".png";
+            }
+
+            var saveFileDialog = new Microsoft.Win32.SaveFileDialog {
+                InitialDirectory = Path.Combine(Directory.GetCurrentDirectory(), "screenshots"),
+                CheckPathExists = true,
+                FilterIndex = 2,
+                Title = "Save chart screenshot",
+                DefaultExt = "png",
+                Filter = "png files |*.png",
+                FileName = fileName
+            };
+
+            if (saveFileDialog.ShowDialog() == true && saveFileDialog.FileName != "") {
+                int imageWidth = 800;
+
+                using (MemoryStream imageStream = activeChart.ExportImage(imageWidth, (int)(imageWidth * 9.0 / 16.0))) {
+                    File.WriteAllBytes(saveFileDialog.FileName, imageStream.ToArray());
+                }
+            }
         }
 
     }

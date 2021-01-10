@@ -2,9 +2,8 @@
 using Newtonsoft.Json.Linq;
 using PingPong.Maths;
 using System;
-using System.IO;
+using System.Text;
 using System.Text.RegularExpressions;
-using System.Windows.Forms;
 
 namespace PingPong.KUKA {
     public class RobotConfig {
@@ -22,7 +21,7 @@ namespace PingPong.KUKA {
         /// <summary>
         /// OptiTrack transformation
         /// </summary>
-        public Transformation Transformation { get; }
+        public Transformation Transformation { get; set; }
 
         /// <param name="port">port defined in RSI_EthernetConfig.xml</param>
         /// <param name="limits">robot limits</param>
@@ -90,7 +89,7 @@ namespace PingPong.KUKA {
             Transformation = new Transformation(rotation, translation);
         }
 
-        public void SaveToFile() {
+        public string ToJsonString() {
             (double wx0, double wy0, double wz0) = Limits.LowerWorkspacePoint;
             (double wx1, double wy1, double wz1) = Limits.UpperWorkspacePoint;
 
@@ -120,19 +119,7 @@ namespace PingPong.KUKA {
             //TODO: C# ogolnie jest spoko, ale to jest jakies uposledzone i nwm jak to zrobic inaczej ¯\_(ツ)_/¯
             jsonString = Regex.Replace(jsonString, @"\n( {4}){3}", "\n");
 
-            SaveFileDialog saveFileDialog = new SaveFileDialog {
-                InitialDirectory = Directory.GetCurrentDirectory(),
-                CheckPathExists = true,
-                FilterIndex = 2,
-                Title = "Save configuration file",
-                DefaultExt = "json",
-                Filter = "JSON files |*.json",
-                FileName = "robot.config.json"
-            };
-
-            if(saveFileDialog.ShowDialog() == DialogResult.OK && saveFileDialog.FileName != "") {
-                File.WriteAllText(saveFileDialog.FileName, jsonString);
-            }
+            return jsonString;
         }
 
     }

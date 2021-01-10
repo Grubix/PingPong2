@@ -108,7 +108,7 @@ namespace PingPong.KUKA {
         }
 
         /// <summary>
-        /// Robot current axis position
+        /// Robot actual axis position
         /// </summary>
         public RobotAxisPosition AxisPosition {
             get {
@@ -119,7 +119,7 @@ namespace PingPong.KUKA {
         }
 
         /// <summary>
-        /// Robot (theoretical) current velocity
+        /// Robot (theoretical) actual velocity
         /// </summary>
         public RobotVector Velocity {
             get {
@@ -128,7 +128,7 @@ namespace PingPong.KUKA {
         }
 
         /// <summary>
-        /// Robot (theoretical) current acceleration
+        /// Robot (theoretical) actual acceleration
         /// </summary>
         public RobotVector Acceleration {
             get {
@@ -137,7 +137,7 @@ namespace PingPong.KUKA {
         }
 
         /// <summary>
-        /// Robot current target position
+        /// Robot actual target position
         /// </summary>
         public RobotVector TargetPosition {
             get {

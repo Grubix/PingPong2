@@ -26,12 +26,12 @@
                         <ItemsControl>
                             <Expander Padding="0,5" IsExpanded="True">
                                 <Expander.Header>
-                                    <TextBlock Text="Ball data" FontWeight="Bold" />
+                                    <TextBlock Text="Ball position" FontWeight="Bold" />
                                 </Expander.Header>
                                 <StackPanel>
                                     <Expander Padding="10,0,0,0" Margin="0,-5,0,0" IsExpanded="True">
                                         <Expander.Header>
-                                            <TextBlock Text="Actual position (optiTrack base)" FontWeight="SemiBold" />
+                                            <TextBlock Text="OptiTrack base" FontWeight="SemiBold" />
                                         </Expander.Header>
                                         <Grid Margin="0,0,0,2">
                                             <Grid.RowDefinitions>
@@ -50,9 +50,10 @@
                                         </Grid>
                                     </Expander>
                                     <Separator Margin="10,2,0,2"/>
+                                    <Separator Margin="10,0,0,2"/>
                                     <Expander Padding="10,0,0,0" IsExpanded="True">
                                         <Expander.Header>
-                                            <TextBlock Text="Actual position (robot 1 base)" FontWeight="SemiBold" />
+                                            <TextBlock Text="Robot 1 base" FontWeight="SemiBold" />
                                         </Expander.Header>
                                         <Grid Margin="0,0,0,2">
                                             <Grid.RowDefinitions>
@@ -71,9 +72,10 @@
                                         </Grid>
                                     </Expander>
                                     <Separator Margin="10,2,0,2"/>
+                                    <Separator Margin="10,0,0,2"/>
                                     <Expander Padding="10,0,0,0" IsExpanded="True">
                                         <Expander.Header>
-                                            <TextBlock Text="Actual position (robot 2 base)" FontWeight="SemiBold" />
+                                            <TextBlock Text="Robot 2 base" FontWeight="SemiBold" />
                                         </Expander.Header>
                                         <Grid Margin="0,0,0,2">
                                             <Grid.RowDefinitions>
@@ -112,13 +114,13 @@
                                         <ColumnDefinition/>
                                     </Grid.ColumnDefinitions>
                                     <Label Content="Host app" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right" Margin="0"/>
-                                    <TextBox Grid.Column="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" IsReadOnly="True" Text="TODO" x:Name="ipAdress" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="hostApp" Grid.Column="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" IsReadOnly="True" VerticalAlignment="Center"/>
                                     <Label Content="Host name" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right"/>
-                                    <TextBox Grid.Column="1" Grid.Row="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="TODO" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="hostName" Grid.Column="1" Grid.Row="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" VerticalAlignment="Center"/>
                                     <Label Content="Host adress" Grid.Column="0" Grid.Row="2" HorizontalAlignment="Right"/>
-                                    <TextBox Grid.Column="1" Grid.Row="2" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="TODO" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="hostAdress" Grid.Column="1" Grid.Row="2" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" VerticalAlignment="Center"/>
                                     <Label Content="NatNet version" Grid.Column="0" Grid.Row="3" HorizontalAlignment="Right"/>
-                                    <TextBox Grid.Column="1" Grid.Row="3" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="TODO" VerticalAlignment="Center"/>
+                                    <TextBox x:Name="natnetVersion" Grid.Column="1" Grid.Row="3" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" VerticalAlignment="Center"/>
                                 </Grid>
                             </Expander>
                         </ItemsControl>
@@ -148,8 +150,10 @@
             <StackPanel Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Left" Orientation="Horizontal">
                 <Button Content="Freeze" Width="75" Height="22" x:Name="freezeBtn"/>
                 <Button Content="Reset zoom" Width="75" Height="22" Margin="5,0,0,0" x:Name="resetZoomBtn" IsEnabled="False"/>
+                <Button Content="Fit to data" Width="75" Height="22" Margin="5,0,0,0" x:Name="fitToDataBtn" IsEnabled="False"/>
+                <Button Content="Screenshot" Width="75" Height="22" Margin="5,0,0,0" x:Name="screenshotBtn" IsEnabled="False"/>
             </StackPanel>
-            <TabControl Grid.Row="1" TabStripPlacement="Bottom" BorderBrush="#FFACACAC" Margin="0,5,0,0" Padding="0">
+            <TabControl Grid.Row="1" TabStripPlacement="Bottom" BorderBrush="#FFACACAC" Margin="0,5,0,0" Padding="0" x:Name="tabControl">
                 <TabItem Header="Position (opriTrack base)">
                     <local:LiveChart Margin="0" x:Name="positionChart"/>
                 </TabItem>

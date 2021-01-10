@@ -10,7 +10,7 @@ using System.Windows.Controls;
 namespace PingPong {
     public partial class LiveChart : UserControl {
 
-        private readonly object updateSyncLock = new object();
+        private readonly object syncLock = new object();
 
         private readonly Stopwatch stopWatch = new Stopwatch();
 
@@ -28,12 +28,12 @@ namespace PingPong {
 
         public int RefreshDelay {
             get {
-                lock (updateSyncLock) {
+                lock (syncLock) {
                     return refreshDelay;
                 }
             }
             set {
-                lock (updateSyncLock) {
+                lock (syncLock) {
                     refreshDelay = value;
                 }
             }
@@ -41,12 +41,12 @@ namespace PingPong {
 
         public int MaxSamples {
             get {
-                lock (updateSyncLock) {
+                lock (syncLock) {
                     return maxSamples;
                 }
             }
             set {
-                lock (updateSyncLock) {
+                lock (syncLock) {
                     maxSamples = value;
                 }
                 Clear();
@@ -62,7 +62,13 @@ namespace PingPong {
                 stopWatch.Reset();
                 stopWatch.Start();
 
-                return deltaTime >= RefreshDelay;
+                bool isReady = deltaTime >= RefreshDelay;
+
+                if (isReady) {
+                    deltaTime = 0;
+                }
+
+                return isReady;
             }
         }
 
@@ -133,45 +139,41 @@ namespace PingPong {
                 throw new ArgumentException("Array length err");
             }
 
-            if (IsReady) {
-                deltaTime = 0;
-
-                lock (updateSyncLock) {
-                    for (int i = 0; i < data.Length; i++) {
-                        ((List<DataPoint>)chart.Series[i].ItemsSource).Add(new DataPoint(currentSample, data[i]));
-                    }
+            lock (syncLock) {
+                for (int i = 0; i < data.Length; i++) {
+                    ((List<DataPoint>)chart.Series[i].ItemsSource).Add(new DataPoint(currentSample, data[i]));
                 }
-
-                Dispatcher.Invoke(() => {
-                    lock (updateSyncLock) {
-                        if (currentSample > (clearCounter + 1) * maxSamples) {
-                            clearCounter++;
-
-                            chart.Axes[0].Minimum = chart.Axes[0].AbsoluteMinimum = clearCounter * maxSamples;
-                            chart.Axes[0].Maximum = chart.Axes[0].AbsoluteMaximum = (clearCounter + 1) * maxSamples;
-
-                            for (int i = 0; i < data.Length; i++) {
-                                ((List<DataPoint>)chart.Series[i].ItemsSource).Clear();
-                            }
-                        }
-
-                        lastUpdateSample = currentSample;
-                        chart.InvalidatePlot();
-                    }
-                });
             }
+
+            Dispatcher.Invoke(() => {
+                lock (syncLock) {
+                    if (currentSample > (clearCounter + 1) * maxSamples) {
+                        clearCounter++;
+
+                        chart.Axes[0].Minimum = chart.Axes[0].AbsoluteMinimum = clearCounter * maxSamples;
+                        chart.Axes[0].Maximum = chart.Axes[0].AbsoluteMaximum = (clearCounter + 1) * maxSamples;
+
+                        for (int i = 0; i < data.Length; i++) {
+                            ((List<DataPoint>)chart.Series[i].ItemsSource).Clear();
+                        }
+                    }
+
+                    lastUpdateSample = currentSample;
+                    chart.InvalidatePlot();
+                }
+            });
 
             Tick();
         }
 
         public void Tick() {
-            lock (updateSyncLock) {
+            lock (syncLock) {
                 currentSample++;
             }
         }
 
         public void Clear() {
-            lock (updateSyncLock) {
+            lock (syncLock) {
                 foreach (var series in chart.Series) {
                     ((List<DataPoint>)series.ItemsSource).Clear();
                 }
@@ -214,29 +216,18 @@ namespace PingPong {
             chart.InvalidatePlot();
         }
 
-        public void SaveToImage(int width, int height) {
-           var saveFileDialog = new System.Windows.Forms.SaveFileDialog {
-                InitialDirectory = Directory.GetCurrentDirectory(),
-                CheckPathExists = true,
-                FilterIndex = 2,
-                Title = "Save chart screenshot",
-                DefaultExt = "png",
-                Filter = "png files |*.png",
-                FileName = YAxisTitle + ".png"
+        public MemoryStream ExportImage(int width, int height) {
+            MemoryStream imageStream = new MemoryStream();
+
+            var pngExporter = new PngExporter {
+                Width = width,
+                Height = height,
+                Background = OxyColors.White
             };
 
-            if (saveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK && saveFileDialog.FileName != "") {
-                using (MemoryStream imageStream = new MemoryStream()) {
-                    var pngExporter = new PngExporter {
-                        Width = width,
-                        Height = height,
-                        Background = OxyColors.White
-                    };
+            pngExporter.Export(chart.ActualModel, imageStream);
 
-                    pngExporter.Export(chart.ActualModel, imageStream);
-                    File.WriteAllBytes(saveFileDialog.FileName, imageStream.ToArray());
-                }
-            }
+            return imageStream;
         }
 
     }

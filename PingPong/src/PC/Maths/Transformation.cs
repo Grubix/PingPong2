@@ -8,21 +8,32 @@ namespace PingPong.Maths {
     /// </summary>
     public class Transformation {
 
-        public Matrix<double> Matrix { get; }
+        private Matrix<double> matrix;
 
-        public Matrix<double> Rotation { get; }
+        private Matrix<double> rotation;
 
-        public Vector<double> Translation { get; }
+        private Vector<double> translation;
 
         /// <summary>
-        /// Gets the value of <see cref="Matrix"></see> at the given row and column
+        /// Gets or sets the value of transformation matrix at the given row and column
         /// </summary>
         /// <param name="i">row</param>
         /// <param name="j">column</param>
         /// <returns></returns>
         public double this[int i, int j] {
             get {
-                return Matrix[i, j];
+                return matrix[i, j];
+            }
+            set {
+                matrix[i, j] = value;
+
+                if (i < 3) {
+                    if (j < 3) {
+                        rotation[i, j] = value;
+                    } else {
+                        translation[i] = value;
+                    }
+                }
             }
         }
 
@@ -77,21 +88,22 @@ namespace PingPong.Maths {
                 V[2, 2] *= -1;
             }
 
-            Rotation = V * UT;
-            Translation = -1 * Rotation * centroidA + centroidB;
+            rotation = V * UT;
+            translation = -1 * rotation * centroidA + centroidB;
 
-            Matrix = Matrix<double>.Build.DenseOfArray(new double[,] {
-                { Rotation[0, 0], Rotation[0, 1], Rotation[0, 2], Translation[0] },
-                { Rotation[1, 0], Rotation[1, 1], Rotation[1, 2], Translation[1] },
-                { Rotation[2, 0], Rotation[2, 1], Rotation[2, 2], Translation[2] },
+            matrix = Matrix<double>.Build.DenseOfArray(new double[,] {
+                { rotation[0, 0], rotation[0, 1], rotation[0, 2], translation[0] },
+                { rotation[1, 0], rotation[1, 1], rotation[1, 2], translation[1] },
+                { rotation[2, 0], rotation[2, 1], rotation[2, 2], translation[2] },
                 { 0.0, 0.0, 0.0, 1.0 }
             });
         }
 
         public Transformation(Matrix<double> rotation, Vector<double> translation) {
-            Rotation = rotation.Clone();
-            Translation = translation.Clone();
-            Matrix = Matrix<double>.Build.DenseOfArray(new double[,] {
+            rotation = rotation.Clone();
+            translation = translation.Clone();
+
+            matrix = Matrix<double>.Build.DenseOfArray(new double[,] {
                 { rotation[0, 0], rotation[0, 1], rotation[0, 2], translation[0] },
                 { rotation[1, 0], rotation[1, 1], rotation[1, 2], translation[1] },
                 { rotation[2, 0], rotation[2, 1], rotation[2, 2], translation[2] },
@@ -100,19 +112,21 @@ namespace PingPong.Maths {
         }
 
         public Transformation() {
-            Rotation = Matrix<double>.Build.DenseOfArray(new double[,] {
-                { 1.0, 0.0, 0.0 },
-                { 0.0, 1.0, 0.0 },
-                { 0.0, 0.0, 1.0 },
-            });
-            Translation = Vector<double>.Build.DenseOfArray(new double[] {
-                0.0, 0.0, 0.0
-            });
-            Matrix = Matrix<double>.Build.DenseOfArray(new double[,] {
+            matrix = Matrix<double>.Build.DenseOfArray(new double[,] {
                 { 1.0, 0.0, 0.0, 0.0 },
                 { 0.0, 1.0, 0.0, 0.0 },
                 { 0.0, 0.0, 1.0, 0.0 },
                 { 0.0, 0.0, 0.0, 1.0 }
+            });
+
+            rotation = Matrix<double>.Build.DenseOfArray(new double[,] {
+                { 1.0, 0.0, 0.0 },
+                { 0.0, 1.0, 0.0 },
+                { 0.0, 0.0, 1.0 },
+            });
+
+            translation = Vector<double>.Build.DenseOfArray(new double[] {
+                0.0, 0.0, 0.0
             });
         }
 
@@ -122,7 +136,7 @@ namespace PingPong.Maths {
         /// <param name="pointInA">vector in A coordinate system</param>
         /// <returns></returns>
         public Vector<double> Convert(Vector<double> pointInA) {
-            return Rotation * pointInA + Translation;
+            return rotation * pointInA + translation;
         }
 
     }

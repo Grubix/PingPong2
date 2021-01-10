@@ -22,11 +22,8 @@
         <TabItem Header="OptiTrack">
             <local:OptiTrackPanel x:Name="optiTrackPanel"/>
         </TabItem>
-        <TabItem Header="Ping app">
-            <Grid Background="#FFE5E5E5"/>
-        </TabItem>
         <TabItem Header="PingPong app">
-            <Grid Background="#FFE5E5E5"/>
+            <local:PingPongPanel x:Name="pingPongPanel"/>
         </TabItem>
     </TabControl>
 </Window>

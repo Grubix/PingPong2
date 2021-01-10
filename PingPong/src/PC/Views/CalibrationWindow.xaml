@@ -6,8 +6,8 @@
         xmlns:local="clr-namespace:PingPong"
         mc:Ignorable="d"
         Title="Calibration" SizeToContent="WidthAndHeight" Background="#FFF1F1F1" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize" Icon="ping-pong.png">
-    <StackPanel MinWidth="230">
-        <Label Content="Robot ip adress: "/>
+    <StackPanel MinWidth="250">
+        <Label Content="Robot ip adress: " x:Name="robotIpAdress"/>
         <Border Grid.Row="1" Grid.Column="0" BorderBrush="#FFA0A0A0" BorderThickness="1" Margin="5,0,5,5" Padding="5" Background="White">
             <StackPanel>
                 <Grid Margin="0">
@@ -53,7 +53,7 @@
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                     <Button Content="Start" Height="22" x:Name="startBtn" Margin="0,0,2.5,0"/>
-                    <Button Grid.Column="1" Content="Stop" Height="22" x:Name="stopBtn" Margin="2.5,0,0,0"/>
+                    <Button Grid.Column="1" Content="Cancel" Height="22" x:Name="cancelBtn" Margin="2.5,0,0,0" IsEnabled="False"/>
                 </Grid>
             </StackPanel>
         </Border>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.IO;
 using System.Threading;
 using System.Windows;
 
@@ -9,6 +10,7 @@ namespace PingPong {
         public MainWindow() {
             InitializeComponent();
 
+            // Force change number separator to dot
             CultureInfo culuteInfo = new CultureInfo("en-US");
             culuteInfo.NumberFormat.NumberDecimalSeparator = ".";
 
@@ -24,7 +26,34 @@ namespace PingPong {
 
                 optiTrackPanel.Robot1 = robot1Panel.Robot;
                 optiTrackPanel.Robot2 = robot2Panel.Robot;
+
+                pingPongPanel.InitializeApplications(
+                    robot1Panel.Robot,
+                    robot2Panel.Robot,
+                    optiTrackPanel.OptiTrack
+                );
             };
+
+            // Shrink window if it is too wide or too high
+            double windowWidth = Width;
+            double windowHeight = Height;
+
+            double screenWidth = SystemParameters.PrimaryScreenWidth;
+            double screenHeight = SystemParameters.PrimaryScreenHeight;
+
+            if (windowWidth >= screenWidth) {
+                Width = MinWidth = screenWidth - 100;
+            }
+
+            if (windowHeight >= screenHeight) {
+                Height = MinHeight = screenHeight - 100;
+            }
+
+            // Robots configuration files directory
+            Directory.CreateDirectory("config");
+
+            // Chart screenshots directory
+            Directory.CreateDirectory("screenshots");
         }
 
         public static void ShowErrorDialog(string errorMessage, Exception exception = null) {

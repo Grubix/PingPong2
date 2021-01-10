@@ -9,7 +9,7 @@ namespace PingPong {
 
         public ManualModeWindow(KUKARobot robot) {
             if (!robot.IsInitialized()) {
-                throw new InvalidOperationException("Robot is not initialized");
+                //throw new InvalidOperationException("Robot is not initialized");
             }
 
             InitializeComponent();
@@ -73,14 +73,16 @@ namespace PingPong {
         }
 
         private void ResetMoveToFields(object sender, RoutedEventArgs e) {
-            RobotVector actualPosition = robot.Position;
+            if (robot.IsInitialized()) {
+                RobotVector actualPosition = robot.Position;
 
-            moveToX.Text = actualPosition.X.ToString();
-            moveToY.Text = actualPosition.Y.ToString();
-            moveToZ.Text = actualPosition.Z.ToString();
-            moveToA.Text = actualPosition.A.ToString();
-            moveToB.Text = actualPosition.B.ToString();
-            moveToC.Text = actualPosition.C.ToString();
+                moveToX.Text = actualPosition.X.ToString();
+                moveToY.Text = actualPosition.Y.ToString();
+                moveToZ.Text = actualPosition.Z.ToString();
+                moveToA.Text = actualPosition.A.ToString();
+                moveToB.Text = actualPosition.B.ToString();
+                moveToC.Text = actualPosition.C.ToString();
+            }
         }
 
         private void ResetShiftFields(object sender, RoutedEventArgs e) {

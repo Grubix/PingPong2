@@ -3,10 +3,7 @@ using PingPong.KUKA;
 using PingPong.Maths;
 using PingPong.OptiTrack;
 using System;
-using System.Diagnostics;
 using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -24,7 +21,7 @@ namespace PingPong {
 
         private bool isPlotFrozen = false;
 
-        public KUKARobot Robot { get; } = new KUKARobot();
+        public KUKARobot Robot { get; }
 
         public MainWindow MainWindowHandle { get; set; }
 
@@ -34,6 +31,8 @@ namespace PingPong {
             InitializeComponent();
             InitializeControls();
             InitializeCharts();
+
+            Robot = new KUKARobot();
             InitializeRobot();
 
             transformationTextBoxes = new TextBox[,] {
@@ -43,47 +42,8 @@ namespace PingPong {
                 { t30, t31, t32, t33 }
             };
 
-            RobotVector actualPosition = new RobotVector();
-            RobotVector targetPosition = new RobotVector(50, -150, 300);
-            TrajectoryGenerator5v2 generator = new TrajectoryGenerator5v2();
-
-            generator.Restart(actualPosition);
-            generator.SetTargetPosition(actualPosition, targetPosition, new RobotVector(-50, 50, -50), 18);
-
-            Task.Run(() => {
-                for (int i = 0; i < 10000; i++) {
-                    Thread.Sleep(4);
-                    actualPosition = generator.GetNextAbsoluteCorrection(actualPosition);
-
-                    if (isPlotFrozen) {
-                        continue;
-                    }
-
-                    if (positionChart.IsReady) {
-                        positionChart.Update(actualPosition.ToArray());
-                    } else {
-                        positionChart.Tick();
-                    }
-
-                    if (positionErrorChart.IsReady) {
-                        positionErrorChart.Update(generator.PositionError.ToArray());
-                    } else {
-                        positionErrorChart.Tick();
-                    }
-
-                    if (velocityChart.IsReady) {
-                        velocityChart.Update(generator.Velocity.ToArray());
-                    } else {
-                        velocityChart.Tick();
-                    }
-
-                    if (accelerationChart.IsReady) {
-                        accelerationChart.Update(generator.Acceleration.ToArray());
-                    } else {
-                        accelerationChart.Tick();
-                    }
-                }
-            });
+            calibrateBtn.IsEnabled = true;
+            manualModeBtn.IsEnabled = true;
         }
 
         private void InitializeControls() {
@@ -92,20 +52,22 @@ namespace PingPong {
             manualModeBtn.Click += OpenManualModeWindow;
             calibrateBtn.Click += OpenCalibrationWindow;
             loadConfigBtn.Click += LoadConfig;
-            saveConfigBtn.Click += (s, e) => CreateConfiguration().SaveToFile();
+            saveConfigBtn.Click += SaveConfig;
 
-            freezeBtn.Click += FreezeOrUnfreeze;
+            freezeBtn.Click += FreezeCharts;
             fitToDataBtn.Click += FitChartsToData;
             resetZoomBtn.Click += ResetChartsZoom;
+            screenshotBtn.Click += TakeChartScreenshot;
 
+            // CTRL + S -> save active chart to png image
             Loaded += (s, e) => Focus();
             activeChart = positionChart;
             tabControl.SelectionChanged += (s, e) => {
                 activeChart = (LiveChart)tabControl.SelectedContent;
             };
             KeyDown += (s, e) => {
-                if (isPlotFrozen && !Robot.IsInitialized() && e.Key == Key.S && Keyboard.IsKeyDown(Key.LeftCtrl)) {
-                    activeChart.SaveToImage(800, (int)(800 * 9.0 / 16.0));
+                if (e.Key == Key.S && Keyboard.IsKeyDown(Key.LeftCtrl)) {
+                    TakeChartScreenshot(null, null);
                 }
             };
         }
@@ -163,16 +125,16 @@ namespace PingPong {
             };
 
             Robot.FrameReceived += frame => {
-                RobotVector position = Robot.Position;
+                RobotVector actualPosition = Robot.Position;
                 RobotVector targetPosition = Robot.TargetPosition;
 
                 Dispatcher.Invoke(() => {
-                    actualPositionX.Text = position.X.ToString("F3");
-                    actualPositionY.Text = position.Y.ToString("F3");
-                    actualPositionZ.Text = position.Z.ToString("F3");
-                    actualPositionA.Text = position.A.ToString("F3");
-                    actualPositionB.Text = position.B.ToString("F3");
-                    actualPositionC.Text = position.C.ToString("F3");
+                    actualPositionX.Text = actualPosition.X.ToString("F3");
+                    actualPositionY.Text = actualPosition.Y.ToString("F3");
+                    actualPositionZ.Text = actualPosition.Z.ToString("F3");
+                    actualPositionA.Text = actualPosition.A.ToString("F3");
+                    actualPositionB.Text = actualPosition.B.ToString("F3");
+                    actualPositionC.Text = actualPosition.C.ToString("F3");
 
                     targetPositionX.Text = targetPosition.X.ToString("F3");
                     targetPositionY.Text = targetPosition.Y.ToString("F3");
@@ -183,7 +145,7 @@ namespace PingPong {
                 });
 
                 if (positionChart.IsReady) {
-                    positionChart.Update(position.ToArray());
+                    positionChart.Update(actualPosition.ToArray());
                 } else {
                     positionChart.Tick();
                 }
@@ -214,7 +176,7 @@ namespace PingPong {
                     return;
                 }
 
-                Robot.Config = CreateConfiguration();
+                Robot.Config = CreateConfigurationFromFields();
                 connectBtn.IsEnabled = false;
                 disconnectBtn.IsEnabled = true;
                 loadConfigBtn.IsEnabled = false;
@@ -238,40 +200,76 @@ namespace PingPong {
         }
 
         private void OpenManualModeWindow(object sender, RoutedEventArgs e) {
-            if (manualModeWindow == null) {
-                manualModeWindow = new ManualModeWindow(Robot);
+            try {
+                if (manualModeWindow == null) {
+                    manualModeWindow = new ManualModeWindow(Robot);
 
-                if (MainWindowHandle != null) {
-                    manualModeWindow.Owner = MainWindowHandle;
+                    if (MainWindowHandle != null) {
+                        manualModeWindow.Owner = MainWindowHandle;
+                    }
+
+                    manualModeWindow.Closed += (se, ev) => manualModeWindow = null;
+                    manualModeWindow.Show();
+                } else {
+                    manualModeWindow.WindowState = WindowState.Normal;
+                    manualModeWindow.Activate();
                 }
-
-                manualModeWindow.Closed += (se, ev) => manualModeWindow = null;
-                manualModeWindow.Show();
-            } else {
-                manualModeWindow.Activate();
+            } catch (InvalidOperationException ex) {
+                MainWindow.ShowErrorDialog("Unable to open manual mode window.", ex);
             }
         }
 
         private void OpenCalibrationWindow(object sender, RoutedEventArgs e) {
-            if (calibrationWindow == null) {
-                calibrationWindow = new CalibrationWindow(Robot, OptiTrack, transformationTextBoxes);
+            try {
+                if (calibrationWindow == null) {
+                    calibrationWindow = new CalibrationWindow(Robot, OptiTrack);
 
-                if (MainWindowHandle != null) {
-                    calibrationWindow.Owner = MainWindowHandle;
+                    if (MainWindowHandle != null) {
+                        calibrationWindow.Owner = MainWindowHandle;
+                    }
+
+                    calibrationWindow.ProgressChanged += transformation => {
+                        Robot.Config.Transformation = transformation;
+
+                        Dispatcher.Invoke(() => {
+                            t00.Text = transformation[0, 0].ToString("F3");
+                            t01.Text = transformation[0, 1].ToString("F3");
+                            t02.Text = transformation[0, 2].ToString("F3");
+                            t03.Text = transformation[0, 3].ToString("F3");
+
+                            t10.Text = transformation[1, 0].ToString("F3");
+                            t11.Text = transformation[1, 1].ToString("F3");
+                            t12.Text = transformation[1, 2].ToString("F3");
+                            t13.Text = transformation[1, 3].ToString("F3");
+
+                            t20.Text = transformation[2, 0].ToString("F3");
+                            t21.Text = transformation[2, 1].ToString("F3");
+                            t22.Text = transformation[2, 2].ToString("F3");
+                            t23.Text = transformation[2, 3].ToString("F3");
+
+                            t30.Text = transformation[3, 0].ToString("F3");
+                            t31.Text = transformation[3, 1].ToString("F3");
+                            t32.Text = transformation[3, 2].ToString("F3");
+                            t33.Text = transformation[3, 3].ToString("F3");
+                        });
+                    };
+
+                    calibrationWindow.Closed += (se, ev) => calibrationWindow = null;
+                    calibrationWindow.Show();
+                } else {
+                    calibrationWindow.WindowState = WindowState.Normal;
+                    calibrationWindow.Activate();
                 }
-
-                calibrationWindow.Closed += (se, ev) => calibrationWindow = null;
-                calibrationWindow.Show();
-            } else {
-                calibrationWindow.Activate();
+            } catch (InvalidOperationException ex) {
+                MainWindow.ShowErrorDialog("Unable to open calibration window.", ex);
             }
         }
 
-        private void FreezeOrUnfreeze(object sender, RoutedEventArgs e) {
-            //TODO: MEGA WAZNE!!! freezowanie (a raczej zoomowanie i scrolowanie wykresu)
-            //TODO: moze powodowac opoznienia komunikacji z robotem co moze byc calkiem niebezpieczne,
-            //TODO: przykladowo opozniajac odbieranie ramek i tym samym spradzanie limitow robota i cyk robot za 20k rozwalony <3
-            //TODO: moze po kliknieciu w freeza zrobic diskonekta z robotami?
+        private void FreezeCharts(object sender, RoutedEventArgs e) {
+            // MEGA WAZNE!!! 
+            // freezowanie (a raczej zoomowanie i scrolowanie wykresu) moze powodowac opoznienia komunikacji z robotem co 
+            // moze byc calkiem niebezpieczne, przykladowo opozniajac odbieranie ramek i tym samym spradzanie limitow robota.
+            // Moze po kliknieciu w freeza zrobic diskonekta z robotami (oba musiałby by sie rozlaczyc)?
 
             if (isPlotFrozen) {
                 positionChart.Clear();
@@ -288,6 +286,7 @@ namespace PingPong {
                 freezeBtn.Content = "Freeze";
                 resetZoomBtn.IsEnabled = false;
                 fitToDataBtn.IsEnabled = false;
+                screenshotBtn.IsEnabled = false;
             } else {
                 positionChart.UnblockZoomAndPan();
                 positionErrorChart.UnblockZoomAndPan();
@@ -298,6 +297,7 @@ namespace PingPong {
                 freezeBtn.Content = "Unfreeze";
                 resetZoomBtn.IsEnabled = true;
                 fitToDataBtn.IsEnabled = true;
+                screenshotBtn.IsEnabled = true;
             }
         }
 
@@ -315,9 +315,41 @@ namespace PingPong {
             accelerationChart.ResetZoom();
         }
 
+        private void TakeChartScreenshot(object sender, RoutedEventArgs e) {
+            if (!isPlotFrozen || Robot.IsInitialized()) {
+                return;
+            }
+
+            string fileName = activeChart.YAxisTitle;
+
+            if (string.IsNullOrEmpty(fileName)) {
+                fileName = "screenshot.png";
+            } else {
+                fileName = fileName.ToLower().Replace(" ", "_") + ".png";
+            }
+
+            var saveFileDialog = new Microsoft.Win32.SaveFileDialog {
+                InitialDirectory = Path.Combine(Directory.GetCurrentDirectory(), "screenshots"),
+                CheckPathExists = true,
+                FilterIndex = 2,
+                Title = "Save chart screenshot",
+                DefaultExt = "png",
+                Filter = "png files |*.png",
+                FileName = fileName
+            };
+
+            if (saveFileDialog.ShowDialog() == true && saveFileDialog.FileName != "") {
+                int imageWidth = 800;
+
+                using (MemoryStream imageStream = activeChart.ExportImage(imageWidth, (int)(imageWidth * 9.0 / 16.0))) {
+                    File.WriteAllBytes(saveFileDialog.FileName, imageStream.ToArray());
+                }
+            }
+        }
+
         private void LoadConfig(object sender, RoutedEventArgs e) {
             var openFileDialog = new Microsoft.Win32.OpenFileDialog {
-                InitialDirectory = Directory.GetCurrentDirectory(),
+                InitialDirectory = Path.Combine(Directory.GetCurrentDirectory(), "config"),
                 Title = "Select configuration file",
                 CheckFileExists = true,
                 CheckPathExists = true,
@@ -329,7 +361,7 @@ namespace PingPong {
                 Multiselect = false
             };
 
-            if ((bool)openFileDialog.ShowDialog() == true) {
+            if (openFileDialog.ShowDialog() == true) {
                 Stream fileStream;
                 StreamReader streamReader;
 
@@ -366,22 +398,25 @@ namespace PingPong {
                             correctionLimitXYZ.Text = config.Limits.CorrectionLimit.XYZ.ToString();
                             correctionLimitABC.Text = config.Limits.CorrectionLimit.ABC.ToString();
 
-                            transformationTextBoxes[0, 0].Text = config.Transformation[0, 0].ToString();
-                            transformationTextBoxes[0, 1].Text = config.Transformation[0, 1].ToString();
-                            transformationTextBoxes[0, 2].Text = config.Transformation[0, 2].ToString();
-                            transformationTextBoxes[0, 3].Text = config.Transformation[0, 3].ToString();
-                            transformationTextBoxes[1, 0].Text = config.Transformation[1, 0].ToString();
-                            transformationTextBoxes[1, 1].Text = config.Transformation[1, 1].ToString();
-                            transformationTextBoxes[1, 2].Text = config.Transformation[1, 2].ToString();
-                            transformationTextBoxes[1, 3].Text = config.Transformation[1, 3].ToString();
-                            transformationTextBoxes[2, 0].Text = config.Transformation[2, 0].ToString();
-                            transformationTextBoxes[2, 1].Text = config.Transformation[2, 1].ToString();
-                            transformationTextBoxes[2, 2].Text = config.Transformation[2, 2].ToString();
-                            transformationTextBoxes[2, 3].Text = config.Transformation[2, 3].ToString();
-                            transformationTextBoxes[3, 0].Text = config.Transformation[3, 0].ToString();
-                            transformationTextBoxes[3, 1].Text = config.Transformation[3, 1].ToString();
-                            transformationTextBoxes[3, 2].Text = config.Transformation[3, 2].ToString();
-                            transformationTextBoxes[3, 3].Text = config.Transformation[3, 3].ToString();
+                            t00.Text = config.Transformation[0, 0].ToString("F3");
+                            t01.Text = config.Transformation[0, 1].ToString("F3");
+                            t02.Text = config.Transformation[0, 2].ToString("F3");
+                            t03.Text = config.Transformation[0, 3].ToString("F3");
+
+                            t10.Text = config.Transformation[1, 0].ToString("F3");
+                            t11.Text = config.Transformation[1, 1].ToString("F3");
+                            t12.Text = config.Transformation[1, 2].ToString("F3");
+                            t13.Text = config.Transformation[1, 3].ToString("F3");
+
+                            t20.Text = config.Transformation[2, 0].ToString("F3");
+                            t21.Text = config.Transformation[2, 1].ToString("F3");
+                            t22.Text = config.Transformation[2, 2].ToString("F3");
+                            t23.Text = config.Transformation[2, 3].ToString("F3");
+
+                            t30.Text = config.Transformation[3, 0].ToString("F3");
+                            t31.Text = config.Transformation[3, 1].ToString("F3");
+                            t32.Text = config.Transformation[3, 2].ToString("F3");
+                            t33.Text = config.Transformation[3, 3].ToString("F3");
                         }
                     }
                 } catch (Exception ex) {
@@ -390,7 +425,25 @@ namespace PingPong {
             }
         }
 
-        private RobotConfig CreateConfiguration() {
+        private void SaveConfig(object sender, RoutedEventArgs e) {
+            RobotConfig config = CreateConfigurationFromFields();
+
+            var saveFileDialog = new Microsoft.Win32.SaveFileDialog {
+                InitialDirectory = Path.Combine(Directory.GetCurrentDirectory(), "config"),
+                CheckPathExists = true,
+                FilterIndex = 2,
+                Title = "Save configuration file",
+                DefaultExt = "json",
+                Filter = "JSON files |*.json",
+                FileName = "robot.config.json"
+            };
+
+            if (saveFileDialog.ShowDialog() == true && saveFileDialog.FileName != "") {
+                File.WriteAllText(saveFileDialog.FileName, config.ToJsonString());
+            }
+        }
+
+        private RobotConfig CreateConfigurationFromFields() {
             int port = int.Parse(connectionPort.Text);
 
             RobotLimits limits = new RobotLimits(
