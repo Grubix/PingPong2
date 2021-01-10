@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PingPong"
         mc:Ignorable="d"
-        Title="Calibration" SizeToContent="WidthAndHeight" Background="#FFF1F1F1" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize">
+        Title="Calibration" SizeToContent="WidthAndHeight" Background="#FFF1F1F1" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize" Icon="ping-pong.png">
     <StackPanel MinWidth="230">
         <Label Content="Robot ip adress: "/>
         <Border Grid.Row="1" Grid.Column="0" BorderBrush="#FFA0A0A0" BorderThickness="1" Margin="5,0,5,5" Padding="5" Background="White">
