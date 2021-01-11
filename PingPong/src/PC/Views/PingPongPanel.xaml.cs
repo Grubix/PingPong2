@@ -6,17 +6,17 @@ using PingPong.OptiTrack;
 namespace PingPong {
     public partial class PingPongPanel : UserControl {
 
-        private PingPongApplication pingPong;
+        private PingPongApp pingPong;
 
-        private PingApplication ping;
+        private PingApp ping;
 
         public PingPongPanel() {
             InitializeComponent();
         }
 
         public void InitializeApplications(KUKARobot robot1, KUKARobot robot2, OptiTrackSystem optiTrack) {
-            pingPong = new PingPongApplication(robot1, robot2, optiTrack);
-            ping = new PingApplication(robot1, optiTrack);
+            //pingPong = new PingPongApp(robot1, robot2, optiTrack);
+            //ping = new PingApp(robot1, optiTrack);
         }
 
     }

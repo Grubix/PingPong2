@@ -11,8 +11,6 @@ using System.Windows.Input;
 namespace PingPong {
     public partial class RobotPanel : UserControl {
 
-        private readonly TextBox[,] transformationTextBoxes;
-
         private ManualModeWindow manualModeWindow;
 
         private CalibrationWindow calibrationWindow;
@@ -34,16 +32,6 @@ namespace PingPong {
 
             Robot = new KUKARobot();
             InitializeRobot();
-
-            transformationTextBoxes = new TextBox[,] {
-                { t00, t01, t02, t03 },
-                { t10, t11, t12, t13 },
-                { t20, t21, t22, t23 },
-                { t30, t31, t32, t33 }
-            };
-
-            calibrateBtn.IsEnabled = true;
-            manualModeBtn.IsEnabled = true;
         }
 
         private void InitializeControls() {
@@ -125,27 +113,27 @@ namespace PingPong {
             };
 
             Robot.FrameReceived += frame => {
-                RobotVector actualPosition = Robot.Position;
-                RobotVector targetPosition = Robot.TargetPosition;
-
-                Dispatcher.Invoke(() => {
-                    actualPositionX.Text = actualPosition.X.ToString("F3");
-                    actualPositionY.Text = actualPosition.Y.ToString("F3");
-                    actualPositionZ.Text = actualPosition.Z.ToString("F3");
-                    actualPositionA.Text = actualPosition.A.ToString("F3");
-                    actualPositionB.Text = actualPosition.B.ToString("F3");
-                    actualPositionC.Text = actualPosition.C.ToString("F3");
-
-                    targetPositionX.Text = targetPosition.X.ToString("F3");
-                    targetPositionY.Text = targetPosition.Y.ToString("F3");
-                    targetPositionZ.Text = targetPosition.Z.ToString("F3");
-                    targetPositionA.Text = targetPosition.A.ToString("F3");
-                    targetPositionB.Text = targetPosition.B.ToString("F3");
-                    targetPositionC.Text = targetPosition.C.ToString("F3");
-                });
-
                 if (positionChart.IsReady) {
+                    RobotVector actualPosition = Robot.Position;
+                    RobotVector targetPosition = Robot.TargetPosition;
+
                     positionChart.Update(actualPosition.ToArray());
+
+                    Dispatcher.Invoke(() => {
+                        actualPositionX.Text = actualPosition.X.ToString("F3");
+                        actualPositionY.Text = actualPosition.Y.ToString("F3");
+                        actualPositionZ.Text = actualPosition.Z.ToString("F3");
+                        actualPositionA.Text = actualPosition.A.ToString("F3");
+                        actualPositionB.Text = actualPosition.B.ToString("F3");
+                        actualPositionC.Text = actualPosition.C.ToString("F3");
+
+                        targetPositionX.Text = targetPosition.X.ToString("F3");
+                        targetPositionY.Text = targetPosition.Y.ToString("F3");
+                        targetPositionZ.Text = targetPosition.Z.ToString("F3");
+                        targetPositionA.Text = targetPosition.A.ToString("F3");
+                        targetPositionB.Text = targetPosition.B.ToString("F3");
+                        targetPositionC.Text = targetPosition.C.ToString("F3");
+                    });
                 } else {
                     positionChart.Tick();
                 }
@@ -194,74 +182,68 @@ namespace PingPong {
             } else {
                 connectBtn.IsEnabled = true;
                 disconnectBtn.IsEnabled = false;
+                manualModeBtn.IsEnabled = false;
+                calibrateBtn.IsEnabled = false;
                 loadConfigBtn.IsEnabled = true;
                 saveConfigBtn.IsEnabled = true;
             }
         }
 
         private void OpenManualModeWindow(object sender, RoutedEventArgs e) {
-            try {
-                if (manualModeWindow == null) {
-                    manualModeWindow = new ManualModeWindow(Robot);
+            if (manualModeWindow == null) {
+                manualModeWindow = new ManualModeWindow(Robot);
 
-                    if (MainWindowHandle != null) {
-                        manualModeWindow.Owner = MainWindowHandle;
-                    }
-
-                    manualModeWindow.Closed += (se, ev) => manualModeWindow = null;
-                    manualModeWindow.Show();
-                } else {
-                    manualModeWindow.WindowState = WindowState.Normal;
-                    manualModeWindow.Activate();
+                if (MainWindowHandle != null) {
+                    manualModeWindow.Owner = MainWindowHandle;
                 }
-            } catch (InvalidOperationException ex) {
-                MainWindow.ShowErrorDialog("Unable to open manual mode window.", ex);
+
+                manualModeWindow.Closed += (se, ev) => manualModeWindow = null;
+                manualModeWindow.Show();
+            } else {
+                manualModeWindow.WindowState = WindowState.Normal;
+                manualModeWindow.Activate();
             }
         }
 
         private void OpenCalibrationWindow(object sender, RoutedEventArgs e) {
-            try {
-                if (calibrationWindow == null) {
-                    calibrationWindow = new CalibrationWindow(Robot, OptiTrack);
+            if (calibrationWindow == null) {
+                calibrationWindow = new CalibrationWindow(Robot, OptiTrack);
 
-                    if (MainWindowHandle != null) {
-                        calibrationWindow.Owner = MainWindowHandle;
-                    }
-
-                    calibrationWindow.ProgressChanged += transformation => {
-                        Robot.Config.Transformation = transformation;
-
-                        Dispatcher.Invoke(() => {
-                            t00.Text = transformation[0, 0].ToString("F3");
-                            t01.Text = transformation[0, 1].ToString("F3");
-                            t02.Text = transformation[0, 2].ToString("F3");
-                            t03.Text = transformation[0, 3].ToString("F3");
-
-                            t10.Text = transformation[1, 0].ToString("F3");
-                            t11.Text = transformation[1, 1].ToString("F3");
-                            t12.Text = transformation[1, 2].ToString("F3");
-                            t13.Text = transformation[1, 3].ToString("F3");
-
-                            t20.Text = transformation[2, 0].ToString("F3");
-                            t21.Text = transformation[2, 1].ToString("F3");
-                            t22.Text = transformation[2, 2].ToString("F3");
-                            t23.Text = transformation[2, 3].ToString("F3");
-
-                            t30.Text = transformation[3, 0].ToString("F3");
-                            t31.Text = transformation[3, 1].ToString("F3");
-                            t32.Text = transformation[3, 2].ToString("F3");
-                            t33.Text = transformation[3, 3].ToString("F3");
-                        });
-                    };
-
-                    calibrationWindow.Closed += (se, ev) => calibrationWindow = null;
-                    calibrationWindow.Show();
-                } else {
-                    calibrationWindow.WindowState = WindowState.Normal;
-                    calibrationWindow.Activate();
+                if (MainWindowHandle != null) {
+                    calibrationWindow.Owner = MainWindowHandle;
                 }
-            } catch (InvalidOperationException ex) {
-                MainWindow.ShowErrorDialog("Unable to open calibration window.", ex);
+
+                calibrationWindow.Completed += transformation => {
+                    Disconnect(null, null);
+
+                    Dispatcher.Invoke(() => {
+                        t00.Text = transformation[0, 0].ToString("F3");
+                        t01.Text = transformation[0, 1].ToString("F3");
+                        t02.Text = transformation[0, 2].ToString("F3");
+                        t03.Text = transformation[0, 3].ToString("F3");
+
+                        t10.Text = transformation[1, 0].ToString("F3");
+                        t11.Text = transformation[1, 1].ToString("F3");
+                        t12.Text = transformation[1, 2].ToString("F3");
+                        t13.Text = transformation[1, 3].ToString("F3");
+
+                        t20.Text = transformation[2, 0].ToString("F3");
+                        t21.Text = transformation[2, 1].ToString("F3");
+                        t22.Text = transformation[2, 2].ToString("F3");
+                        t23.Text = transformation[2, 3].ToString("F3");
+
+                        t30.Text = transformation[3, 0].ToString("F3");
+                        t31.Text = transformation[3, 1].ToString("F3");
+                        t32.Text = transformation[3, 2].ToString("F3");
+                        t33.Text = transformation[3, 3].ToString("F3");
+                    });
+                };
+
+                calibrationWindow.Closed += (se, ev) => calibrationWindow = null;
+                calibrationWindow.Show();
+            } else {
+                calibrationWindow.WindowState = WindowState.Normal;
+                calibrationWindow.Activate();
             }
         }
 
@@ -329,7 +311,7 @@ namespace PingPong {
             }
 
             var saveFileDialog = new Microsoft.Win32.SaveFileDialog {
-                InitialDirectory = Path.Combine(Directory.GetCurrentDirectory(), "screenshots"),
+                InitialDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Screenshots"),
                 CheckPathExists = true,
                 FilterIndex = 2,
                 Title = "Save chart screenshot",
@@ -349,7 +331,7 @@ namespace PingPong {
 
         private void LoadConfig(object sender, RoutedEventArgs e) {
             var openFileDialog = new Microsoft.Win32.OpenFileDialog {
-                InitialDirectory = Path.Combine(Directory.GetCurrentDirectory(), "config"),
+                InitialDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Config"),
                 Title = "Select configuration file",
                 CheckFileExists = true,
                 CheckPathExists = true,
@@ -429,7 +411,7 @@ namespace PingPong {
             RobotConfig config = CreateConfigurationFromFields();
 
             var saveFileDialog = new Microsoft.Win32.SaveFileDialog {
-                InitialDirectory = Path.Combine(Directory.GetCurrentDirectory(), "config"),
+                InitialDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Config"),
                 CheckPathExists = true,
                 FilterIndex = 2,
                 Title = "Save configuration file",

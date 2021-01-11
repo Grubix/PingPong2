@@ -50,10 +50,10 @@ namespace PingPong {
             }
 
             // Robots configuration files directory
-            Directory.CreateDirectory("config");
+            Directory.CreateDirectory("Config");
 
             // Chart screenshots directory
-            Directory.CreateDirectory("screenshots");
+            Directory.CreateDirectory("Screenshots");
         }
 
         public static void ShowErrorDialog(string errorMessage, Exception exception = null) {

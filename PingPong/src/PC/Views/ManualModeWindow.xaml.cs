@@ -8,10 +8,6 @@ namespace PingPong {
         private readonly KUKARobot robot;
 
         public ManualModeWindow(KUKARobot robot) {
-            if (!robot.IsInitialized()) {
-                //throw new InvalidOperationException("Robot is not initialized");
-            }
-
             InitializeComponent();
 
             this.robot = robot;
@@ -25,10 +21,6 @@ namespace PingPong {
         }
 
         private void MoveTo(object sender, RoutedEventArgs e) {
-            if (!robot.IsInitialized()) {
-                return;
-            }
-
             try {
                 double x = double.Parse(moveToX.Text);
                 double y = double.Parse(moveToY.Text);
@@ -48,10 +40,6 @@ namespace PingPong {
         }
 
         private void Shift(object sender, RoutedEventArgs e) {
-            if (!robot.IsInitialized()) {
-                return;
-            }
-
             try {
                 double x = double.Parse(shiftX.Text);
                 double y = double.Parse(shiftY.Text);

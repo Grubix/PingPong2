@@ -62,6 +62,11 @@ namespace PingPong {
                 positionChart.Update(new double[] {
                     frame.BallPosition[0], frame.BallPosition[1], frame.BallPosition[2]
                 });
+                Dispatcher.Invoke(() => {
+                    actualPositionX.Text = frame.BallPosition[0].ToString("F3");
+                    actualPositionY.Text = frame.BallPosition[1].ToString("F3");
+                    actualPositionZ.Text = frame.BallPosition[2].ToString("F3");
+                });
             } else {
                 positionChart.Tick();
             }
@@ -74,6 +79,11 @@ namespace PingPong {
                 robot1PositionChart.Update(new double[] {
                     robot1BasePosition[0], robot1BasePosition[1], robot1BasePosition[2]
                 });
+                Dispatcher.Invoke(() => {
+                    robot1BaseActualPositionX.Text = robot1BasePosition[0].ToString("F3");
+                    robot1BaseActualPositionY.Text = robot1BasePosition[1].ToString("F3");
+                    robot1BaseActualPositionZ.Text = robot1BasePosition[2].ToString("F3");
+                });
             } else {
                 robot1PositionChart.Tick();
             }
@@ -85,6 +95,11 @@ namespace PingPong {
             if (robot2PositionChart.IsReady) {
                 robot2PositionChart.Update(new double[] {
                     robot2BasePosition[0], robot2BasePosition[1], robot2BasePosition[2]
+                });
+                Dispatcher.Invoke(() => {
+                    robot2BaseActualPositionX.Text = robot2BasePosition[0].ToString("F3");
+                    robot2BaseActualPositionY.Text = robot2BasePosition[1].ToString("F3");
+                    robot2BaseActualPositionZ.Text = robot2BasePosition[2].ToString("F3");
                 });
             } else {
                 robot2PositionChart.Tick();

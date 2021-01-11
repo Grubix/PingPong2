@@ -78,6 +78,7 @@
     <Reference Include="ReachFramework" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Printing" />
     <Reference Include="System.Runtime.Serialization" />
@@ -100,9 +101,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="src\PC\Applications\HitPrediction.cs" />
     <Compile Include="src\PC\Applications\IApplication.cs" />
-    <Compile Include="src\PC\Applications\PingApplication.cs" />
-    <Compile Include="src\PC\Applications\PingPongApplication.cs" />
+    <Compile Include="src\PC\Applications\PingApp.cs" />
+    <Compile Include="src\PC\Applications\PingPongApp.cs" />
     <Compile Include="src\PC\Devices\IDevice.cs" />
     <Compile Include="src\PC\Devices\KUKA\KUKARobot.cs" />
     <Compile Include="src\PC\Devices\KUKA\RobotAxisPosition.cs" />
@@ -221,7 +223,9 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="src\PC\Views\ping-pong.png" />
+    <None Include="Resources\favicon.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

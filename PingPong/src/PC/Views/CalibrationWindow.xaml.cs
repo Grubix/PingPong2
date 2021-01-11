@@ -25,6 +25,9 @@ namespace PingPong {
 
             private readonly List<Vector<double>> calibrationPoints;
 
+            private int samplesPerPoint;
+
+
             public event Action Start;
 
             public event Action<int, Transformation> ProgressChanged;
@@ -58,7 +61,7 @@ namespace PingPong {
                         }
                         // Move robot to next calibration point and wait
                         //MoveRobotToPoint(robot, calibrationPoints[0], robot.Limits.MaxVelocity.XYZ / 3.0);
-                        //robot.ForceMoveTo(new RobotVector(calibrationPoints[i], robot.Position.ABC), RobotVector.Zero, 4.0);
+                        robot.ForceMoveTo(new RobotVector(calibrationPoints[i], robot.Position.ABC), RobotVector.Zero, 4.0);
 
                         Thread.Sleep(1000);
 
@@ -67,10 +70,7 @@ namespace PingPong {
                         kukaRobotPoints.Add(kukaPoint);
 
                         // Gen n samples from optitrack system and add average ball position to the list
-                        //var optiTrackPoint = optiTrack.GetAveragePosition(samplesPerPoint);
-                        var optiTrackPoint = Vector<double>.Build.DenseOfArray(new double[] {
-                            50, 200, 30 + random.NextDouble() * 40
-                        });
+                        var optiTrackPoint = optiTrack.GetAveragePosition(samplesPerPoint);
 
                         optiTrackPoints.Add(optiTrackPoint);
 
@@ -109,14 +109,15 @@ namespace PingPong {
                     return;
                 }
 
-                //if (!optiTrack.IsInitialized()) {
-                //    throw new InvalidOperationException("OptiTrack system is not initialized");
-                //}
+                if (!optiTrack.IsInitialized()) {
+                    throw new InvalidOperationException("OptiTrack system is not initialized");
+                }
 
-                //if (!robot.IsInitialized()) {
-                //    throw new InvalidOperationException("KUKA robot is not initialized");
-                //}
+                if (!robot.IsInitialized()) {
+                    throw new InvalidOperationException("KUKA robot is not initialized");
+                }
 
+                this.samplesPerPoint = samplesPerPoint;
                 CalculateCalibrationPoints(pointsPerLine);
 
                 worker.RunWorkerAsync();
@@ -177,11 +178,12 @@ namespace PingPong {
 
         private readonly CalibrationTool calibrationTool;
 
-        public Action<Transformation> ProgressChanged;
+        public Action<Transformation> Completed;
 
         public CalibrationWindow(KUKARobot robot, OptiTrackSystem optiTrack) {
             InitializeComponent();
 
+            Transformation currentTransformation = null;
             calibrationTool = new CalibrationTool(robot, optiTrack);
 
             calibrationTool.Start += () => {
@@ -194,6 +196,8 @@ namespace PingPong {
             };
 
             calibrationTool.ProgressChanged += (progress, transformation) => {
+                currentTransformation = transformation;
+
                 Dispatcher.Invoke(() => {
                     progressBar.Value = progress;
                     progressBarLabel.Content = $"{progress}%";
@@ -218,16 +222,11 @@ namespace PingPong {
                     t32.Text = transformation[3, 2].ToString("F3");
                     t33.Text = transformation[3, 3].ToString("F3");
                 });
-                ProgressChanged?.Invoke(transformation);
             };
 
             calibrationTool.Completed += () => {
-                Dispatcher.Invoke(() => {
-                    startBtn.IsEnabled = true;
-                    cancelBtn.IsEnabled = false;
-                    progressBar.Value = 0;
-                    progressBarLabel.Content = "0%";
-                });
+                Completed?.Invoke(currentTransformation);
+                Close();
             };
 
             startBtn.Click += (s, e) => {
@@ -237,7 +236,9 @@ namespace PingPong {
                     MainWindow.ShowErrorDialog("Unable to start calibration.", ex);
                 }
             };
-            cancelBtn.Click += (s, e) => calibrationTool.Cancel();
+            cancelBtn.Click += (s, e) => {
+                calibrationTool.Cancel();
+            };
 
             Closing += (s, e) => {
                 calibrationTool.Cancel();

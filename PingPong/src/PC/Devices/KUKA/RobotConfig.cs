@@ -2,7 +2,6 @@
 using Newtonsoft.Json.Linq;
 using PingPong.Maths;
 using System;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace PingPong.KUKA {
@@ -21,7 +20,7 @@ namespace PingPong.KUKA {
         /// <summary>
         /// OptiTrack transformation
         /// </summary>
-        public Transformation Transformation { get; set; }
+        public Transformation Transformation { get; }
 
         /// <param name="port">port defined in RSI_EthernetConfig.xml</param>
         /// <param name="limits">robot limits</param>

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PingPong"
         mc:Ignorable="d"
-        Title="Manual mode" SizeToContent="WidthAndHeight" Background="#FFF1F1F1" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize" Icon="ping-pong.png">
+        Title="Manual mode" SizeToContent="WidthAndHeight" Background="#FFF1F1F1" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize" Icon="pack://siteoforigin:,,,/Resources/favicon.ico">
 
     <Grid MinWidth="410">
         <Grid.ColumnDefinitions>

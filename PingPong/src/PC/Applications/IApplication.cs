@@ -3,6 +3,8 @@
 
         void Start();
 
+        //void Start(IApplication application);
+
         void Stop();
 
     }
