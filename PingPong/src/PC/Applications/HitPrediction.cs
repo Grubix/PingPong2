@@ -20,6 +20,16 @@ namespace PingPong.Applications {
 
         private readonly List<double> predictedTimeSamples;
 
+        public List<double> XCoefficients { get; private set; }
+
+        public List<double> YCoefficients { get; private set; }
+
+        public List<double> ZCoefficients { get; private set; }
+
+        public Vector<double> Position { get; private set;}
+
+        public Vector<double> Velocity { get; private set; }
+
         public double TargetHitHeight { get; private set; }
 
         public double TimeOfFlight { get; private set; }
@@ -33,16 +43,6 @@ namespace PingPong.Applications {
                 return polyfitZ.Values.Count;
             }
         }
-
-        public List<double> XCoefficients { get; private set; }
-
-        public List<double> YCoefficients { get; private set; }
-
-        public List<double> ZCoefficients { get; private set; }
-
-        public Vector<double> Position { get; private set;}
-
-        public Vector<double> Velocity { get; private set; }
 
         public HitPrediction() {
             polyfitX = new Polyfit(1);

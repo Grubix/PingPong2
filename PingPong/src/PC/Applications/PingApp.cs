@@ -18,6 +18,8 @@ namespace PingPong.Applications {
 
         private readonly Func<Vector<double>, bool> checkFunction;
 
+        private readonly Vector<double> upVector;
+
         private readonly object syncLock = new object();
 
         private bool robotMovedToHitPosition;
@@ -30,6 +32,9 @@ namespace PingPong.Applications {
             this.checkFunction = checkFunction;
 
             prediction = new HitPrediction();
+            upVector = Vector<double>.Build.DenseOfArray(
+                new double[] { 0.0, 0.0, 1.0 }
+            );
         }
 
         ~PingApp() {
@@ -123,16 +128,12 @@ namespace PingPong.Applications {
 
                 var predBallPosition = prediction.Position; // predicted ball position on hit
                 var predBallVelocity = prediction.Velocity; // predicted ball velocity on hit
-
-                //TODO: kwestia takiego dobrania tego wektora zeby po zderzeniu pilka leciala do jakiegos targeta (regulatory PID?)
-                var reflectionVector = Vector<double>.Build.DenseOfArray(
-                    new double[] { 0.0, 0.0, 1.0 }
-                );
-
-                var racketNormalVector = reflectionVector.Normalize(1.0) - predBallVelocity.Normalize(1.0);
+                var racketNormalVector = upVector.Normalize(1.0) - predBallVelocity.Normalize(1.0);
 
                 double angleB = Math.Atan2(racketNormalVector[0], racketNormalVector[2]) * 180.0 / Math.PI;
                 double angleC = -90.0 - Math.Atan2(racketNormalVector[1], racketNormalVector[2]) * 180.0 / Math.PI;
+
+                //TODO: wykorzystanie pida czy czegokolwiek innego zeby skorygowac katy abc (odbicie do zadanego targeta)
 
                 RobotVector robotTargetPostion = new RobotVector(
                     predBallPosition[0], predBallPosition[1], predBallPosition[2], 0, angleB, angleC
@@ -145,6 +146,10 @@ namespace PingPong.Applications {
                     }
                 }
             }
+        }
+
+        public bool IsStarted() {
+            return isStarted;
         }
 
     }

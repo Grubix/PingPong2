@@ -34,6 +34,12 @@ namespace PingPong {
             InitializeRobot();
         }
 
+        public void LoadConfig(string configFile) {
+            string jsonString = File.ReadAllText(configFile);
+            RobotConfig config = new RobotConfig(jsonString);
+            ParseConfig(config);
+        }
+
         private void InitializeControls() {
             connectBtn.Click += Connect;
             disconnectBtn.Click += Disconnect;
@@ -100,6 +106,13 @@ namespace PingPong {
                     calibrateBtn.IsEnabled = true;
                     manualModeBtn.IsEnabled = true;
                     ipAdress.Text = Robot.Ip;
+
+                    homePositionX.Text = Robot.HomePosition.X.ToString("F3");
+                    homePositionY.Text = Robot.HomePosition.Y.ToString("F3");
+                    homePositionZ.Text = Robot.HomePosition.Z.ToString("F3");
+                    homePositionA.Text = Robot.HomePosition.A.ToString("F3");
+                    homePositionB.Text = Robot.HomePosition.B.ToString("F3");
+                    homePositionC.Text = Robot.HomePosition.C.ToString("F3");
                 });
             };
 
@@ -353,52 +366,7 @@ namespace PingPong {
                         using (streamReader = new StreamReader(fileStream)) {
                             string jsonString = streamReader.ReadToEnd();
                             RobotConfig config = new RobotConfig(jsonString);
-
-                            connectionPort.Text = config.Port.ToString();
-
-                            workspaceLowerX.Text = config.Limits.LowerWorkspacePoint.X.ToString();
-                            workspaceLowerY.Text = config.Limits.LowerWorkspacePoint.Y.ToString();
-                            workspaceLowerZ.Text = config.Limits.LowerWorkspacePoint.Z.ToString();
-
-                            workspaceUpperX.Text = config.Limits.UpperWorkspacePoint.X.ToString();
-                            workspaceUpperY.Text = config.Limits.UpperWorkspacePoint.Y.ToString();
-                            workspaceUpperZ.Text = config.Limits.UpperWorkspacePoint.Z.ToString();
-
-                            a1LowerLimit.Text = config.Limits.A1AxisLimit.Min.ToString();
-                            a1UpperLimit.Text = config.Limits.A1AxisLimit.Max.ToString();
-                            a2LowerLimit.Text = config.Limits.A2AxisLimit.Min.ToString();
-                            a2UpperLimit.Text = config.Limits.A2AxisLimit.Max.ToString();
-                            a3LowerLimit.Text = config.Limits.A3AxisLimit.Min.ToString();
-                            a3UpperLimit.Text = config.Limits.A3AxisLimit.Max.ToString();
-                            a4LowerLimit.Text = config.Limits.A4AxisLimit.Min.ToString();
-                            a4UpperLimit.Text = config.Limits.A4AxisLimit.Max.ToString();
-                            a5LowerLimit.Text = config.Limits.A5AxisLimit.Min.ToString();
-                            a5UpperLimit.Text = config.Limits.A5AxisLimit.Max.ToString();
-                            a6LowerLimit.Text = config.Limits.A6AxisLimit.Min.ToString();
-                            a6UpperLimit.Text = config.Limits.A6AxisLimit.Max.ToString();
-
-                            correctionLimitXYZ.Text = config.Limits.CorrectionLimit.XYZ.ToString();
-                            correctionLimitABC.Text = config.Limits.CorrectionLimit.ABC.ToString();
-
-                            t00.Text = config.Transformation[0, 0].ToString("F3");
-                            t01.Text = config.Transformation[0, 1].ToString("F3");
-                            t02.Text = config.Transformation[0, 2].ToString("F3");
-                            t03.Text = config.Transformation[0, 3].ToString("F3");
-
-                            t10.Text = config.Transformation[1, 0].ToString("F3");
-                            t11.Text = config.Transformation[1, 1].ToString("F3");
-                            t12.Text = config.Transformation[1, 2].ToString("F3");
-                            t13.Text = config.Transformation[1, 3].ToString("F3");
-
-                            t20.Text = config.Transformation[2, 0].ToString("F3");
-                            t21.Text = config.Transformation[2, 1].ToString("F3");
-                            t22.Text = config.Transformation[2, 2].ToString("F3");
-                            t23.Text = config.Transformation[2, 3].ToString("F3");
-
-                            t30.Text = config.Transformation[3, 0].ToString("F3");
-                            t31.Text = config.Transformation[3, 1].ToString("F3");
-                            t32.Text = config.Transformation[3, 2].ToString("F3");
-                            t33.Text = config.Transformation[3, 3].ToString("F3");
+                            ParseConfig(config);
                         }
                     }
                 } catch (Exception ex) {
@@ -423,6 +391,54 @@ namespace PingPong {
             if (saveFileDialog.ShowDialog() == true && saveFileDialog.FileName != "") {
                 File.WriteAllText(saveFileDialog.FileName, config.ToJsonString());
             }
+        }
+
+        private void ParseConfig(RobotConfig config) {
+            connectionPort.Text = config.Port.ToString();
+
+            workspaceLowerX.Text = config.Limits.LowerWorkspacePoint.X.ToString();
+            workspaceLowerY.Text = config.Limits.LowerWorkspacePoint.Y.ToString();
+            workspaceLowerZ.Text = config.Limits.LowerWorkspacePoint.Z.ToString();
+
+            workspaceUpperX.Text = config.Limits.UpperWorkspacePoint.X.ToString();
+            workspaceUpperY.Text = config.Limits.UpperWorkspacePoint.Y.ToString();
+            workspaceUpperZ.Text = config.Limits.UpperWorkspacePoint.Z.ToString();
+
+            a1LowerLimit.Text = config.Limits.A1AxisLimit.Min.ToString();
+            a1UpperLimit.Text = config.Limits.A1AxisLimit.Max.ToString();
+            a2LowerLimit.Text = config.Limits.A2AxisLimit.Min.ToString();
+            a2UpperLimit.Text = config.Limits.A2AxisLimit.Max.ToString();
+            a3LowerLimit.Text = config.Limits.A3AxisLimit.Min.ToString();
+            a3UpperLimit.Text = config.Limits.A3AxisLimit.Max.ToString();
+            a4LowerLimit.Text = config.Limits.A4AxisLimit.Min.ToString();
+            a4UpperLimit.Text = config.Limits.A4AxisLimit.Max.ToString();
+            a5LowerLimit.Text = config.Limits.A5AxisLimit.Min.ToString();
+            a5UpperLimit.Text = config.Limits.A5AxisLimit.Max.ToString();
+            a6LowerLimit.Text = config.Limits.A6AxisLimit.Min.ToString();
+            a6UpperLimit.Text = config.Limits.A6AxisLimit.Max.ToString();
+
+            correctionLimitXYZ.Text = config.Limits.CorrectionLimit.XYZ.ToString();
+            correctionLimitABC.Text = config.Limits.CorrectionLimit.ABC.ToString();
+
+            t00.Text = config.Transformation[0, 0].ToString("F3");
+            t01.Text = config.Transformation[0, 1].ToString("F3");
+            t02.Text = config.Transformation[0, 2].ToString("F3");
+            t03.Text = config.Transformation[0, 3].ToString("F3");
+
+            t10.Text = config.Transformation[1, 0].ToString("F3");
+            t11.Text = config.Transformation[1, 1].ToString("F3");
+            t12.Text = config.Transformation[1, 2].ToString("F3");
+            t13.Text = config.Transformation[1, 3].ToString("F3");
+
+            t20.Text = config.Transformation[2, 0].ToString("F3");
+            t21.Text = config.Transformation[2, 1].ToString("F3");
+            t22.Text = config.Transformation[2, 2].ToString("F3");
+            t23.Text = config.Transformation[2, 3].ToString("F3");
+
+            t30.Text = config.Transformation[3, 0].ToString("F3");
+            t31.Text = config.Transformation[3, 1].ToString("F3");
+            t32.Text = config.Transformation[3, 2].ToString("F3");
+            t33.Text = config.Transformation[3, 3].ToString("F3");
         }
 
         private RobotConfig CreateConfigurationFromFields() {

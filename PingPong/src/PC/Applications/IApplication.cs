@@ -7,5 +7,7 @@
 
         void Stop();
 
+        bool IsStarted();
+
     }
 }

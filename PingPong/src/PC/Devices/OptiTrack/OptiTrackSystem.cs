@@ -1,6 +1,6 @@
-﻿using MathNet.Numerics.LinearAlgebra;
-using NatNetML;
+﻿using NatNetML;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace PingPong.OptiTrack {
@@ -68,22 +68,19 @@ namespace PingPong.OptiTrack {
             }
         }
 
-        // TODO: async, token source
-        public Vector<double> GetAveragePosition(int samples) {
+        // TODO: async, Task, token source ?
+        public List<InputFrame> WaitForFrames(int numOfFrames) {
             if (!isInitialized) {
                 throw new InvalidOperationException("OptiTrack system is not initialized");
             }
 
             ManualResetEvent getSamplesEvent = new ManualResetEvent(false);
-            var position = Vector<double>.Build.Dense(3);
+            var frames = new List<InputFrame>();
 
-            int currentSample = 0;
+            void processFrame(InputFrame frame) {
+                frames.Add(frame);
 
-            void processFrame(InputFrame inputFrame) {
-                position += inputFrame.BallPosition;
-                currentSample++;
-
-                if (currentSample >= samples) {
+                if (frames.Count == numOfFrames) {
                     FrameReceived -= processFrame;
                     getSamplesEvent.Set();
                 }
@@ -92,7 +89,7 @@ namespace PingPong.OptiTrack {
             FrameReceived += processFrame;
             getSamplesEvent.WaitOne();
 
-            return position / samples;
+            return frames;
         }
 
     }

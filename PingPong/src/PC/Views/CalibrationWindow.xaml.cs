@@ -50,29 +50,32 @@ namespace PingPong {
                     Start?.Invoke();
 
                     // Move robot to first calibration point and wait
-                    //MoveRobotToPoint(robot, calibrationPoints[0], robot.Limits.MaxVelocity.XYZ / 3.0);
-                    //robot.ForceMoveTo(new RobotVector(calibrationPoints[0], robot.Position.ABC), RobotVector.Zero, 10.0);
 
-                    Random random = new Random();
+                    //MoveRobotToPoint(robot, calibrationPoints[0], robot.Limits.MaxVelocity.XYZ / 3.0);
+                    robot.ForceMoveTo(new RobotVector(calibrationPoints[0], robot.Position.ABC), RobotVector.Zero, 10.0);
 
                     for (int i = 0; i < calibrationPoints.Count; i++) {
                         if (worker.CancellationPending) {
                             break;
                         }
                         // Move robot to next calibration point and wait
+
                         //MoveRobotToPoint(robot, calibrationPoints[0], robot.Limits.MaxVelocity.XYZ / 3.0);
                         robot.ForceMoveTo(new RobotVector(calibrationPoints[i], robot.Position.ABC), RobotVector.Zero, 4.0);
-
-                        Thread.Sleep(1000);
 
                         // Add robot XYZ position to list
                         var kukaPoint = robot.Position.XYZ;
                         kukaRobotPoints.Add(kukaPoint);
 
                         // Gen n samples from optitrack system and add average ball position to the list
-                        var optiTrackPoint = optiTrack.GetAveragePosition(samplesPerPoint);
+                        var optiTrackFrames = optiTrack.WaitForFrames(samplesPerPoint);
+                        var optiTrackPoint = Vector<double>.Build.Dense(3);
 
-                        optiTrackPoints.Add(optiTrackPoint);
+                        optiTrackFrames.ForEach(frame => {
+                            optiTrackPoint += frame.BallPosition;
+                        });
+
+                        optiTrackPoints.Add(optiTrackPoint / optiTrackFrames.Count);
 
                         // Calculate new transformation
                         int progress = i * 100 / (calibrationPoints.Count - 1);

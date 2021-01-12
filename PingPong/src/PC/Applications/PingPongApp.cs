@@ -37,5 +37,9 @@ namespace PingPong.Applications {
             //TODO:
         }
 
+        public bool IsStarted() {
+            return isStarted;
+        }
+
     }
 }

@@ -318,7 +318,7 @@ namespace PingPong.KUKA {
             generator.SetTargetPosition(targetPosition, targetVelocity, targetDuration);
         }
 
-        // TODO: async, token source
+        // TODO: async, Task, token source ?
         /// <summary>
         /// Moves robot to the specified position and blocks current thread until position is reached.
         /// Enables force move mode during the movement.
@@ -360,7 +360,7 @@ namespace PingPong.KUKA {
             MoveTo(Position + deltaPosition, targetVelocity, targetDuration);
         }
 
-        // TODO: async, token source
+        // TODO: async, Task, token source ?
         /// <summary>
         /// Shifts robot by the specified delta position and blocks current thread until new position is reached.
         /// Enables force move mode during the movement.

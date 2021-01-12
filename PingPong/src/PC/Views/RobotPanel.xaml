@@ -80,6 +80,33 @@
                                             <TextBox Grid.Column="3" Grid.Row="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" IsReadOnly="True" MaxLines="1" Text="0.0" x:Name="targetPositionC"/>
                                         </Grid>
                                     </Expander>
+                                    <Separator Margin="10,2,0,2"/>
+                                    <Separator Margin="10,0,0,2"/>
+                                    <Expander Padding="10,0,0,0" Margin="0,0,0,0">
+                                        <Expander.Header>
+                                            <TextBlock Text="Home position" FontWeight="SemiBold" />
+                                        </Expander.Header>
+                                        <Grid Margin="0,0,0,2">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition/>
+                                                <RowDefinition/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Content="XYZ [mm]" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right" Margin="0"/>
+                                            <Label Content="ABC [deg]" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right"/>
+                                            <TextBox Grid.Column="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" IsReadOnly="True" MaxLines="1" Text="0.0" x:Name="homePositionX"/>
+                                            <TextBox Grid.Column="2" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" IsReadOnly="True" MaxLines="1" Text="0.0" x:Name="homePositionY"/>
+                                            <TextBox Grid.Column="3" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" IsReadOnly="True" MaxLines="1" Text="0.0" x:Name="homePositionZ"/>
+                                            <TextBox Grid.Column="1" Grid.Row="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" IsReadOnly="True" MaxLines="1" Text="0.0" x:Name="homePositionA"/>
+                                            <TextBox Grid.Column="2" Grid.Row="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" IsReadOnly="True" MaxLines="1" Text="0.0" x:Name="homePositionB"/>
+                                            <TextBox Grid.Column="3" Grid.Row="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" IsReadOnly="True" MaxLines="1" Text="0.0" x:Name="homePositionC"/>
+                                        </Grid>
+                                    </Expander>
                                 </StackPanel>
                             </Expander>
                             <Separator Margin="0,2,0,2"/>

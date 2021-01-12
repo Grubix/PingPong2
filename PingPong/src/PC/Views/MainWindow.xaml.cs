@@ -27,6 +27,12 @@ namespace PingPong {
                 optiTrackPanel.Robot1 = robot1Panel.Robot;
                 optiTrackPanel.Robot2 = robot2Panel.Robot;
 
+                try {
+                    robot1Panel.LoadConfig("Config/robot1.config.json");
+                    robot2Panel.LoadConfig("Config/robot2.config.json");
+                } catch (Exception) {
+                }
+
                 pingPongPanel.InitializeApplications(
                     robot1Panel.Robot,
                     robot2Panel.Robot,

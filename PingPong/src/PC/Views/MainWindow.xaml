@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PingPong"
         mc:Ignorable="d"
-        Title="PingPong v2.0 [K.Borowicz / W.Mila / B.Babiaczyk]" Height="740" Width="1480" WindowStartupLocation="CenterScreen" MinHeight="740" MinWidth="1480" Icon="pack://siteoforigin:,,,/Resources/favicon.ico">
+        Title="PingPong v2.0 [K.Borowicz / W.Mila / B.Babiaczyk]" Height="780" Width="1500" WindowStartupLocation="CenterScreen" MinHeight="780" MinWidth="1500" Icon="pack://siteoforigin:,,,/Resources/favicon.ico">
     <TabControl Padding="5" Grid.IsSharedSizeScope="True" Background="#FFF1F1F1">
         <TabItem Header="Robot 1">
             <TabItem.Background>
