@@ -41,7 +41,7 @@ namespace PingPong {
         }
 
         private void InitializeControls() {
-            connectBtn.Click += Connect;
+            initializeBtn.Click += Initialize;
             disconnectBtn.Click += Disconnect;
             manualModeBtn.Click += OpenManualModeWindow;
             calibrateBtn.Click += OpenCalibrationWindow;
@@ -53,12 +53,13 @@ namespace PingPong {
             resetZoomBtn.Click += ResetChartsZoom;
             screenshotBtn.Click += TakeChartScreenshot;
 
-            // CTRL + S -> save active chart to png image
-            Loaded += (s, e) => Focus();
             activeChart = positionChart;
             tabControl.SelectionChanged += (s, e) => {
                 activeChart = (LiveChart)tabControl.SelectedContent;
             };
+
+            // CTRL + S -> save active chart to png image
+            Loaded += (s, e) => Focus();
             KeyDown += (s, e) => {
                 if (e.Key == Key.S && Keyboard.IsKeyDown(Key.LeftCtrl)) {
                     TakeChartScreenshot(null, null);
@@ -105,8 +106,8 @@ namespace PingPong {
                 Dispatcher.Invoke(() => {
                     calibrateBtn.IsEnabled = true;
                     manualModeBtn.IsEnabled = true;
-                    ipAdress.Text = Robot.Ip;
 
+                    ipAdress.Text = Robot.Ip;
                     homePositionX.Text = Robot.HomePosition.X.ToString("F3");
                     homePositionY.Text = Robot.HomePosition.Y.ToString("F3");
                     homePositionZ.Text = Robot.HomePosition.Z.ToString("F3");
@@ -118,7 +119,7 @@ namespace PingPong {
 
             Robot.Uninitialized += () => {
                 Dispatcher.Invoke(() => {
-                    connectBtn.IsEnabled = true;
+                    initializeBtn.IsEnabled = true;
                     disconnectBtn.IsEnabled = false;
                     loadConfigBtn.IsEnabled = true;
                     saveConfigBtn.IsEnabled = true;
@@ -126,6 +127,10 @@ namespace PingPong {
             };
 
             Robot.FrameReceived += frame => {
+                if (isPlotFrozen) {
+                    return;
+                }
+
                 if (positionChart.IsReady) {
                     RobotVector actualPosition = Robot.Position;
                     RobotVector targetPosition = Robot.TargetPosition;
@@ -171,29 +176,29 @@ namespace PingPong {
             };
         }
 
-        private void Connect(object sender, RoutedEventArgs e) {
+        private void Initialize(object sender, RoutedEventArgs e) {
             try {
                 if (Robot.IsInitialized()) {
                     return;
                 }
 
                 Robot.Config = CreateConfigurationFromFields();
-                connectBtn.IsEnabled = false;
-                disconnectBtn.IsEnabled = true;
+                Robot.Initialize();
+
+                initializeBtn.IsEnabled = false;
                 loadConfigBtn.IsEnabled = false;
                 saveConfigBtn.IsEnabled = false;
-
-                Robot.Initialize();
+                disconnectBtn.IsEnabled = true;
             } catch (Exception ex) {
                 MainWindow.ShowErrorDialog("Robot initialization failed.", ex);
             }
         }
 
         private void Disconnect(object sender, RoutedEventArgs e) {
-            if (Robot.IsInitialized()) {
-                Robot.Uninitialize();
-            } else {
-                connectBtn.IsEnabled = true;
+            Robot.Uninitialize();
+
+            if (!Robot.IsInitialized()) {
+                initializeBtn.IsEnabled = true;
                 disconnectBtn.IsEnabled = false;
                 manualModeBtn.IsEnabled = false;
                 calibrateBtn.IsEnabled = false;
@@ -261,11 +266,6 @@ namespace PingPong {
         }
 
         private void FreezeCharts(object sender, RoutedEventArgs e) {
-            // MEGA WAZNE!!! 
-            // freezowanie (a raczej zoomowanie i scrolowanie wykresu) moze powodowac opoznienia komunikacji z robotem co 
-            // moze byc calkiem niebezpieczne, przykladowo opozniajac odbieranie ramek i tym samym spradzanie limitow robota.
-            // Moze po kliknieciu w freeza zrobic diskonekta z robotami (oba musiałby by sie rozlaczyc)?
-
             if (isPlotFrozen) {
                 positionChart.Clear();
                 positionErrorChart.Clear();

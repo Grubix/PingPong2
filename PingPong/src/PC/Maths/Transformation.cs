@@ -100,8 +100,8 @@ namespace PingPong.Maths {
         }
 
         public Transformation(Matrix<double> rotation, Vector<double> translation) {
-            rotation = rotation.Clone();
-            translation = translation.Clone();
+            this.rotation = rotation.Clone();
+            this.translation = translation.Clone();
 
             matrix = Matrix<double>.Build.DenseOfArray(new double[,] {
                 { rotation[0, 0], rotation[0, 1], rotation[0, 2], translation[0] },

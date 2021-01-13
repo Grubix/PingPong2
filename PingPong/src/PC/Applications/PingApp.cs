@@ -32,6 +32,8 @@ namespace PingPong.Applications {
             this.checkFunction = checkFunction;
 
             prediction = new HitPrediction();
+            prediction.Reset(183.48);
+
             upVector = Vector<double>.Build.DenseOfArray(
                 new double[] { 0.0, 0.0, 1.0 }
             );
@@ -104,6 +106,7 @@ namespace PingPong.Applications {
                     // Slow down the robot
                     robotMovedToHitPosition = false;
                     robot.MoveTo(new RobotVector(robot.Position.XYZ, robot.HomePosition.ABC), RobotVector.Zero, 3);
+                    Stop();
                 }
             }
         }

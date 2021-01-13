@@ -24,20 +24,15 @@ namespace PingPong {
                 robot2Panel.MainWindowHandle = this;
                 robot2Panel.OptiTrack = optiTrackPanel.OptiTrack;
 
-                optiTrackPanel.Robot1 = robot1Panel.Robot;
-                optiTrackPanel.Robot2 = robot2Panel.Robot;
-
                 try {
                     robot1Panel.LoadConfig("Config/robot1.config.json");
                     robot2Panel.LoadConfig("Config/robot2.config.json");
                 } catch (Exception) {
+                    // Ingore exception - config files may not exist in Config folder
                 }
 
-                pingPongPanel.InitializeApplications(
-                    robot1Panel.Robot,
-                    robot2Panel.Robot,
-                    optiTrackPanel.OptiTrack
-                );
+                optiTrackPanel.Initialize(robot1Panel.Robot, robot2Panel.Robot);
+                pingPongPanel.Initialize(robot1Panel.Robot, robot2Panel.Robot, optiTrackPanel.OptiTrack );
             };
 
             // Shrink window if it is too wide or too high

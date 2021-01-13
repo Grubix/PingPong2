@@ -1,8 +1,8 @@
 {
-    "port": 8089,
+    "port": 8082,
     "limits": {
-        "lowerWorkspacePoint": [-250, 700, 150],
-        "upperWorkspacePoint": [250, 950, 400],
+        "lowerWorkspacePoint": [0, 0, 0],
+        "upperWorkspacePoint": [0, 0, 0],
         "maxCorrectionXYZ": 2.0,
         "maxCorrectionABC": 0.1,
         "A1": [-360, 360],
@@ -13,9 +13,9 @@
         "A6": [-360, 360]
     },
     "transformation": [
-        [-0.009, 0.001, -1, 791.016],
-        [-1, -0.002, 0.009, 743.144],
-        [-0.002, 1, 0.001, 148.319],
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 1, 0],
         [0, 0, 0, 1]
     ]
 }

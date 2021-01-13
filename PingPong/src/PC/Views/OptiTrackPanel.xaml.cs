@@ -12,6 +12,10 @@ namespace PingPong {
 
         private bool isPlotFrozen;
 
+        private KUKARobot robot1;
+
+        private KUKARobot robot2;
+
         private Transformation robot1Transformation;
 
         private Transformation robot2Transformation;
@@ -19,10 +23,6 @@ namespace PingPong {
         private LiveChart activeChart;
 
         public OptiTrackSystem OptiTrack { get; }
-
-        public KUKARobot Robot1 { get; set; }
-
-        public KUKARobot Robot2 { get; set; }
 
         public OptiTrackPanel() {
             InitializeComponent();
@@ -43,13 +43,13 @@ namespace PingPong {
             resetZoomBtn.Click += ResetChartsZoom;
             screenshotBtn.Click += TakeChartScreenshot;
 
-            // CTRL + S -> save active chart to png image
-            activeChart = positionChart;
-            Loaded += (s, e) => Focus();
             activeChart = positionChart;
             tabControl.SelectionChanged += (s, e) => {
                 activeChart = (LiveChart)tabControl.SelectedContent;
             };
+
+            // CTRL + S -> save active chart to png image
+            Loaded += (s, e) => Focus();
             KeyDown += (s, e) => {
                 if (e.Key == Key.S && Keyboard.IsKeyDown(Key.LeftCtrl)) {
                     TakeChartScreenshot(null, null);
@@ -57,7 +57,19 @@ namespace PingPong {
             };
         }
 
+        public void Initialize(KUKARobot robot1, KUKARobot robot2) {
+            this.robot1 = robot1;
+            this.robot2 = robot2;
+
+            robot1.Initialized += () => robot1Transformation = robot1.OptiTrackTransformation;
+            robot2.Initialized += () => robot2Transformation = robot2.OptiTrackTransformation;
+        }
+
         private void UpdateOptiTrackBasePositionChart(OptiTrack.InputFrame frame) {
+            if (isPlotFrozen) {
+                return;
+            }
+
             if (positionChart.IsReady) {
                 positionChart.Update(new double[] {
                     frame.BallPosition[0], frame.BallPosition[1], frame.BallPosition[2]
@@ -73,6 +85,10 @@ namespace PingPong {
         }
 
         private void UpdateRobot1BasePositionChart(OptiTrack.InputFrame frame) {
+            if (isPlotFrozen) {
+                return;
+            }
+
             var robot1BasePosition = robot1Transformation.Convert(frame.BallPosition);
 
             if (robot1PositionChart.IsReady) {
@@ -90,6 +106,10 @@ namespace PingPong {
         }
 
         private void UpdateRobot2BasePositionChart(OptiTrack.InputFrame frame) {
+            if (isPlotFrozen) {
+                return;
+            }
+
             var robot2BasePosition = robot2Transformation.Convert(frame.BallPosition);
 
             if (robot2PositionChart.IsReady) {
@@ -126,13 +146,11 @@ namespace PingPong {
         private void Connect(object sender, RoutedEventArgs e) {
             OptiTrack.FrameReceived += UpdateOptiTrackBasePositionChart;
 
-            if (Robot1 != null && Robot1.OptiTrackTransformation != null) {
-                robot1Transformation = Robot1.OptiTrackTransformation;
+            if (robot1Transformation != null) {
                 OptiTrack.FrameReceived += UpdateRobot1BasePositionChart;
             }
 
-            if (Robot2 != null && Robot2.OptiTrackTransformation != null) {
-                robot2Transformation = Robot2.OptiTrackTransformation;
+            if (robot2Transformation != null) {
                 OptiTrack.FrameReceived += UpdateRobot2BasePositionChart;
             }
 
@@ -146,6 +164,8 @@ namespace PingPong {
         }
 
         private void Disconnect(object sender, RoutedEventArgs e) {
+            OptiTrack.Uninitialize();
+
             OptiTrack.FrameReceived -= UpdateOptiTrackBasePositionChart;
             OptiTrack.FrameReceived -= UpdateRobot1BasePositionChart;
             OptiTrack.FrameReceived -= UpdateRobot2BasePositionChart;
@@ -195,7 +215,7 @@ namespace PingPong {
         }
 
         private void TakeChartScreenshot(object sender, RoutedEventArgs e) {
-            if (!isPlotFrozen || Robot1.IsInitialized() || Robot2.IsInitialized()) {
+            if (!isPlotFrozen || robot1.IsInitialized() || robot2.IsInitialized()) {
                 return;
             }
 

@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{AA67FE29-80B6-4424-A9DE-83D3DEB61BA0}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <RootNamespace>PingPong</RootNamespace>
     <AssemblyName>Ping Pong</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
@@ -199,17 +199,21 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="bin\Debug\Config\robot1.config.json" />
+    <None Include="bin\Debug\Config\robot2.config.json" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <None Include="src\PC\Devices\KUKA\robot1.config.json" />
+    <None Include="src\PC\Devices\KUKA\robot2.config.json" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="src\Docs\" />
+    <Folder Include="Docs\" />
     <Folder Include="src\KUKA\" />
     <Folder Include="src\OptiTrack\" />
   </ItemGroup>

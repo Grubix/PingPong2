@@ -19,6 +19,8 @@ namespace PingPong.KUKA {
 
         private readonly TrajectoryGenerator5 generator;
 
+        private CancellationTokenSource cancellationTokenSource;
+
         private bool isInitialized = false;
 
         private bool forceMoveMode = false;
@@ -200,8 +202,22 @@ namespace PingPong.KUKA {
             };
 
             worker.DoWork += async (sender, args) => {
-                // Connect with the robot
-                InputFrame receivedFrame = await rsiAdapter.Connect(Config.Port);
+                cancellationTokenSource = new CancellationTokenSource();
+                InputFrame receivedFrame = null;
+
+                try {
+                    // Connect with the robot
+                    Task connectTask = Task.Run(async () => {
+                        receivedFrame = await rsiAdapter.Connect(Config.Port);
+                    });
+
+                    connectTask.Wait(cancellationTokenSource.Token);
+                } catch (OperationCanceledException) {
+                    // Connect operation cancelled (Disconnect() method)
+                    rsiAdapter.Disconnect();
+                    return;
+                }
+
                 generator.Restart(receivedFrame.Position);
 
                 lock (receivedDataSyncLock) {
@@ -254,7 +270,7 @@ namespace PingPong.KUKA {
                     $"{Environment.NewLine}{receivedFrame.Position}");
             }
 
-            //TODO: mozna dorobic sprawdzanie korekcji, ale dodatkowo przy sprawdzeniu czy IsTargetPositonReached zeby nie wywalal przy jakims drobnym syfie jak robot stoi
+            //TODO: mozna dorobic sprawdzanie korekcji (dla IsTargetPositonReached = true) zeby nie wywalal jak robot stoi
 
             lock (receivedDataSyncLock) {
                 IPOC = receivedFrame.IPOC;
@@ -383,7 +399,11 @@ namespace PingPong.KUKA {
         }
 
         public void Uninitialize() {
-            if (isInitialized && worker.CancellationPending) {
+            if (cancellationTokenSource != null) {
+                cancellationTokenSource.Cancel();
+            }
+
+            if (worker.CancellationPending) {
                 worker.CancelAsync();
             }
         }

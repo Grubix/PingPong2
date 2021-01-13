@@ -17,7 +17,7 @@ namespace PingPong {
             InitializeComponent();
         }
 
-        public void InitializeApplications(KUKARobot robot1, KUKARobot robot2, OptiTrackSystem optiTrack) {
+        public void Initialize(KUKARobot robot1, KUKARobot robot2, OptiTrackSystem optiTrack) {
             if (robot1 == robot2) {
                 throw new ArgumentException("Cos tam ze roboty musza byc rozne bo skutki moga byc calkiem nie ciekawe");
             }
@@ -26,9 +26,11 @@ namespace PingPong {
             //    return true; //TODO:
             //});
 
-            //robot1PingApp = new PingApp(robot1, optiTrack, (position) => {
-            //    return position[0] < 1200.0; //TODO:
-            //});
+            robot1PingApp = new PingApp(robot1, optiTrack, (position) => {
+                return position[0] < 1200.0; //TODO:
+            });
+
+            optiTrack.Initialized += () => robot1PingApp.Start();
 
             //robot2PingApp = new PingApp(robot2, optiTrack, (position) => {
             //    return position[0] < 1200.0; //TODO:
