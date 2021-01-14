@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace PingPong.Applications {
-    class PingApp : IApplication {
+    class PingApp : IApplication<PingData> {
 
         private bool isStarted;
 
@@ -25,6 +25,12 @@ namespace PingPong.Applications {
         private bool robotMovedToHitPosition;
 
         private double elapsedTime = 0;
+
+        public event Action Started;
+
+        public event Action Stopped;
+
+        public event Action<PingData> DataReady;
 
         public PingApp(KUKARobot robot, OptiTrackSystem optiTrack, Func<Vector<double>, bool> checkFunction) {
             this.robot = robot;
@@ -68,10 +74,11 @@ namespace PingPong.Applications {
 
                     ballPosition = robot.OptiTrackTransformation.Convert(frame.BallPosition);
 
+                    //TODO: CZEMU TO NIE ZADZIALALO JAK POWINNO ??!?!?!?!
                     bool positionChanged =
-                        ballPosition[0] != prevBallPosition[0] ||
+                        (ballPosition[0] != prevBallPosition[0] ||
                         ballPosition[1] != prevBallPosition[1] ||
-                        ballPosition[2] != prevBallPosition[2];
+                        ballPosition[2] != prevBallPosition[2]);
 
                     if (positionChanged && checkFunction.Invoke(ballPosition)) {
                         optiTrack.FrameReceived -= checkBallVisiblity;
@@ -87,17 +94,23 @@ namespace PingPong.Applications {
 
                 // start application
                 isStarted = true;
+
                 robot.FrameReceived += ProcessRobotFrame;
                 optiTrack.FrameReceived += ProcessOptiTrackFrame;
+                Started?.Invoke();
             });
         }
 
         public void Stop() {
-            isStarted = false;
+            if (isStarted) {
+                isStarted = false;
 
-            robot.FrameReceived -= ProcessRobotFrame;
-            optiTrack.FrameReceived -= ProcessOptiTrackFrame;
-            robot.Uninitialize();
+                robot.FrameReceived -= ProcessRobotFrame;
+                optiTrack.FrameReceived -= ProcessOptiTrackFrame;
+                robot.Uninitialize();
+
+                Stopped?.Invoke();
+            }
         }
 
         private void ProcessRobotFrame(KUKA.InputFrame frame) {
@@ -126,6 +139,12 @@ namespace PingPong.Applications {
 
             prediction.AddMeasurement(robotBaseBallPosition, elapsedTime);
 
+            PingData data = new PingData {
+                ActualBallPosition = robotBaseBallPosition,
+                PredictedTimeOfFlight = prediction.TimeOfFlight,
+                PredictedBallPosition = Vector<double>.Build.DenseOfArray(new double[] { -1, -1, -1 })
+            };
+
             if (prediction.IsReady && prediction.TimeToHit >= 0.3) {
                 prediction.Calculate();
 
@@ -148,7 +167,11 @@ namespace PingPong.Applications {
                         robot.MoveTo(robotTargetPostion, RobotVector.Zero, prediction.TimeToHit);
                     }
                 }
+
+                data.PredictedBallPosition = predBallPosition;
             }
+
+            DataReady?.Invoke(data);
         }
 
         public bool IsStarted() {

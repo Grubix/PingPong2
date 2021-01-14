@@ -403,9 +403,7 @@ namespace PingPong.KUKA {
                 cancellationTokenSource.Cancel();
             }
 
-            if (worker.CancellationPending) {
-                worker.CancelAsync();
-            }
+            worker.CancelAsync();
         }
 
         public bool IsInitialized() {

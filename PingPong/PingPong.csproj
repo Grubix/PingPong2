@@ -107,7 +107,9 @@
     <Compile Include="src\PC\Applications\HitPrediction.cs" />
     <Compile Include="src\PC\Applications\IApplication.cs" />
     <Compile Include="src\PC\Applications\PingApp.cs" />
+    <Compile Include="src\PC\Applications\PingData.cs" />
     <Compile Include="src\PC\Applications\PingPongApp.cs" />
+    <Compile Include="src\PC\Applications\PingPongData.cs" />
     <Compile Include="src\PC\Devices\IDevice.cs" />
     <Compile Include="src\PC\Devices\KUKA\KUKARobot.cs" />
     <Compile Include="src\PC\Devices\KUKA\RobotAxisPosition.cs" />
@@ -126,29 +128,29 @@
     <Compile Include="src\PC\Maths\PIDRegulator.cs" />
     <Compile Include="src\PC\Maths\Polyfit.cs" />
     <Compile Include="src\PC\Maths\Transformation.cs" />
-    <Compile Include="src\PC\Views\CalibrationWindow.xaml.cs">
+    <Compile Include="src\PC\Views\Panels\CalibrationWindow.xaml.cs">
       <DependentUpon>CalibrationWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="src\PC\Views\LiveChart.xaml.cs">
+    <Compile Include="src\PC\Views\Controls\LiveChart.xaml.cs">
       <DependentUpon>LiveChart.xaml</DependentUpon>
     </Compile>
-    <Compile Include="src\PC\Views\ManualModeWindow.xaml.cs">
+    <Compile Include="src\PC\Views\Panels\ManualModeWindow.xaml.cs">
       <DependentUpon>ManualModeWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="src\PC\Views\OptiTrackPanel.xaml.cs">
+    <Compile Include="src\PC\Views\Panels\OptiTrackPanel.xaml.cs">
       <DependentUpon>OptiTrackPanel.xaml</DependentUpon>
     </Compile>
-    <Compile Include="src\PC\Views\PingPongPanel.xaml.cs">
+    <Compile Include="src\PC\Views\Panels\PingPongPanel.xaml.cs">
       <DependentUpon>PingPongPanel.xaml</DependentUpon>
     </Compile>
-    <Compile Include="src\PC\Views\RobotPanel.xaml.cs">
+    <Compile Include="src\PC\Views\Panels\RobotPanel.xaml.cs">
       <DependentUpon>RobotPanel.xaml</DependentUpon>
     </Compile>
-    <Page Include="src\PC\Views\CalibrationWindow.xaml">
+    <Page Include="src\PC\Views\Panels\CalibrationWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="src\PC\Views\LiveChart.xaml">
+    <Page Include="src\PC\Views\Controls\LiveChart.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -164,19 +166,19 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="src\PC\Views\ManualModeWindow.xaml">
+    <Page Include="src\PC\Views\Panels\ManualModeWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="src\PC\Views\OptiTrackPanel.xaml">
+    <Page Include="src\PC\Views\Panels\OptiTrackPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="src\PC\Views\PingPongPanel.xaml">
+    <Page Include="src\PC\Views\Panels\PingPongPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="src\PC\Views\RobotPanel.xaml">
+    <Page Include="src\PC\Views\Panels\RobotPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

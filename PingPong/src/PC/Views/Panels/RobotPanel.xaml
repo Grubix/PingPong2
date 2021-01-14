@@ -304,7 +304,7 @@
                 <Button Content="Screenshot" Width="75" Height="22" Margin="5,0,0,0" x:Name="screenshotBtn" IsEnabled="False"/>
             </StackPanel>
             <TabControl Grid.Row="1" TabStripPlacement="Bottom" BorderBrush="#FFACACAC" Margin="0,5,0,0" Padding="0" x:Name="tabControl">
-                <TabItem Header="Position" x:Name="positionTab">
+                <TabItem Header="Position">
                     <local:LiveChart Margin="0" x:Name="positionChart"/>
                 </TabItem>
                 <TabItem Header="Position error">
