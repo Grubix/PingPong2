@@ -8,11 +8,11 @@ namespace PingPong.Maths {
     /// </summary>
     public class Transformation {
 
-        private Matrix<double> matrix;
+        public Matrix<double> Matrix { get; }
 
-        private Matrix<double> rotation;
+        public Matrix<double> Rotation { get; }
 
-        private Vector<double> translation;
+        public Vector<double> Translation { get; }
 
         /// <summary>
         /// Gets or sets the value of transformation matrix at the given row and column
@@ -22,16 +22,16 @@ namespace PingPong.Maths {
         /// <returns></returns>
         public double this[int i, int j] {
             get {
-                return matrix[i, j];
+                return Matrix[i, j];
             }
             set {
-                matrix[i, j] = value;
+                Matrix[i, j] = value;
 
                 if (i < 3) {
                     if (j < 3) {
-                        rotation[i, j] = value;
+                        Rotation[i, j] = value;
                     } else {
-                        translation[i] = value;
+                        Translation[i] = value;
                     }
                 }
             }
@@ -88,22 +88,22 @@ namespace PingPong.Maths {
                 V[2, 2] *= -1;
             }
 
-            rotation = V * UT;
-            translation = -1 * rotation * centroidA + centroidB;
+            Rotation = V * UT;
+            Translation = -1 * Rotation * centroidA + centroidB;
 
-            matrix = Matrix<double>.Build.DenseOfArray(new double[,] {
-                { rotation[0, 0], rotation[0, 1], rotation[0, 2], translation[0] },
-                { rotation[1, 0], rotation[1, 1], rotation[1, 2], translation[1] },
-                { rotation[2, 0], rotation[2, 1], rotation[2, 2], translation[2] },
+            Matrix = Matrix<double>.Build.DenseOfArray(new double[,] {
+                { Rotation[0, 0], Rotation[0, 1], Rotation[0, 2], Translation[0] },
+                { Rotation[1, 0], Rotation[1, 1], Rotation[1, 2], Translation[1] },
+                { Rotation[2, 0], Rotation[2, 1], Rotation[2, 2], Translation[2] },
                 { 0.0, 0.0, 0.0, 1.0 }
             });
         }
 
         public Transformation(Matrix<double> rotation, Vector<double> translation) {
-            this.rotation = rotation.Clone();
-            this.translation = translation.Clone();
+            Rotation = rotation.Clone();
+            Translation = translation.Clone();
 
-            matrix = Matrix<double>.Build.DenseOfArray(new double[,] {
+            Matrix = Matrix<double>.Build.DenseOfArray(new double[,] {
                 { rotation[0, 0], rotation[0, 1], rotation[0, 2], translation[0] },
                 { rotation[1, 0], rotation[1, 1], rotation[1, 2], translation[1] },
                 { rotation[2, 0], rotation[2, 1], rotation[2, 2], translation[2] },
@@ -112,20 +112,20 @@ namespace PingPong.Maths {
         }
 
         public Transformation() {
-            matrix = Matrix<double>.Build.DenseOfArray(new double[,] {
+            Matrix = Matrix<double>.Build.DenseOfArray(new double[,] {
                 { 1.0, 0.0, 0.0, 0.0 },
                 { 0.0, 1.0, 0.0, 0.0 },
                 { 0.0, 0.0, 1.0, 0.0 },
                 { 0.0, 0.0, 0.0, 1.0 }
             });
 
-            rotation = Matrix<double>.Build.DenseOfArray(new double[,] {
+            Rotation = Matrix<double>.Build.DenseOfArray(new double[,] {
                 { 1.0, 0.0, 0.0 },
                 { 0.0, 1.0, 0.0 },
                 { 0.0, 0.0, 1.0 },
             });
 
-            translation = Vector<double>.Build.DenseOfArray(new double[] {
+            Translation = Vector<double>.Build.DenseOfArray(new double[] {
                 0.0, 0.0, 0.0
             });
         }
@@ -136,7 +136,7 @@ namespace PingPong.Maths {
         /// <param name="pointInA">vector in A coordinate system</param>
         /// <returns></returns>
         public Vector<double> Convert(Vector<double> pointInA) {
-            return rotation * pointInA + translation;
+            return Rotation * pointInA + Translation;
         }
 
     }

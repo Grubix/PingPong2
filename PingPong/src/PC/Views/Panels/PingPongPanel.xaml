@@ -23,57 +23,31 @@
                 <Grid Grid.Column="0" Grid.Row="0">
                     <ScrollViewer UseLayoutRounding="False" VerticalScrollBarVisibility="Hidden">
                         <ItemsControl>
-                            <Expander Padding="0,5" IsExpanded="True">
+                            <Expander Padding="0,5">
                                 <Expander.Header>
                                     <TextBlock Text="Robot1 Ping app" FontWeight="Bold" />
                                 </Expander.Header>
                                 <StackPanel>
-                                    <Expander Padding="10,0,0,0" Margin="0,-5,0,0" IsExpanded="True">
-                                        <Expander.Header>
-                                            <TextBlock Text="Actual position" FontWeight="SemiBold" />
-                                        </Expander.Header>
-                                        <Grid Margin="0,0,0,2">
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition/>
-                                                <RowDefinition/>
-                                            </Grid.RowDefinitions>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition/>
-                                                <ColumnDefinition/>
-                                                <ColumnDefinition/>
-                                            </Grid.ColumnDefinitions>
-                                            <Label Content="XYZ [mm]" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right" Margin="0"/>
-                                            <Label Content="ABC [deg]" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right"/>
-                                        </Grid>
-                                    </Expander>
-                                    <Separator Margin="10,2,0,2"/>
-                                    <Separator Margin="10,0,0,2"/>
-                                    <Expander Padding="10,0,0,0" Margin="0,0,0,0" IsExpanded="True">
-                                        <Expander.Header>
-                                            <TextBlock Text="Robot2 Ping app" FontWeight="SemiBold" />
-                                        </Expander.Header>
-                                        <Grid Margin="0,0,0,2">
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition/>
-                                                <RowDefinition/>
-                                            </Grid.RowDefinitions>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto"/>
-                                                <ColumnDefinition/>
-                                                <ColumnDefinition/>
-                                                <ColumnDefinition/>
-                                            </Grid.ColumnDefinitions>
-                                            <Label Content="XYZ [mm]" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right" Margin="0"/>
-                                            <Label Content="ABC [deg]" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right"/>
-                                        </Grid>
-                                    </Expander>
-                                    <Separator Margin="10,2,0,2"/>
-                                    <Separator Margin="10,0,0,2"/>
                                 </StackPanel>
                             </Expander>
                             <Separator Margin="0,2,0,2"/>
                             <Separator Margin="0,0,0,2"/>
+                            <Expander Padding="0,5">
+                                <Expander.Header>
+                                    <TextBlock Text="Robot2 Ping app" FontWeight="Bold" />
+                                </Expander.Header>
+                                <StackPanel>
+                                </StackPanel>
+                            </Expander>
+                            <Separator Margin="0,2,0,2"/>
+                            <Separator Margin="0,0,0,2"/>
+                            <Expander Padding="0,5">
+                                <Expander.Header>
+                                    <TextBlock Text="Ping Pong app" FontWeight="Bold" />
+                                </Expander.Header>
+                                <StackPanel>
+                                </StackPanel>
+                            </Expander>
                         </ItemsControl>
                     </ScrollViewer>
                 </Grid>
@@ -81,20 +55,14 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                     <Separator Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="-5,0,-5,5"/>
-                    <Button Content="Initialize" Grid.Column="0" Height="22" Margin="0,0,2.5,0" Grid.Row="1" x:Name="initializeBtn"/>
-                    <Button Content="Disconnect" Grid.Column="1" Height="22" Margin="2.5,0,0,0" Grid.Row="1" x:Name="disconnectBtn" IsEnabled="False"/>
-                    <Button Content="Calibrate" Grid.Column="0" Height="22" Margin="0,5,2.5,0" Grid.Row="2" x:Name="calibrateBtn" IsEnabled="False"/>
-                    <Button Content="Manual mode" Grid.Column="1" Height="22" Margin="2.5,5,0,0" Grid.Row="2" x:Name="manualModeBtn" IsEnabled="False"/>
-                    <Button Content="Load config" Grid.Column="0" Height="22" Margin="0,5,2.5,0" Grid.Row="3" x:Name="loadConfigBtn"/>
-                    <Button Content="Save config" Grid.Column="1" Height="22" Margin="2.5,5,0,0" Grid.Row="3" x:Name="saveConfigBtn"/>
+                    <Button Content="Sztarte" Grid.Column="0" Height="22" Margin="0,0,2.5,0" Grid.Row="1" IsEnabled="True" x:Name="startBtn"/>
+                    <Button Content="baton 1" Grid.Column="1" Height="22" Margin="2.5,0,0,0" Grid.Row="1" IsEnabled="False"/>
                 </Grid>
             </Grid>
         </Border>

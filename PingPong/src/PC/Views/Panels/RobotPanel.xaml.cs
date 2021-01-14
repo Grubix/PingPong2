@@ -37,7 +37,9 @@ namespace PingPong {
         public void LoadConfig(string configFile) {
             string jsonString = File.ReadAllText(configFile);
             RobotConfig config = new RobotConfig(jsonString);
-            ParseConfig(config);
+
+            Robot.Config = config;
+            UpdateConfigControls(config);
         }
 
         private void InitializeControls() {
@@ -366,7 +368,9 @@ namespace PingPong {
                         using (streamReader = new StreamReader(fileStream)) {
                             string jsonString = streamReader.ReadToEnd();
                             RobotConfig config = new RobotConfig(jsonString);
-                            ParseConfig(config);
+                            Robot.Config = config;
+
+                            UpdateConfigControls(config);
                         }
                     }
                 } catch (Exception ex) {
@@ -393,7 +397,7 @@ namespace PingPong {
             }
         }
 
-        private void ParseConfig(RobotConfig config) {
+        private void UpdateConfigControls(RobotConfig config) {
             connectionPort.Text = config.Port.ToString();
 
             workspaceLowerX.Text = config.Limits.LowerWorkspacePoint.X.ToString();

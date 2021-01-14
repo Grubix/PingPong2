@@ -61,6 +61,14 @@ namespace PingPong {
             this.robot1 = robot1;
             this.robot2 = robot2;
 
+            if (robot1.OptiTrackTransformation != null) {
+                robot1Transformation = robot1.OptiTrackTransformation;
+            }
+
+            if (robot2.OptiTrackTransformation != null) {
+                robot2Transformation = robot2.OptiTrackTransformation;
+            }
+
             robot1.Initialized += () => robot1Transformation = robot1.OptiTrackTransformation;
             robot2.Initialized += () => robot2Transformation = robot2.OptiTrackTransformation;
         }

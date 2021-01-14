@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace PingPong.Applications {
-    class PingApp : IApplication<PingData> {
+    class PingApp : IApplication<PingAppData> {
 
         private bool isStarted;
 
@@ -30,7 +30,7 @@ namespace PingPong.Applications {
 
         public event Action Stopped;
 
-        public event Action<PingData> DataReady;
+        public event Action<PingAppData> DataReady;
 
         public PingApp(KUKARobot robot, OptiTrackSystem optiTrack, Func<Vector<double>, bool> checkFunction) {
             this.robot = robot;
@@ -58,11 +58,15 @@ namespace PingPong.Applications {
                 throw new InvalidOperationException("Robot and optiTrack system must be initialized");
             }
 
+            isStarted = true;
+
             // waiting for ball to be visible
             Task.Run(() => {
                 ManualResetEvent ballSpottedEvent = new ManualResetEvent(false);
                 Vector<double> ballPosition = null;
                 Vector<double> prevBallPosition = null;
+                Vector<double> translation = robot.OptiTrackTransformation.Translation;
+
                 bool firstFrame = true;
 
                 void checkBallVisiblity(OptiTrack.InputFrame frame) {
@@ -74,13 +78,17 @@ namespace PingPong.Applications {
 
                     ballPosition = robot.OptiTrackTransformation.Convert(frame.BallPosition);
 
-                    //TODO: CZEMU TO NIE ZADZIALALO JAK POWINNO ??!?!?!?!
-                    bool positionChanged =
-                        (ballPosition[0] != prevBallPosition[0] ||
-                        ballPosition[1] != prevBallPosition[1] ||
-                        ballPosition[2] != prevBallPosition[2]);
+                    bool ballVisible =
+                        ballPosition[0] != translation[0] &&
+                        ballPosition[1] != translation[1] &&
+                        ballPosition[2] != translation[2];
 
-                    if (positionChanged && checkFunction.Invoke(ballPosition)) {
+                    bool ballPositionChanged =
+                        ballPosition[0] != prevBallPosition[0] ||
+                        ballPosition[1] != prevBallPosition[1] ||
+                        ballPosition[2] != prevBallPosition[2];
+
+                    if (ballVisible && ballPositionChanged && checkFunction.Invoke(ballPosition)) {
                         optiTrack.FrameReceived -= checkBallVisiblity;
                         ballSpottedEvent.Set();
                     } else {
@@ -93,14 +101,13 @@ namespace PingPong.Applications {
                 ballSpottedEvent.WaitOne();
 
                 // start application
-                isStarted = true;
-
                 robot.FrameReceived += ProcessRobotFrame;
                 optiTrack.FrameReceived += ProcessOptiTrackFrame;
                 Started?.Invoke();
             });
         }
 
+        //TODO: MEGA WAZNE ANULACJA TASKA UTWORZONEGO W START()
         public void Stop() {
             if (isStarted) {
                 isStarted = false;
@@ -139,10 +146,11 @@ namespace PingPong.Applications {
 
             prediction.AddMeasurement(robotBaseBallPosition, elapsedTime);
 
-            PingData data = new PingData {
+            PingAppData data = new PingAppData {
                 ActualBallPosition = robotBaseBallPosition,
+                ActualRobotPosition = robot.Position,
                 PredictedTimeOfFlight = prediction.TimeOfFlight,
-                PredictedBallPosition = Vector<double>.Build.DenseOfArray(new double[] { -1, -1, -1 })
+                PredictedBallPosition = Vector<double>.Build.DenseOfArray(new double[] { -1, -1, -1 }),
             };
 
             if (prediction.IsReady && prediction.TimeToHit >= 0.3) {
@@ -154,8 +162,6 @@ namespace PingPong.Applications {
 
                 double angleB = Math.Atan2(racketNormalVector[0], racketNormalVector[2]) * 180.0 / Math.PI;
                 double angleC = -90.0 - Math.Atan2(racketNormalVector[1], racketNormalVector[2]) * 180.0 / Math.PI;
-
-                //TODO: wykorzystanie pida czy czegokolwiek innego zeby skorygowac katy abc (odbicie do zadanego targeta)
 
                 RobotVector robotTargetPostion = new RobotVector(
                     predBallPosition[0], predBallPosition[1], predBallPosition[2], 0, angleB, angleC
