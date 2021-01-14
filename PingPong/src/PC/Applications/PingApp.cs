@@ -18,13 +18,19 @@ namespace PingPong.Applications {
 
         private readonly Func<Vector<double>, bool> checkFunction;
 
-        private readonly Vector<double> upVector;
+        private Vector<double> upVector;
 
         private readonly object syncLock = new object();
 
         private bool robotMovedToHitPosition;
 
         private double elapsedTime = 0;
+
+        private double maxBallHeigth = 1500;
+
+        private Vector<double> destBallPosition;
+
+        private readonly double CoR = 0.8;
 
         public event Action Started;
 
@@ -42,6 +48,9 @@ namespace PingPong.Applications {
 
             upVector = Vector<double>.Build.DenseOfArray(
                 new double[] { 0.0, 0.0, 1.0 }
+            );
+            destBallPosition = Vector<double>.Build.DenseOfArray(
+                new double[] { 0.0, 850.0, 183.48 }
             );
         }
 
@@ -150,12 +159,22 @@ namespace PingPong.Applications {
 
                 var predBallPosition = prediction.Position; // predicted ball position on hit
                 var predBallVelocity = prediction.Velocity; // predicted ball velocity on hit
+                double t = Math.Sqrt(2 / 9.81 * (maxBallHeigth - predBallPosition[2])) + Math.Sqrt(2 / 9.81 * (maxBallHeigth - destBallPosition[2]));
+                upVector = Vector<double>.Build.DenseOfArray(new double[] {
+                    (destBallPosition[0] - predBallPosition[0]) / t,
+                    (destBallPosition[1] - predBallPosition[1]) / t,
+                    Math.Sqrt(2 * 9.81 * (maxBallHeigth - predBallPosition[2]))
+                });
                 var racketNormalVector = upVector.Normalize(1.0) - predBallVelocity.Normalize(1.0);
 
                 double angleB = Math.Atan2(racketNormalVector[0], racketNormalVector[2]) * 180.0 / Math.PI;
                 double angleC = -90.0 - Math.Atan2(racketNormalVector[1], racketNormalVector[2]) * 180.0 / Math.PI;
 
-                //TODO: wykorzystanie pida czy czegokolwiek innego zeby skorygowac katy abc (odbicie do zadanego targeta)
+                var robotTargetVelocity = new RobotVector(
+                    (upVector[0] + CoR * predBallVelocity[0]) / (1 + CoR),
+                    (upVector[1] + CoR * predBallVelocity[1]) / (1 + CoR),
+                    (upVector[2] + CoR * predBallVelocity[2]) / (1 + CoR)
+                );
 
                 RobotVector robotTargetPostion = new RobotVector(
                     predBallPosition[0], predBallPosition[1], predBallPosition[2], 0, angleB, angleC
@@ -164,7 +183,7 @@ namespace PingPong.Applications {
                 if (robot.Limits.CheckPosition(robotTargetPostion)) {
                     lock (syncLock) {
                         robotMovedToHitPosition = true;
-                        robot.MoveTo(robotTargetPostion, RobotVector.Zero, prediction.TimeToHit);
+                        robot.MoveTo(robotTargetPostion, robotTargetVelocity, prediction.TimeToHit);
                     }
                 }
 
