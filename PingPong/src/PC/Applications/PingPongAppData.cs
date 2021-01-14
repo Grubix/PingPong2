@@ -1,5 +1,5 @@
 ﻿namespace PingPong.Applications {
-    class PingPongData {
+    class PingPongAppData {
 
     }
 }

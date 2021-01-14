@@ -58,6 +58,7 @@ namespace PingPong.KUKA {
             }
         }
 
+        //TODO: port powinien byc brany z rsi adaptera
         /// <summary>
         /// Port number (Robot Sensor Interface - RSI)
         /// </summary>

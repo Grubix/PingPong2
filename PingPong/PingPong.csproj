@@ -107,9 +107,9 @@
     <Compile Include="src\PC\Applications\HitPrediction.cs" />
     <Compile Include="src\PC\Applications\IApplication.cs" />
     <Compile Include="src\PC\Applications\PingApp.cs" />
-    <Compile Include="src\PC\Applications\PingData.cs" />
+    <Compile Include="src\PC\Applications\PingAppData.cs" />
     <Compile Include="src\PC\Applications\PingPongApp.cs" />
-    <Compile Include="src\PC\Applications\PingPongData.cs" />
+    <Compile Include="src\PC\Applications\PingPongAppData.cs" />
     <Compile Include="src\PC\Devices\IDevice.cs" />
     <Compile Include="src\PC\Devices\KUKA\KUKARobot.cs" />
     <Compile Include="src\PC\Devices\KUKA\RobotAxisPosition.cs" />
@@ -202,21 +202,20 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="bin\Debug\Config\robot1.config.json" />
-    <None Include="bin\Debug\Config\robot2.config.json" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <None Include="src\PC\Devices\KUKA\robot1.config.json" />
-    <None Include="src\PC\Devices\KUKA\robot2.config.json" />
+    <None Include="src\KUKA\robot1.config.json" />
+    <None Include="bin\Debug\Config\robot2.config.json" />
+    <None Include="src\KUKA\robot2.config.json" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Docs\" />
-    <Folder Include="src\KUKA\" />
     <Folder Include="src\OptiTrack\" />
   </ItemGroup>
   <ItemGroup>

@@ -4,7 +4,7 @@ using PingPong.OptiTrack;
 using System;
 
 namespace PingPong.Applications {
-    class PingPongApp : IApplication<PingPongData> {
+    class PingPongApp : IApplication<PingPongAppData> {
 
         private bool isStarted;
 
@@ -20,7 +20,7 @@ namespace PingPong.Applications {
 
         public event Action Stopped;
 
-        public event Action<PingPongData> DataReady;
+        public event Action<PingPongAppData> DataReady;
 
         public PingPongApp(KUKARobot robot1, KUKARobot robot2, OptiTrackSystem optiTrack, Func<Vector<double>, bool> checkFunction) {
             this.robot1 = robot1;
