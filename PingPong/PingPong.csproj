@@ -202,6 +202,15 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="bin\Debug\Config\robot1.config.json" />
+    <None Include="Docs\eggert_comparison_mva97.pdf" />
+    <None Include="Docs\LN9_TrajectoryGeneration.pdf" />
+    <None Include="Docs\Meissner feat. Pazda.pdf" />
+    <None Include="Docs\Metody15.pdf" />
+    <None Include="Docs\NatNetUsersGuide.pdf" />
+    <None Include="Docs\RSI_40.pdf" />
+    <None Include="Docs\RSI_XML.pdf" />
+    <None Include="Docs\Trajectory generator.pdf" />
+    <None Include="Docs\Trajectory_Planning_for_Automatic_Machines_and_Robots.pdf" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -215,7 +224,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Docs\" />
     <Folder Include="src\OptiTrack\" />
   </ItemGroup>
   <ItemGroup>

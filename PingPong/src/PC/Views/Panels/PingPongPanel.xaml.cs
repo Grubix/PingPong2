@@ -69,9 +69,10 @@ namespace PingPong {
             startBtn.Click += (s, e) => {
                 try {
                     optiTrack.Initialize();
-                    startBtn.IsEnabled = false;
+                    robot1.Initialize();
+                    robot1.Initialized += () => robot1PingApp.Start();
 
-                    optiTrack.Initialized += () => robot1PingApp.Start();
+                    startBtn.IsEnabled = false;
                 } catch (Exception ex) {
                     MainWindow.ShowErrorDialog("Unable to start application.", ex);
                 }
@@ -92,10 +93,10 @@ namespace PingPong {
             robot1PingChart.AddSeries("Predicted time of flight [ms]", "pred. Tf", true);
             robot1PingChart.AddSeries("Predicted ball position X [mm]", "pred. X", true);
             robot1PingChart.AddSeries("Predicted ball position Y [mm]", "pred. Y", true);
-            robot1PingChart.AddSeries("Predicted ball position Z [mm]", "pred. Z", false);
+            robot1PingChart.AddSeries("Predicted ball position Z [mm]", "pred. Z", false, true);
             robot1PingChart.AddSeries("Ball position X [mm]", "ball X", false);
             robot1PingChart.AddSeries("Ball position Y [mm]", "ball Y", false);
-            robot1PingChart.AddSeries("Ball position Z [mm]", "ball Z", false);
+            robot1PingChart.AddSeries("Ball position Z [mm]", "ball Z", false, true);
             robot1PingChart.AddSeries("Robot position X [mm]", "robot X", false);
             robot1PingChart.AddSeries("Robot position Y [mm]", "robot Y", false);
             robot1PingChart.AddSeries("Robot position Z [mm]", "robot Z", false);

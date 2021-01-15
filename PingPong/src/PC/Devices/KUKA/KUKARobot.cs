@@ -101,6 +101,13 @@ namespace PingPong.KUKA {
             }
         }
 
+        //TODO:
+        public RobotVector TheoreticalPosition {
+            get {
+                return generator.Position;
+            }
+        }
+
         /// <summary>
         /// Robot actual position error
         /// </summary>

@@ -3,6 +3,7 @@ using PingPong.KUKA;
 using PingPong.Maths;
 using PingPong.OptiTrack;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -70,21 +71,27 @@ namespace PingPong {
         }
 
         private void InitializeCharts() {
-            positionChart.YAxisTitle = "Position (actual)";
-            positionChart.AddSeries("Position X [mm]", "X", true);
-            positionChart.AddSeries("Position Y [mm]", "Y", true);
-            positionChart.AddSeries("Position Z [mm]", "Z", true);
-            positionChart.AddSeries("Position A [deg]", "A", false);
-            positionChart.AddSeries("Position B [deg]", "B", false);
-            positionChart.AddSeries("Position C [deg]", "C", false);
+            positionChart.YAxisTitle = "Position";
+            positionChart.AddSeries("Actual position X [mm]", "X", true);
+            positionChart.AddSeries("Actual position Y [mm]", "Y", true);
+            positionChart.AddSeries("Actual position Z [mm]", "Z", true);
+            positionChart.AddSeries("Actual position A [deg]", "A", false);
+            positionChart.AddSeries("Actual position B [deg]", "B", false);
+            positionChart.AddSeries("Actual position C [deg]", "C", false, true);
 
-            positionErrorChart.YAxisTitle = "Position error";
-            positionErrorChart.AddSeries("Error X [mm]", "X", true);
-            positionErrorChart.AddSeries("Error Y [mm]", "Y", true);
-            positionErrorChart.AddSeries("Error Z [mm]", "Z", true);
-            positionErrorChart.AddSeries("Error A [deg]", "A", false);
-            positionErrorChart.AddSeries("Error B [deg]", "B", false);
-            positionErrorChart.AddSeries("Error C [deg]", "C", false);
+            positionChart.AddSeries("Target position X [mm]", "X.t", false);
+            positionChart.AddSeries("Target position Y [mm]", "Y.t", false);
+            positionChart.AddSeries("Target position Z [mm]", "Z.t", false);
+            positionChart.AddSeries("Target position A [deg]", "A.t", false);
+            positionChart.AddSeries("Target position B [deg]", "B.t", false);
+            positionChart.AddSeries("Target position C [deg]", "C.t", false, true);
+
+            positionChart.AddSeries("Theoretical position X [mm]", "X.th", false);
+            positionChart.AddSeries("Theoretical position Y [mm]", "Y.th", false);
+            positionChart.AddSeries("Theoretical position Z [mm]", "Z.th", false);
+            positionChart.AddSeries("Theoretical position A [deg]", "A.th", false);
+            positionChart.AddSeries("Theoretical position B [deg]", "B.th", false);
+            positionChart.AddSeries("Theoretical position C [deg]", "C.th", false);
 
             velocityChart.YAxisTitle = "Velocity (theoretical)";
             velocityChart.AddSeries("Velocity X [mm/s]", "X", true);
@@ -136,8 +143,14 @@ namespace PingPong {
                 if (positionChart.IsReady) {
                     RobotVector actualPosition = Robot.Position;
                     RobotVector targetPosition = Robot.TargetPosition;
+                    RobotVector theoreticalPosition = Robot.TheoreticalPosition;
 
-                    positionChart.Update(actualPosition.ToArray());
+                    List<double> positionData = new List<double>();
+                    positionData.AddRange(actualPosition.ToArray());
+                    positionData.AddRange(targetPosition.ToArray());
+                    positionData.AddRange(theoreticalPosition.ToArray());
+
+                    positionChart.Update(positionData.ToArray());
 
                     Dispatcher.Invoke(() => {
                         actualPositionX.Text = actualPosition.X.ToString("F3");
@@ -156,12 +169,6 @@ namespace PingPong {
                     });
                 } else {
                     positionChart.Tick();
-                }
-
-                if (positionErrorChart.IsReady) {
-                    positionErrorChart.Update(Robot.PositionError.ToArray());
-                } else {
-                    positionErrorChart.Tick();
                 }
 
                 if (velocityChart.IsReady) {
@@ -270,12 +277,10 @@ namespace PingPong {
         private void FreezeCharts(object sender, RoutedEventArgs e) {
             if (isPlotFrozen) {
                 positionChart.Clear();
-                positionErrorChart.Clear();
                 velocityChart.Clear();
                 accelerationChart.Clear();
 
                 positionChart.BlockZoomAndPan();
-                positionErrorChart.BlockZoomAndPan();
                 velocityChart.BlockZoomAndPan();
                 accelerationChart.BlockZoomAndPan();
 
@@ -286,7 +291,6 @@ namespace PingPong {
                 screenshotBtn.IsEnabled = false;
             } else {
                 positionChart.UnblockZoomAndPan();
-                positionErrorChart.UnblockZoomAndPan();
                 velocityChart.UnblockZoomAndPan();
                 accelerationChart.UnblockZoomAndPan();
 
@@ -300,14 +304,12 @@ namespace PingPong {
 
         private void FitChartsToData(object sender, RoutedEventArgs e) {
             positionChart.FitToData();
-            positionErrorChart.FitToData();
             velocityChart.FitToData();
             accelerationChart.FitToData();
         }
 
         private void ResetChartsZoom(object sender, RoutedEventArgs e) {
             positionChart.ResetZoom();
-            positionErrorChart.ResetZoom();
             velocityChart.ResetZoom();
             accelerationChart.ResetZoom();
         }
