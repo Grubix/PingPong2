@@ -3,6 +3,7 @@ using PingPong.KUKA;
 using PingPong.Maths;
 using PingPong.OptiTrack;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -128,7 +129,16 @@ namespace PingPong {
                 });
             };
 
+            Stopwatch stopwatch = new Stopwatch();
+
             Robot.FrameReceived += frame => {
+                stopwatch.Stop();
+
+                Console.WriteLine(stopwatch.ElapsedMilliseconds);
+
+                stopwatch.Reset();
+                stopwatch.Start();
+
                 if (isPlotFrozen) {
                     return;
                 }

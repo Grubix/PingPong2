@@ -48,7 +48,7 @@ namespace PingPong {
                 double b = double.Parse(shiftB.Text);
                 double c = double.Parse(shiftC.Text);
 
-                double movementTime = Math.Max(double.Parse(shiftTime.Text), 2);
+                double movementTime = Math.Max(double.Parse(shiftTime.Text), 0.5);
                 shiftTime.Text = movementTime.ToString();
 
                 RobotVector deltaPosition = new RobotVector(x, y, z, a, b, c);

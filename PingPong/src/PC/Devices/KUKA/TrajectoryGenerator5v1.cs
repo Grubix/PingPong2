@@ -164,8 +164,8 @@ namespace PingPong.KUKA {
             lock (syncLock) {
                 this.homePosition = homePosition;
                 targetPositionReached = true;
-                reachedPosition = homePosition;
-                targetPosition = homePosition;
+                reachedPosition = RobotVector.Zero;
+                targetPosition = RobotVector.Zero;
                 targetVelocity = RobotVector.Zero;
                 positionError = RobotVector.Zero;
                 targetDuration = 0.0;
@@ -178,8 +178,8 @@ namespace PingPong.KUKA {
                 throw new ArgumentException($"Duration value must be greater than 0, get {targetDuration}");
             }
 
-            bool targetPositionChanged = !targetPosition.Compare(this.targetPosition, 0.1, 0.1);
-            bool targetVelocityChanged = !targetVelocity.Compare(this.targetVelocity, 0.1, 0.1);
+            bool targetPositionChanged = !targetPosition.Compare(this.targetPosition, 0.1, 1);
+            bool targetVelocityChanged = !targetVelocity.Compare(this.targetVelocity, 0.1, 1);
             bool targetDurationChanged = targetDuration != this.targetDuration;
 
             if (targetDurationChanged || targetPositionChanged || targetVelocityChanged) {

@@ -286,7 +286,7 @@ namespace PingPong.KUKA {
         /// Sends data (IPOC, correction) to the robot, raises <see cref="KUKARobot.FrameSent">FrameSent</see> event
         /// </summary>
         private void SendData() {
-            RobotVector correction = generator.GetNextCorrection(position); ;
+            RobotVector correction = generator.GetNextCorrection(position);
 
             // ZMIANA NA CHECK ABSOLUTE CORRECTION DLA GENERATORA ABS.
             if (!Limits.CheckRelativeCorrection(correction)) {
@@ -295,6 +295,7 @@ namespace PingPong.KUKA {
                     $"{Environment.NewLine}{correction}");
             }
 
+            //correction = new RobotVector(correction.X, correction.Y, correction.Z, 0, 0, 0);
             OutputFrame outputFrame = new OutputFrame() {
                 Correction = correction,
                 IPOC = IPOC

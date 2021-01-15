@@ -32,6 +32,8 @@ namespace PingPong.Applications {
 
         private readonly double CoR = 0.8;
 
+        private bool timeIsOver = false;
+
         public event Action Started;
 
         public event Action Stopped;
@@ -123,7 +125,7 @@ namespace PingPong.Applications {
 
                 robot.FrameReceived -= ProcessRobotFrame;
                 optiTrack.FrameReceived -= ProcessOptiTrackFrame;
-                robot.Uninitialize();
+                //robot.Uninitialize();
 
                 Stopped?.Invoke();
             }
@@ -134,8 +136,8 @@ namespace PingPong.Applications {
                 if (robotMovedToHitPosition && robot.IsTargetPositionReached) {
                     // Slow down the robot
                     robotMovedToHitPosition = false;
-                    robot.MoveTo(new RobotVector(robot.Position.XYZ, robot.HomePosition.ABC), RobotVector.Zero, 3);
-                    Stop();
+                    //robot.MoveTo(new RobotVector(robot.Position.XYZ, robot.HomePosition.ABC), RobotVector.Zero, 3);
+                    Stop(); // jeśli 196 jest zakomentowane to też zakomentować
                 }
             }
         }
@@ -162,31 +164,33 @@ namespace PingPong.Applications {
                 PredictedBallPosition = Vector<double>.Build.DenseOfArray(new double[] { -1, -1, -1 }),
             };
 
-            if (prediction.IsReady && prediction.TimeToHit >= 0.3) {
+            if (prediction.IsReady && prediction.TimeToHit >= 0.3 && !timeIsOver) {
                 prediction.Calculate();
 
                 var predBallPosition = prediction.Position; // predicted ball position on hit
                 var predBallVelocity = prediction.Velocity; // predicted ball velocity on hit
-                double t = Math.Sqrt(2 / 9.81 * (maxBallHeigth - predBallPosition[2])) + Math.Sqrt(2 / 9.81 * (maxBallHeigth - destBallPosition[2]));
+                /*double t = Math.Sqrt(2 / 9.81 * (maxBallHeigth - predBallPosition[2])) + Math.Sqrt(2 / 9.81 * (maxBallHeigth - destBallPosition[2]));
                 upVector = Vector<double>.Build.DenseOfArray(new double[] {
                     (destBallPosition[0] - predBallPosition[0]) / t,
                     (destBallPosition[1] - predBallPosition[1]) / t,
                     Math.Sqrt(2 * 9.81 * (maxBallHeigth - predBallPosition[2]))
-                });
+                });*/
                 var racketNormalVector = upVector.Normalize(1.0) - predBallVelocity.Normalize(1.0);
 
                 double angleB = Math.Atan2(racketNormalVector[0], racketNormalVector[2]) * 180.0 / Math.PI;
                 double angleC = -90.0 - Math.Atan2(racketNormalVector[1], racketNormalVector[2]) * 180.0 / Math.PI;
 
-                var robotTargetVelocity = new RobotVector(
+                /*var robotTargetVelocity = new RobotVector(
                     (upVector[0] + CoR * predBallVelocity[0]) / (1 + CoR),
                     (upVector[1] + CoR * predBallVelocity[1]) / (1 + CoR),
                     (upVector[2] + CoR * predBallVelocity[2]) / (1 + CoR)
-                );
+                );*/
+                var robotTargetVelocity = new RobotVector(0, 0, 0);
 
                 RobotVector robotTargetPostion = new RobotVector(
-                    predBallPosition[0], predBallPosition[1], predBallPosition[2], 0, angleB, angleC
+                    predBallPosition[0], predBallPosition[1], predBallPosition[2], 0, 0, -90//angleB, angleC
                 );
+                Console.WriteLine(robotTargetPostion + " time: " + prediction.TimeToHit);
 
                 if (robot.Limits.CheckPosition(robotTargetPostion)) {
                     lock (syncLock) {
@@ -196,6 +200,8 @@ namespace PingPong.Applications {
                 }
 
                 data.PredictedBallPosition = predBallPosition;
+            } else if (prediction.TimeToHit < 0.3 && prediction.TimeToHit != -1) {
+                timeIsOver = true;
             }
 
             DataReady?.Invoke(data);
@@ -207,3 +213,15 @@ namespace PingPong.Applications {
 
     }
 }
+
+/*
+ * ZMIANA TRYBU ABSOLUTE / RELATIVE
+ * 
+ * 1. zmiana w KRL: absolute / relative
+ * 2. zmiana w QKRobocie: 20 linia 5v1(5v2) / 5
+ * 3. naprawa errorów w linii
+ *          195        generator = new TrajectoryGenerator5v1(); / generator = new TrajectoryGenerator5();
+ *          289        RobotVector correction = generator.GetNextAbsoluteCorrection(position); / RobotVector correction = generator.GetNextRelativeCorrection(position);
+ *          292        if (!Limits.CheckAbsoluteCorrection(correction, HomePosition)) / if (!Limits.CheckRelativeCorrection(correction))
+ *(możliwe że opcjonalnie)          335        generator.SetTargetPosition(position, targetPosition, targetVelocity, targetDuration); / generator.SetTargetPosition(targetPosition, targetVelocity, targetDuration);
+ * */

@@ -61,7 +61,7 @@ namespace PingPong.Applications {
             polyfitZ.AddPoint(elapsedTime, position[2]);
 
             TimeOfFlight = CalculatePredictedTimeOfFlight();
-            IsReady = TimeOfFlight > 0.1 && IsPredictedTimeStable(TimeOfFlight);
+            IsReady = TimeOfFlight > 0.0 && IsPredictedTimeStable(TimeOfFlight);
             TimeToHit = IsReady ? TimeOfFlight - elapsedTime : -1.0;
         }
 

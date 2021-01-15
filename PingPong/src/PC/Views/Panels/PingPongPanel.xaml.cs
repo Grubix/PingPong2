@@ -39,7 +39,7 @@ namespace PingPong {
             this.robot2 = robot2;
 
             robot1PingApp = new PingApp(robot1, optiTrack, (position) => {
-                return position[0] < 900.0 && position[2] > 250.0;
+                return position[0] < 1000.0 && position[2] > 250.0;
             });
 
             robot1PingApp.DataReady += data => {
@@ -71,7 +71,9 @@ namespace PingPong {
                     optiTrack.Initialize();
                     startBtn.IsEnabled = false;
 
-                    optiTrack.Initialized += () => robot1PingApp.Start();
+                    //optiTrack.Initialized += () => robot1PingApp.Start();
+                    robot1.Initialized += () => robot1PingApp.Start();
+                    robot1.Initialize();
                 } catch (Exception ex) {
                     MainWindow.ShowErrorDialog("Unable to start application.", ex);
                 }
@@ -87,7 +89,7 @@ namespace PingPong {
         }
 
         private void InitializeCharts() {
-            robot1PingChart.RefreshDelay = 60;
+            robot1PingChart.RefreshDelay = 30;
             robot1PingChart.YAxisTitle = "Ping app (robot 1)";
             robot1PingChart.AddSeries("Predicted time of flight [ms]", "pred. Tf", true);
             robot1PingChart.AddSeries("Predicted ball position X [mm]", "pred. X", true);
