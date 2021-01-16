@@ -52,7 +52,7 @@
             ke2 = b2 / a0;
         }
 
-        public (double Output, double Error) Compute(double setpoint, double feedback) {
+        public double Compute(double setpoint, double feedback) {
             double e0 = setpoint - feedback;
 
             e2 = e1;
@@ -64,7 +64,7 @@
 
             //TODO: limity wyjscia, anti windup, cos?
 
-            return (u0, e0);
+            return u0;
         }
 
     }

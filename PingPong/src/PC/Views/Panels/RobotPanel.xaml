@@ -307,9 +307,6 @@
                 <TabItem Header="Position">
                     <local:LiveChart Margin="0" x:Name="positionChart"/>
                 </TabItem>
-                <TabItem Header="Position error">
-                    <local:LiveChart Margin="0" x:Name="positionErrorChart"/>
-                </TabItem>
                 <TabItem Header="Velocity">
                     <local:LiveChart Margin="0" x:Name="velocityChart"/>
                 </TabItem>

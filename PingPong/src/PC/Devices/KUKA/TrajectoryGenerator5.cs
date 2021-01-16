@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PingPong.Maths;
+using System;
 
 namespace PingPong.KUKA {
     class TrajectoryGenerator5 {

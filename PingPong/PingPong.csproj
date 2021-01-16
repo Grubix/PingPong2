@@ -112,6 +112,7 @@
     <Compile Include="src\PC\Applications\PingPongAppData.cs" />
     <Compile Include="src\PC\Devices\IDevice.cs" />
     <Compile Include="src\PC\Devices\KUKA\KUKARobot.cs" />
+    <Compile Include="src\PC\Devices\KUKA\KUKARobotEmulator.cs" />
     <Compile Include="src\PC\Devices\KUKA\RobotAxisPosition.cs" />
     <Compile Include="src\PC\Devices\KUKA\RobotConfig.cs" />
     <Compile Include="src\PC\Devices\KUKA\RobotLimits.cs" />
@@ -119,10 +120,8 @@
     <Compile Include="src\PC\Devices\KUKA\RSI\InputFrame.cs" />
     <Compile Include="src\PC\Devices\KUKA\RSI\OutputFrame.cs" />
     <Compile Include="src\PC\Devices\KUKA\RSI\RSIAdapter.cs" />
-    <Compile Include="src\PC\Devices\KUKA\TrajectoryGenerator3.cs" />
     <Compile Include="src\PC\Devices\KUKA\TrajectoryGenerator5.cs" />
-    <Compile Include="src\PC\Devices\KUKA\TrajectoryGenerator5v1.cs" />
-    <Compile Include="src\PC\Devices\KUKA\TrajectoryGenerator5v2.cs" />
+    <Compile Include="src\PC\Devices\KUKA\TrajectoryGenerator5T.cs" />
     <Compile Include="src\PC\Devices\OptiTrack\InputFrame.cs" />
     <Compile Include="src\PC\Devices\OptiTrack\OptiTrackSystem.cs" />
     <Compile Include="src\PC\Maths\PIDRegulator.cs" />
@@ -202,6 +201,15 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="bin\Debug\Config\robot1.config.json" />
+    <None Include="Docs\eggert_comparison_mva97.pdf" />
+    <None Include="Docs\LN9_TrajectoryGeneration.pdf" />
+    <None Include="Docs\Meissner feat. Pazda.pdf" />
+    <None Include="Docs\Metody15.pdf" />
+    <None Include="Docs\NatNetUsersGuide.pdf" />
+    <None Include="Docs\RSI_40.pdf" />
+    <None Include="Docs\RSI_XML.pdf" />
+    <None Include="Docs\Trajectory generator.pdf" />
+    <None Include="Docs\Trajectory_Planning_for_Automatic_Machines_and_Robots.pdf" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -215,7 +223,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Docs\" />
     <Folder Include="src\OptiTrack\" />
   </ItemGroup>
   <ItemGroup>

@@ -6,6 +6,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Shapes;
 
 namespace PingPong {
     public partial class LiveChart : UserControl {
@@ -90,7 +92,7 @@ namespace PingPong {
             chart.Axes[0].MinimumRange = 10;
         }
 
-        public void AddSeries(string title, string name, bool visible) {
+        public void AddSeries(string title, string text, bool visible, bool addSeparator = false) {
             LineSeries series = new LineSeries {
                 Title = title
             };
@@ -99,7 +101,8 @@ namespace PingPong {
             series.ItemsSource = new List<DataPoint>();
 
             CheckBox checkbox = new CheckBox {
-                VerticalAlignment = System.Windows.VerticalAlignment.Center
+                VerticalAlignment = System.Windows.VerticalAlignment.Center,
+                Padding = new Thickness(4, 0, 4, 0),
             };
 
             if (visible) {
@@ -120,18 +123,58 @@ namespace PingPong {
                 }
             };
 
-            Label label = new Label {
-                Content = name
-            };
-
-            StackPanel panel = new StackPanel {
+            StackPanel checkboxLabel = new StackPanel {
                 Orientation = Orientation.Horizontal,
-                VerticalAlignment = System.Windows.VerticalAlignment.Center
             };
 
-            panel.Children.Add(checkbox);
-            panel.Children.Add(label);
-            visibleSeries.Children.Add(panel);
+            string[] textSplit = text.Split('_');
+
+            TextBlock label = new TextBlock {
+                Text = textSplit[0]
+            };
+
+            checkboxLabel.Children.Add(label);
+
+            if (textSplit.Length > 1) {
+                TextBlock labelSubscript = new TextBlock {
+                    VerticalAlignment = System.Windows.VerticalAlignment.Bottom,
+                    Margin = new Thickness(1, 0, 0, -3),
+                    FontSize = 10,
+                    Text = textSplit[1]
+                };
+
+                checkboxLabel.Children.Add(labelSubscript);
+            }
+
+            checkbox.Content = checkboxLabel;
+
+            visibleSeries.Children.Add(checkbox);
+
+            if (addSeparator) {
+                Rectangle separator1 = new Rectangle {
+                    Width = 1.0,
+                    VerticalAlignment = System.Windows.VerticalAlignment.Stretch,
+                    SnapsToDevicePixels = true,
+                    Margin = new Thickness(8, 0, 0, 0),
+                };
+
+                Rectangle separator2 = new Rectangle {
+                    Width = 1.0,
+                    VerticalAlignment = System.Windows.VerticalAlignment.Stretch,
+                    SnapsToDevicePixels = true,
+                    Margin = new Thickness(2, 0, 8, 0)
+                };
+
+                SolidColorBrush brush = new SolidColorBrush {
+                    Color = Color.FromArgb(255, 160, 160, 160)
+                };
+
+                separator1.Stroke = brush;
+                separator2.Stroke = brush;
+
+                visibleSeries.Children.Add(separator1);
+                visibleSeries.Children.Add(separator2);
+            }
         }
 
         public void Update(double[] data) {

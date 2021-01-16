@@ -60,17 +60,21 @@ namespace PingPong.KUKA {
         /// <summary>
         /// Time stamp
         /// </summary>
-        public long IPOC { get; }
+        public long IPOC { get; set; }
 
         /// <summary>
         /// Current cartesian position
         /// </summary>
-        public RobotVector Position { get; }
+        public RobotVector Position { get; set; }
 
         /// <summary>
         /// Current axis position
         /// </summary>
-        public RobotAxisPosition AxisPosition { get; }
+        public RobotAxisPosition AxisPosition { get; set; }
+
+        public InputFrame() {
+
+        }
 
         public InputFrame(string data) {
             IPOC = long.Parse(new Tag(data, "IPOC").Value);

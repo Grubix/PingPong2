@@ -1,10 +1,7 @@
 ﻿using System;
 
 namespace PingPong.KUKA {
-    /// <summary>
-    /// WERSJA ABSOLUTNA BEZ WYKORZYSTANIA SPRZEZENIA Z KUKI
-    /// </summary>
-    class TrajectoryGenerator5v2 {
+    class TrajectoryGenerator5T {
 
         private class Polynominal {
 
@@ -85,15 +82,9 @@ namespace PingPong.KUKA {
 
         private readonly Polynominal polyC = new Polynominal();
 
-        private RobotVector homePosition;
-
-        private RobotVector reachedPosition;
-
         private RobotVector targetPosition;
 
         private RobotVector targetVelocity;
-
-        private RobotVector positionError;
 
         private double targetDuration;
 
@@ -150,28 +141,14 @@ namespace PingPong.KUKA {
             }
         }
 
-        /// <summary>
-        /// Current position error (diffrence between theoretical and actual position)
-        /// </summary>
-        public RobotVector PositionError {
-            get {
-                lock (syncLock) {
-                    return positionError;
-                }
-            }
+        public TrajectoryGenerator5T() {
         }
 
-        public TrajectoryGenerator5v2() {
-        }
-
-        public void Restart(RobotVector homePosition) {
+        public void Initialize(RobotVector actualRobotPosition) {
             lock (syncLock) {
-                this.homePosition = homePosition;
                 targetPositionReached = true;
-                reachedPosition = homePosition;
-                targetPosition = homePosition;
+                targetPosition = actualRobotPosition;
                 targetVelocity = RobotVector.Zero;
-                positionError = RobotVector.Zero;
                 targetDuration = 0.0;
                 elapsedTime = 0.0;
             }
@@ -179,11 +156,11 @@ namespace PingPong.KUKA {
 
         public void SetTargetPosition(RobotVector currentPosition, RobotVector targetPosition, RobotVector targetVelocity, double targetDuration) {
             if (targetDuration <= 0.0) {
-                throw new ArgumentException($"Duration value must be greater than 0, get {targetDuration}");
+                throw new ArgumentException($"Duration value must be greater than 0, get: {targetDuration}");
             }
 
-            bool targetPositionChanged = !targetPosition.Compare(this.targetPosition, 0.1, 0.1);
-            bool targetVelocityChanged = !targetVelocity.Compare(this.targetVelocity, 0.1, 0.1);
+            bool targetPositionChanged = !targetPosition.Compare(this.targetPosition, 1, 0.1);
+            bool targetVelocityChanged = !targetVelocity.Compare(this.targetVelocity, 1, 0.1);
             bool targetDurationChanged = targetDuration != this.targetDuration;
 
             if (targetDurationChanged || targetPositionChanged || targetVelocityChanged) {
@@ -195,6 +172,7 @@ namespace PingPong.KUKA {
                     elapsedTime = 0.0;
                 }
 
+                //TODO: teraz pytanie czy brac current position robota czy idealny
                 polyX.UpdateCoefficients(currentPosition.X, targetPosition.X, targetVelocity.X, targetDuration);
                 polyY.UpdateCoefficients(currentPosition.Y, targetPosition.Y, targetVelocity.Y, targetDuration);
                 polyZ.UpdateCoefficients(currentPosition.Z, targetPosition.Z, targetVelocity.Z, targetDuration);
@@ -204,10 +182,10 @@ namespace PingPong.KUKA {
             }
         }
 
-        public RobotVector GetNextAbsoluteCorrection(RobotVector currentPosition) {
+        public RobotVector GetNextCorrection() {
             lock (syncLock) {
                 if (targetPositionReached) {
-                    return reachedPosition;
+                    return RobotVector.Zero;
                 }
 
                 if (elapsedTime < targetDuration) {
@@ -220,11 +198,13 @@ namespace PingPong.KUKA {
                     double nb = polyB.GetValueAt(elapsedTime);
                     double nc = polyC.GetValueAt(elapsedTime);
 
-                    positionError = Position - currentPosition;
-                    return new RobotVector(nx, ny, nz, na, nb, nc) - homePosition;
+                    // Theoretical current position
+                    RobotVector currentPosition = Position;
+
+                    //TODO: TUTAJ MOGL BYC BLAD ZE BYLO ODEJMOWANE CURRENT POSITION OTRZYMANE OD ROBOTA A NIE TEORETYCZNE
+                    return new RobotVector(nx, ny, nz, na, nb, nc) - currentPosition;
                 } else {
                     targetPositionReached = true;
-                    reachedPosition = currentPosition - homePosition;
 
                     polyX.Reset(targetVelocity.X);
                     polyY.Reset(targetVelocity.Y);
@@ -233,7 +213,7 @@ namespace PingPong.KUKA {
                     polyB.Reset(targetVelocity.B);
                     polyC.Reset(targetVelocity.C);
 
-                    return reachedPosition;
+                    return RobotVector.Zero;
                 }
             }
         }
