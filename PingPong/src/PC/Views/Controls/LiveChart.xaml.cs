@@ -92,7 +92,7 @@ namespace PingPong {
             chart.Axes[0].MinimumRange = 10;
         }
 
-        public void AddSeries(string title, string name, bool visible, bool addSeparator = false) {
+        public void AddSeries(string title, string text, bool visible, bool addSeparator = false) {
             LineSeries series = new LineSeries {
                 Title = title
             };
@@ -123,12 +123,30 @@ namespace PingPong {
                 }
             };
 
-            checkbox.Content = name;
-
-            StackPanel panel = new StackPanel {
+            StackPanel checkboxLabel = new StackPanel {
                 Orientation = Orientation.Horizontal,
-                VerticalAlignment = System.Windows.VerticalAlignment.Center
             };
+
+            string[] textSplit = text.Split('_');
+
+            TextBlock label = new TextBlock {
+                Text = textSplit[0]
+            };
+
+            checkboxLabel.Children.Add(label);
+
+            if (textSplit.Length > 1) {
+                TextBlock labelSubscript = new TextBlock {
+                    VerticalAlignment = System.Windows.VerticalAlignment.Bottom,
+                    Margin = new Thickness(1, 0, 0, -3),
+                    FontSize = 10,
+                    Text = textSplit[1]
+                };
+
+                checkboxLabel.Children.Add(labelSubscript);
+            }
+
+            checkbox.Content = checkboxLabel;
 
             visibleSeries.Children.Add(checkbox);
 

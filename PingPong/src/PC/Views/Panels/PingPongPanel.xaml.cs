@@ -90,16 +90,16 @@ namespace PingPong {
         private void InitializeCharts() {
             robot1PingChart.RefreshDelay = 60;
             robot1PingChart.YAxisTitle = "Ping app (robot 1)";
-            robot1PingChart.AddSeries("Predicted time of flight [ms]", "pred. Tf", true);
-            robot1PingChart.AddSeries("Predicted ball position X [mm]", "pred. X", true);
-            robot1PingChart.AddSeries("Predicted ball position Y [mm]", "pred. Y", true);
-            robot1PingChart.AddSeries("Predicted ball position Z [mm]", "pred. Z", false, true);
-            robot1PingChart.AddSeries("Ball position X [mm]", "ball X", false);
-            robot1PingChart.AddSeries("Ball position Y [mm]", "ball Y", false);
-            robot1PingChart.AddSeries("Ball position Z [mm]", "ball Z", false, true);
-            robot1PingChart.AddSeries("Robot position X [mm]", "robot X", false);
-            robot1PingChart.AddSeries("Robot position Y [mm]", "robot Y", false);
-            robot1PingChart.AddSeries("Robot position Z [mm]", "robot Z", false);
+            robot1PingChart.AddSeries("Predicted time of flight [ms]", "T_Pred", true);
+            robot1PingChart.AddSeries("Predicted ball position X [mm]", "X_Pred", true);
+            robot1PingChart.AddSeries("Predicted ball position Y [mm]", "Y_Pred", true);
+            robot1PingChart.AddSeries("Predicted ball position Z [mm]", "Z_Pred", false, true);
+            robot1PingChart.AddSeries("Ball position X [mm]", "X_Ball", false);
+            robot1PingChart.AddSeries("Ball position Y [mm]", "Y_Ball", false);
+            robot1PingChart.AddSeries("Ball position Z [mm]", "Z_Ball", false, true);
+            robot1PingChart.AddSeries("Robot position X [mm]", "X_Robot", false);
+            robot1PingChart.AddSeries("Robot position Y [mm]", "Y_Robot", false);
+            robot1PingChart.AddSeries("Robot position Z [mm]", "Z_Robot", false);
         }
 
         private void InitializeControls() {

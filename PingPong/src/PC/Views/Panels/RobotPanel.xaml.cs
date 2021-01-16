@@ -5,6 +5,8 @@ using PingPong.OptiTrack;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -33,6 +35,55 @@ namespace PingPong {
 
             Robot = new KUKARobot();
             InitializeRobot();
+
+            positionChart.RefreshDelay = 30;
+
+            RobotLimits limits = new RobotLimits(
+                lowerWorkspaceLimit: (-500, -500, -500),
+                upperWorkspaceLimit: (500, 500, 500),
+                a1AxisLimit: (-360, 360),
+                a2AxisLimit: (-360, 360),
+                a3AxisLimit: (-360, 360),
+                a4AxisLimit: (-360, 360),
+                a5AxisLimit: (-360, 360),
+                a6AxisLimit: (-360, 360),
+                correctionLimit: (2.0, 0.1)
+            );
+            RobotConfig config = new RobotConfig(0, limits, null);
+            KUKARobotEmulator emulator = new KUKARobotEmulator(config);
+            emulator.Initialize();
+
+            Task.Run(() => {
+                Thread.Sleep(3000);
+                emulator.MoveTo(new RobotVector(100, 0, 0), RobotVector.Zero, 5);
+            });
+
+            Task.Run(() => {
+                Thread.Sleep(6000);
+                emulator.MoveTo(new RobotVector(-100, 0, 0), RobotVector.Zero, 5);
+            });
+
+            emulator.FrameReceived += fr => {
+                if(isPlotFrozen) {
+                    return;
+                }
+                if (positionChart.IsReady) {
+                    RobotVector actualPosition = emulator.Position;
+                    RobotVector targetPosition = emulator.TargetPosition;
+                    RobotVector theoreticalPosition = emulator.TheoreticalPosition;
+
+                    positionChart.Update(new double[] {
+                        actualPosition.X, targetPosition.X, theoreticalPosition.X,
+                        actualPosition.Y, targetPosition.Y, theoreticalPosition.Y,
+                        actualPosition.Z, targetPosition.Z, theoreticalPosition.Z,
+                        actualPosition.A, targetPosition.A, theoreticalPosition.A,
+                        actualPosition.B, targetPosition.B, theoreticalPosition.B,
+                        actualPosition.C, targetPosition.C, theoreticalPosition.C,
+                    });
+                } else {
+                    positionChart.Tick();
+                }
+            };
         }
 
         public void LoadConfig(string configFile) {
@@ -73,25 +124,23 @@ namespace PingPong {
         private void InitializeCharts() {
             positionChart.YAxisTitle = "Position";
             positionChart.AddSeries("Actual position X [mm]", "X", true);
+            positionChart.AddSeries("Target position X [mm]", "X_T", false);
+            positionChart.AddSeries("Theoretical position X [mm]", "X_TH", false, true);
             positionChart.AddSeries("Actual position Y [mm]", "Y", true);
+            positionChart.AddSeries("Target position Y [mm]", "Y_T", false);
+            positionChart.AddSeries("Theoretical position Y [mm]", "Y_TH", false, true);
             positionChart.AddSeries("Actual position Z [mm]", "Z", true);
+            positionChart.AddSeries("Target position Z [mm]", "Z_T", false);
+            positionChart.AddSeries("Theoretical position Z [mm]", "Z_TH", false, true);
             positionChart.AddSeries("Actual position A [deg]", "A", false);
+            positionChart.AddSeries("Target position A [mm]", "A_T", false);
+            positionChart.AddSeries("Theoretical position A [deg]", "A_TH", false, true);
             positionChart.AddSeries("Actual position B [deg]", "B", false);
-            positionChart.AddSeries("Actual position C [deg]", "C", false, true);
-
-            positionChart.AddSeries("Target position X [mm]", "X.t", false);
-            positionChart.AddSeries("Target position Y [mm]", "Y.t", false);
-            positionChart.AddSeries("Target position Z [mm]", "Z.t", false);
-            positionChart.AddSeries("Target position A [deg]", "A.t", false);
-            positionChart.AddSeries("Target position B [deg]", "B.t", false);
-            positionChart.AddSeries("Target position C [deg]", "C.t", false, true);
-
-            positionChart.AddSeries("Theoretical position X [mm]", "X.th", false);
-            positionChart.AddSeries("Theoretical position Y [mm]", "Y.th", false);
-            positionChart.AddSeries("Theoretical position Z [mm]", "Z.th", false);
-            positionChart.AddSeries("Theoretical position A [deg]", "A.th", false);
-            positionChart.AddSeries("Theoretical position B [deg]", "B.th", false);
-            positionChart.AddSeries("Theoretical position C [deg]", "C.th", false);
+            positionChart.AddSeries("Target position B [deg]", "B_T", false);
+            positionChart.AddSeries("Theoretical position B [deg]", "B_TH", false, true);
+            positionChart.AddSeries("Actual position C [deg]", "C", false);
+            positionChart.AddSeries("Target position C [deg]", "C_T", false);
+            positionChart.AddSeries("Theoretical position C [deg]", "C_TH", false);
 
             velocityChart.YAxisTitle = "Velocity (theoretical)";
             velocityChart.AddSeries("Velocity X [mm/s]", "X", true);
@@ -145,12 +194,14 @@ namespace PingPong {
                     RobotVector targetPosition = Robot.TargetPosition;
                     RobotVector theoreticalPosition = Robot.TheoreticalPosition;
 
-                    List<double> positionData = new List<double>();
-                    positionData.AddRange(actualPosition.ToArray());
-                    positionData.AddRange(targetPosition.ToArray());
-                    positionData.AddRange(theoreticalPosition.ToArray());
-
-                    positionChart.Update(positionData.ToArray());
+                    positionChart.Update(new double[] {
+                        actualPosition.X, targetPosition.X, theoreticalPosition.X,
+                        actualPosition.Y, targetPosition.Y, theoreticalPosition.Y,
+                        actualPosition.Z, targetPosition.Z, theoreticalPosition.Z,
+                        actualPosition.A, targetPosition.A, theoreticalPosition.A,
+                        actualPosition.B, targetPosition.B, theoreticalPosition.B,
+                        actualPosition.C, targetPosition.C, theoreticalPosition.C,
+                    });
 
                     Dispatcher.Invoke(() => {
                         actualPositionX.Text = actualPosition.X.ToString("F3");

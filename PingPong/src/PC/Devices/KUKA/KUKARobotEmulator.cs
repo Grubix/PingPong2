@@ -1,13 +1,11 @@
 ﻿using PingPong.Maths;
 using System;
 using System.ComponentModel;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace PingPong.KUKA {
-
-    public class KUKARobot : IDevice {
+    class KUKARobotEmulator : IDevice {
 
         private readonly object receivedDataSyncLock = new object();
 
@@ -15,11 +13,9 @@ namespace PingPong.KUKA {
 
         private readonly BackgroundWorker worker;
 
-        private readonly RSIAdapter rsiAdapter;
+        private readonly TrajectoryGenerator5T generator;
 
-        private readonly TrajectoryGenerator5 generator;
-
-        private CancellationTokenSource cancellationTokenSource;
+        private readonly Random rand = new Random();
 
         private bool isInitialized = false;
 
@@ -29,7 +25,7 @@ namespace PingPong.KUKA {
 
         private RobotVector position;
 
-        private RobotAxisPosition axisPosition;
+        private RobotVector correction;
 
         private RobotConfig config;
 
@@ -54,27 +50,27 @@ namespace PingPong.KUKA {
         /// </summary>
         public string Ip {
             get {
-                return rsiAdapter.Ip;
+                return "x.x.x.x";
             }
         }
 
         /// <summary>
         /// Port number (Robot Sensor Interface - RSI)
         /// </summary>
-        public int Port { 
+        public int Port {
             get {
                 if (config != null) {
                     return config.Port;
                 } else {
                     return 0;
                 }
-            } 
+            }
         }
 
         /// <summary>
         /// Robot limits
         /// </summary>
-        public RobotLimits Limits { 
+        public RobotLimits Limits {
             get {
                 if (config != null) {
                     return config.Limits;
@@ -106,7 +102,7 @@ namespace PingPong.KUKA {
         public RobotAxisPosition AxisPosition {
             get {
                 lock (receivedDataSyncLock) {
-                    return axisPosition;
+                    return RobotAxisPosition.Zero;
                 }
             }
         }
@@ -168,7 +164,7 @@ namespace PingPong.KUKA {
                 }
             }
         }
-        
+
         /// <summary>
         /// Occurs when the robot is initialized (connection has been established)
         /// </summary>
@@ -189,36 +185,26 @@ namespace PingPong.KUKA {
         /// </summary>
         public event Action<OutputFrame> FrameSent;
 
-        public KUKARobot(RobotConfig config) {
-            rsiAdapter = new RSIAdapter();
-            generator = new TrajectoryGenerator5();
+        public KUKARobotEmulator(RobotConfig config) {
+            generator = new TrajectoryGenerator5T();
             Config = config;
 
             position = RobotVector.Zero;
-            axisPosition = RobotAxisPosition.Zero;
+            correction = RobotVector.Zero;
 
             worker = new BackgroundWorker() {
                 WorkerSupportsCancellation = true
             };
 
-            worker.DoWork += async (sender, args) => {
-                cancellationTokenSource = new CancellationTokenSource();
-                InputFrame receivedFrame = null;
+            worker.DoWork += (sender, args) => {
+                InputFrame receivedFrame = new InputFrame {
+                    IPOC = 0,
+                    Position = RobotVector.Zero,
+                    AxisPosition = RobotAxisPosition.Zero
+                };
 
-                try {
-                    // Connect with the robot
-                    Task connectTask = Task.Run(async () => {
-                        receivedFrame = await rsiAdapter.Connect(Config.Port);
-                    });
-
-                    connectTask.Wait(cancellationTokenSource.Token);
-                } catch (OperationCanceledException) {
-                    // Connect operation cancelled (Disconnect() method)
-                    rsiAdapter.Disconnect();
-                    return;
-                }
-
-                generator.Restart(receivedFrame.Position);
+                Console.WriteLine(receivedFrame.Position == null);
+                generator.Initialize(receivedFrame.Position);
 
                 lock (receivedDataSyncLock) {
                     IPOC = receivedFrame.IPOC;
@@ -227,36 +213,48 @@ namespace PingPong.KUKA {
                 }
 
                 // Send first response
-                rsiAdapter.SendData(new OutputFrame() {
+                OutputFrame response = new OutputFrame() {
                     Correction = new RobotVector(),
                     IPOC = IPOC
-                });
+                };
 
                 isInitialized = true;
                 Initialized?.Invoke();
 
                 // Start loop for receiving and sending data
                 while (!worker.CancellationPending) {
-                    await ReceiveDataAsync();
+                    ReceiveDataAsync();
                     SendData();
+                    Thread.Sleep(4);
                 }
 
                 isInitialized = false;
-                rsiAdapter.Disconnect();
-
                 Uninitialized?.Invoke();
             };
         }
 
-        public KUKARobot() : this(null) {
+        public KUKARobotEmulator() : this(null) {
         }
 
         /// <summary>
         /// Receives data (IPOC, cartesian and axis position) from the robot asynchronously, 
         /// raises <see cref="KUKARobot.FrameRecived">FrameReceived</see> event
         /// </summary>
-        private async Task ReceiveDataAsync() {
-            InputFrame receivedFrame = await rsiAdapter.ReceiveDataAsync();
+        private void ReceiveDataAsync() {
+            RobotVector noise = new RobotVector(
+                rand.NextDouble() * 0.1 - 0.05,
+                0,
+                0,
+                0,
+                0,
+                0
+            );
+
+            InputFrame receivedFrame = new InputFrame {
+                IPOC = IPOC + 4,
+                Position = position + correction + noise,
+                AxisPosition = RobotAxisPosition.Zero
+            };
 
             if (!Limits.CheckAxisPosition(receivedFrame.AxisPosition)) {
                 Uninitialize();
@@ -273,7 +271,6 @@ namespace PingPong.KUKA {
             lock (receivedDataSyncLock) {
                 IPOC = receivedFrame.IPOC;
                 position = receivedFrame.Position;
-                axisPosition = receivedFrame.AxisPosition;
             }
 
             FrameReceived?.Invoke(receivedFrame);
@@ -283,7 +280,7 @@ namespace PingPong.KUKA {
         /// Sends data (IPOC, correction) to the robot, raises <see cref="KUKARobot.FrameSent">FrameSent</see> event
         /// </summary>
         private void SendData() {
-            RobotVector correction = generator.GetNextCorrection(position);
+            correction = generator.GetNextCorrection();
 
             if (!Limits.CheckRelativeCorrection(correction)) {
                 Uninitialize();
@@ -296,7 +293,6 @@ namespace PingPong.KUKA {
                 IPOC = IPOC
             };
 
-            rsiAdapter.SendData(outputFrame);
             FrameSent?.Invoke(outputFrame);
         }
 
@@ -328,7 +324,7 @@ namespace PingPong.KUKA {
                 }
             }
 
-            generator.SetTargetPosition(targetPosition, targetVelocity, targetDuration);
+            generator.SetTargetPosition(Position, targetPosition, targetVelocity, targetDuration);
         }
 
         /// <summary>
@@ -394,10 +390,6 @@ namespace PingPong.KUKA {
         }
 
         public void Uninitialize() {
-            if (cancellationTokenSource != null) {
-                cancellationTokenSource.Cancel();
-            }
-
             worker.CancelAsync();
         }
 
@@ -406,11 +398,7 @@ namespace PingPong.KUKA {
         }
 
         public override string ToString() {
-            if (Ip != null) {
-                return $"{Ip}:{Port}";
-            } else {
-                return $"0.0.0.0:{Port}";
-            }
+            return "x.x.x.x:yyyy";
         }
 
     }
