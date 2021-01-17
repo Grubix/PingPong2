@@ -47,20 +47,20 @@ namespace PingPong {
                 a4AxisLimit: (-360, 360),
                 a5AxisLimit: (-360, 360),
                 a6AxisLimit: (-360, 360),
-                correctionLimit: (2.0, 0.1)
+                correctionLimit: (5.0, 0.1)
             );
             RobotConfig config = new RobotConfig(0, limits, null);
             RobotEmulator emulator = new RobotEmulator(config);
             emulator.Initialize();
 
             Task.Run(() => {
-                Thread.Sleep(3000);
-                emulator.MoveTo(new RobotVector(100, 0, 0), RobotVector.Zero, 5);
+                Thread.Sleep(8000);
+                emulator.MoveTo(new RobotVector(240, 0, 0), RobotVector.Zero, 3);
             });
 
             Task.Run(() => {
-                Thread.Sleep(6000);
-                emulator.MoveTo(new RobotVector(-100, 0, 0), RobotVector.Zero, 3);
+                                                                        Thread.Sleep(6000);
+                emulator.MoveTo(new RobotVector(-100, 0, 0), RobotVector.Zero, 5);
             });
 
             Task.Run(() => {
