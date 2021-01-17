@@ -22,7 +22,7 @@ namespace PingPong {
 
         private bool isPlotFrozen = false;
 
-        public KUKARobot Robot { get; }
+        public Robot Robot { get; }
 
         public MainWindow MainWindowHandle { get; set; }
 
@@ -33,10 +33,10 @@ namespace PingPong {
             InitializeControls();
             InitializeCharts();
 
-            Robot = new KUKARobot();
+            Robot = new Robot();
             InitializeRobot();
 
-            positionChart.RefreshDelay = 30;
+            positionChart.RefreshDelay = 80;
 
             RobotLimits limits = new RobotLimits(
                 lowerWorkspaceLimit: (-500, -500, -500),
@@ -50,7 +50,7 @@ namespace PingPong {
                 correctionLimit: (2.0, 0.1)
             );
             RobotConfig config = new RobotConfig(0, limits, null);
-            KUKARobotEmulator emulator = new KUKARobotEmulator(config);
+            RobotEmulator emulator = new RobotEmulator(config);
             emulator.Initialize();
 
             Task.Run(() => {
@@ -60,7 +60,12 @@ namespace PingPong {
 
             Task.Run(() => {
                 Thread.Sleep(6000);
-                emulator.MoveTo(new RobotVector(-100, 0, 0), RobotVector.Zero, 5);
+                emulator.MoveTo(new RobotVector(-100, 0, 0), RobotVector.Zero, 3);
+            });
+
+            Task.Run(() => {
+                Thread.Sleep(8000);
+                emulator.MoveTo(new RobotVector(200, 0, 0), RobotVector.Zero, 6);
             });
 
             emulator.FrameReceived += fr => {
@@ -143,20 +148,20 @@ namespace PingPong {
             positionChart.AddSeries("Theoretical position C [deg]", "C_TH", false);
 
             velocityChart.YAxisTitle = "Velocity (theoretical)";
-            velocityChart.AddSeries("Velocity X [mm/s]", "X", true);
-            velocityChart.AddSeries("Velocity Y [mm/s]", "Y", true);
-            velocityChart.AddSeries("Velocity Z [mm/s]", "Z", true);
-            velocityChart.AddSeries("Velocity A [deg/s]", "A", false);
-            velocityChart.AddSeries("Velocity B [deg/s]", "B", false);
-            velocityChart.AddSeries("Velocity C [deg/s]", "C", false);
+            velocityChart.AddSeries("Velocity X [mm/s]", "V_X", true);
+            velocityChart.AddSeries("Velocity Y [mm/s]", "V_Y", true);
+            velocityChart.AddSeries("Velocity Z [mm/s]", "V_Z", true);
+            velocityChart.AddSeries("Velocity A [deg/s]", "V_A", false);
+            velocityChart.AddSeries("Velocity B [deg/s]", "V_B", false);
+            velocityChart.AddSeries("Velocity C [deg/s]", "V_C", false);
 
             accelerationChart.YAxisTitle = "Acceleration (theoretical)";
-            accelerationChart.AddSeries("Acceleration X [mm/s²]", "X", true);
-            accelerationChart.AddSeries("Acceleration Y [mm/s²]", "Y", true);
-            accelerationChart.AddSeries("Acceleration Z [mm/s²]", "Z", true);
-            accelerationChart.AddSeries("Acceleration A [deg/s²]", "A", false);
-            accelerationChart.AddSeries("Acceleration B [deg/s²]", "B", false);
-            accelerationChart.AddSeries("Acceleration C [deg/s²]", "C", false);
+            accelerationChart.AddSeries("Acceleration X [mm/s²]", "A_X", true);
+            accelerationChart.AddSeries("Acceleration Y [mm/s²]", "A_Y", true);
+            accelerationChart.AddSeries("Acceleration Z [mm/s²]", "A_Z", true);
+            accelerationChart.AddSeries("Acceleration A [deg/s²]", "A_A", false);
+            accelerationChart.AddSeries("Acceleration B [deg/s²]", "A_B", false);
+            accelerationChart.AddSeries("Acceleration C [deg/s²]", "A_C", false);
         }
 
         private void InitializeRobot() {

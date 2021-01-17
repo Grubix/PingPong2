@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace PingPong.KUKA {
 
-    public class KUKARobot : IDevice {
+    public class Robot : IDevice {
 
         private readonly object receivedDataSyncLock = new object();
 
@@ -189,7 +189,7 @@ namespace PingPong.KUKA {
         /// </summary>
         public event Action<OutputFrame> FrameSent;
 
-        public KUKARobot(RobotConfig config) {
+        public Robot(RobotConfig config) {
             rsiAdapter = new RSIAdapter();
             generator = new TrajectoryGenerator5();
             Config = config;
@@ -248,12 +248,12 @@ namespace PingPong.KUKA {
             };
         }
 
-        public KUKARobot() : this(null) {
+        public Robot() : this(null) {
         }
 
         /// <summary>
         /// Receives data (IPOC, cartesian and axis position) from the robot asynchronously, 
-        /// raises <see cref="KUKARobot.FrameRecived">FrameReceived</see> event
+        /// raises <see cref="Robot.FrameRecived">FrameReceived</see> event
         /// </summary>
         private async Task ReceiveDataAsync() {
             InputFrame receivedFrame = await rsiAdapter.ReceiveDataAsync();
@@ -280,7 +280,7 @@ namespace PingPong.KUKA {
         }
 
         /// <summary>
-        /// Sends data (IPOC, correction) to the robot, raises <see cref="KUKARobot.FrameSent">FrameSent</see> event
+        /// Sends data (IPOC, correction) to the robot, raises <see cref="Robot.FrameSent">FrameSent</see> event
         /// </summary>
         private void SendData() {
             RobotVector correction = generator.GetNextCorrection(position);
@@ -409,7 +409,7 @@ namespace PingPong.KUKA {
             if (Ip != null) {
                 return $"{Ip}:{Port}";
             } else {
-                return $"0.0.0.0:{Port}";
+                return $"192.168.1.2:8081";
             }
         }
 

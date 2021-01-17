@@ -13,7 +13,7 @@ namespace PingPong {
 
         private class CalibrationTool {
 
-            private readonly KUKARobot robot;
+            private readonly Robot robot;
 
             private readonly OptiTrackSystem optiTrack;
 
@@ -34,7 +34,7 @@ namespace PingPong {
 
             public event Action Completed;
 
-            public CalibrationTool(KUKARobot robot, OptiTrackSystem optiTrack) {
+            public CalibrationTool(Robot robot, OptiTrackSystem optiTrack) {
                 this.robot = robot;
                 this.optiTrack = optiTrack;
 
@@ -94,7 +94,7 @@ namespace PingPong {
                 };
             }
 
-            private void MoveRobotToPoint(KUKARobot robot, Vector<double> point, double velocity) {
+            private void MoveRobotToPoint(Robot robot, Vector<double> point, double velocity) {
                 // Find greatest XYZ displacement
                 double deltaX = Math.Abs(point[0] - robot.Position.X);
                 double deltaY = Math.Abs(point[1] - robot.Position.Y);
@@ -183,7 +183,7 @@ namespace PingPong {
 
         public Action<Transformation> Completed;
 
-        public CalibrationWindow(KUKARobot robot, OptiTrackSystem optiTrack) {
+        public CalibrationWindow(Robot robot, OptiTrackSystem optiTrack) {
             InitializeComponent();
 
             Transformation currentTransformation = null;

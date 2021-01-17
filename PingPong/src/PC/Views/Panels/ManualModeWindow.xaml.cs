@@ -5,9 +5,9 @@ using System.Windows;
 namespace PingPong {
     public partial class ManualModeWindow : Window {
 
-        private readonly KUKARobot robot;
+        private readonly Robot robot;
 
-        public ManualModeWindow(KUKARobot robot) {
+        public ManualModeWindow(Robot robot) {
             InitializeComponent();
 
             this.robot = robot;

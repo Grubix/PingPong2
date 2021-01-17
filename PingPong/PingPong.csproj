@@ -111,8 +111,8 @@
     <Compile Include="src\PC\Applications\PingPongApp.cs" />
     <Compile Include="src\PC\Applications\PingPongAppData.cs" />
     <Compile Include="src\PC\Devices\IDevice.cs" />
-    <Compile Include="src\PC\Devices\KUKA\KUKARobot.cs" />
-    <Compile Include="src\PC\Devices\KUKA\KUKARobotEmulator.cs" />
+    <Compile Include="src\PC\Devices\KUKA\Robot.cs" />
+    <Compile Include="src\PC\Devices\KUKA\RobotEmulator.cs" />
     <Compile Include="src\PC\Devices\KUKA\RobotAxisPosition.cs" />
     <Compile Include="src\PC\Devices\KUKA\RobotConfig.cs" />
     <Compile Include="src\PC\Devices\KUKA\RobotLimits.cs" />
@@ -122,6 +122,8 @@
     <Compile Include="src\PC\Devices\KUKA\RSI\RSIAdapter.cs" />
     <Compile Include="src\PC\Devices\KUKA\TrajectoryGenerator5.cs" />
     <Compile Include="src\PC\Devices\KUKA\TrajectoryGenerator5T.cs" />
+    <Compile Include="src\PC\Devices\KUKA\TrajectoryGenerator7.cs" />
+    <Compile Include="src\PC\Devices\KUKA\TrajectoryGenerator7T.cs" />
     <Compile Include="src\PC\Devices\OptiTrack\InputFrame.cs" />
     <Compile Include="src\PC\Devices\OptiTrack\OptiTrackSystem.cs" />
     <Compile Include="src\PC\Maths\PIDRegulator.cs" />

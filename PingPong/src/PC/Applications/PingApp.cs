@@ -10,7 +10,7 @@ namespace PingPong.Applications {
 
         private bool isStarted;
 
-        private readonly KUKARobot robot;
+        private readonly Robot robot;
 
         private readonly OptiTrackSystem optiTrack;
 
@@ -38,7 +38,7 @@ namespace PingPong.Applications {
 
         public event Action<PingAppData> DataReady;
 
-        public PingApp(KUKARobot robot, OptiTrackSystem optiTrack, Func<Vector<double>, bool> checkFunction) {
+        public PingApp(Robot robot, OptiTrackSystem optiTrack, Func<Vector<double>, bool> checkFunction) {
             this.robot = robot;
             this.optiTrack = optiTrack;
             this.checkFunction = checkFunction;

@@ -198,11 +198,7 @@ namespace PingPong.KUKA {
                     double nb = polyB.GetValueAt(elapsedTime);
                     double nc = polyC.GetValueAt(elapsedTime);
 
-                    // Theoretical current position
-                    RobotVector currentPosition = Position;
-
-                    //TODO: TUTAJ MOGL BYC BLAD ZE BYLO ODEJMOWANE CURRENT POSITION OTRZYMANE OD ROBOTA A NIE TEORETYCZNE
-                    return new RobotVector(nx, ny, nz, na, nb, nc) - currentPosition;
+                    return new RobotVector(nx, ny, nz, na, nb, nc) - Position;
                 } else {
                     targetPositionReached = true;
 

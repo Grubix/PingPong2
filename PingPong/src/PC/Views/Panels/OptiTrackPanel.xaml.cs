@@ -12,9 +12,9 @@ namespace PingPong {
 
         private bool isPlotFrozen;
 
-        private KUKARobot robot1;
+        private Robot robot1;
 
-        private KUKARobot robot2;
+        private Robot robot2;
 
         private Transformation robot1Transformation;
 
@@ -57,7 +57,7 @@ namespace PingPong {
             };
         }
 
-        public void Initialize(KUKARobot robot1, KUKARobot robot2) {
+        public void Initialize(Robot robot1, Robot robot2) {
             this.robot1 = robot1;
             this.robot2 = robot2;
 

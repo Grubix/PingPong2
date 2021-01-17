@@ -16,9 +16,9 @@ namespace PingPong {
 
         private PingPongApp pingPongApp;
 
-        private KUKARobot robot1;
+        private Robot robot1;
 
-        private KUKARobot robot2;
+        private Robot robot2;
 
         private LiveChart activeChart;
 
@@ -30,7 +30,7 @@ namespace PingPong {
             InitializeControls();
         }
 
-        public void Initialize(KUKARobot robot1, KUKARobot robot2, OptiTrackSystem optiTrack) {
+        public void Initialize(Robot robot1, Robot robot2, OptiTrackSystem optiTrack) {
             if (robot1 == robot2) {
                 throw new ArgumentException("Cos tam ze instancje robota musza byc rozne");
             }

@@ -2,10 +2,9 @@
 using System;
 using System.ComponentModel;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace PingPong.KUKA {
-    class KUKARobotEmulator : IDevice {
+    class RobotEmulator : IDevice {
 
         private readonly object receivedDataSyncLock = new object();
 
@@ -14,8 +13,6 @@ namespace PingPong.KUKA {
         private readonly BackgroundWorker worker;
 
         private readonly TrajectoryGenerator5T generator;
-
-        private readonly Random rand = new Random();
 
         private bool isInitialized = false;
 
@@ -185,7 +182,7 @@ namespace PingPong.KUKA {
         /// </summary>
         public event Action<OutputFrame> FrameSent;
 
-        public KUKARobotEmulator(RobotConfig config) {
+        public RobotEmulator(RobotConfig config) {
             generator = new TrajectoryGenerator5T();
             Config = config;
 
@@ -203,7 +200,6 @@ namespace PingPong.KUKA {
                     AxisPosition = RobotAxisPosition.Zero
                 };
 
-                Console.WriteLine(receivedFrame.Position == null);
                 generator.Initialize(receivedFrame.Position);
 
                 lock (receivedDataSyncLock) {
@@ -233,26 +229,17 @@ namespace PingPong.KUKA {
             };
         }
 
-        public KUKARobotEmulator() : this(null) {
+        public RobotEmulator() : this(null) {
         }
 
         /// <summary>
         /// Receives data (IPOC, cartesian and axis position) from the robot asynchronously, 
-        /// raises <see cref="KUKARobot.FrameRecived">FrameReceived</see> event
+        /// raises <see cref="Robot.FrameRecived">FrameReceived</see> event
         /// </summary>
         private void ReceiveDataAsync() {
-            RobotVector noise = new RobotVector(
-                rand.NextDouble() * 0.1 - 0.05,
-                0,
-                0,
-                0,
-                0,
-                0
-            );
-
             InputFrame receivedFrame = new InputFrame {
                 IPOC = IPOC + 4,
-                Position = position + correction + noise,
+                Position = position + correction,
                 AxisPosition = RobotAxisPosition.Zero
             };
 
@@ -277,7 +264,7 @@ namespace PingPong.KUKA {
         }
 
         /// <summary>
-        /// Sends data (IPOC, correction) to the robot, raises <see cref="KUKARobot.FrameSent">FrameSent</see> event
+        /// Sends data (IPOC, correction) to the robot, raises <see cref="Robot.FrameSent">FrameSent</see> event
         /// </summary>
         private void SendData() {
             correction = generator.GetNextCorrection();
