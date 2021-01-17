@@ -122,6 +122,8 @@
     <Compile Include="src\PC\Devices\KUKA\RSI\RSIAdapter.cs" />
     <Compile Include="src\PC\Devices\KUKA\TrajectoryGenerator5.cs" />
     <Compile Include="src\PC\Devices\KUKA\TrajectoryGenerator5T.cs" />
+    <Compile Include="src\PC\Devices\KUKA\TrajectoryGenerator7.cs" />
+    <Compile Include="src\PC\Devices\KUKA\TrajectoryGenerator7_32ms.cs" />
     <Compile Include="src\PC\Devices\OptiTrack\InputFrame.cs" />
     <Compile Include="src\PC\Devices\OptiTrack\OptiTrackSystem.cs" />
     <Compile Include="src\PC\Maths\PIDRegulator.cs" />

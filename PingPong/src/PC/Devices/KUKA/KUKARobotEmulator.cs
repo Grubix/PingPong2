@@ -1,5 +1,6 @@
 ﻿using PingPong.Maths;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,6 +29,8 @@ namespace PingPong.KUKA {
         private RobotVector correction;
 
         private RobotConfig config;
+
+        private List<RobotVector> bufor;
 
         /// <summary>
         /// Robot config
@@ -186,6 +189,7 @@ namespace PingPong.KUKA {
         public event Action<OutputFrame> FrameSent;
 
         public KUKARobotEmulator(RobotConfig config) {
+            bufor = new List<RobotVector>();
             generator = new TrajectoryGenerator5T();
             Config = config;
 
@@ -204,6 +208,7 @@ namespace PingPong.KUKA {
                 };
 
                 Console.WriteLine(receivedFrame.Position == null);
+                //generator.Restart(position);
                 generator.Initialize(receivedFrame.Position);
 
                 lock (receivedDataSyncLock) {
@@ -242,17 +247,21 @@ namespace PingPong.KUKA {
         /// </summary>
         private void ReceiveDataAsync() {
             RobotVector noise = new RobotVector(
-                rand.NextDouble() * 0.1 - 0.05,
+                0, //rand.NextDouble() * 0.1 - 0.05,
                 0,
                 0,
                 0,
                 0,
                 0
             );
+            bufor.Add(correction);
+            if (bufor.Count > 8) {
+                bufor.RemoveAt(0);
+            }
 
             InputFrame receivedFrame = new InputFrame {
                 IPOC = IPOC + 4,
-                Position = position + correction + noise,
+                Position = position + bufor[0] + noise,
                 AxisPosition = RobotAxisPosition.Zero
             };
 
@@ -324,7 +333,7 @@ namespace PingPong.KUKA {
                 }
             }
 
-            generator.SetTargetPosition(Position, targetPosition, targetVelocity, targetDuration);
+            generator.SetTargetPosition(position, targetPosition, targetVelocity, targetDuration);
         }
 
         /// <summary>
