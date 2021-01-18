@@ -154,7 +154,7 @@ namespace PingPong.KUKA {
         public TrajectoryGenerator5() {
         }
 
-        public void Restart(RobotVector homePosition) {
+        public void Initialize(RobotVector homePosition) {
             lock (syncLock) {
                 targetPositionReached = true;
                 targetPosition = homePosition;

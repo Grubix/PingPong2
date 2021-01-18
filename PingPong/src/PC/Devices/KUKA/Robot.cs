@@ -218,7 +218,7 @@ namespace PingPong.KUKA {
                     return;
                 }
 
-                generator.Restart(receivedFrame.Position);
+                generator.Initialize(receivedFrame.Position);
 
                 lock (receivedDataSyncLock) {
                     IPOC = receivedFrame.IPOC;

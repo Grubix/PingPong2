@@ -35,60 +35,6 @@ namespace PingPong {
 
             Robot = new Robot();
             InitializeRobot();
-
-            positionChart.RefreshDelay = 80;
-
-            RobotLimits limits = new RobotLimits(
-                lowerWorkspaceLimit: (-500, -500, -500),
-                upperWorkspaceLimit: (500, 500, 500),
-                a1AxisLimit: (-360, 360),
-                a2AxisLimit: (-360, 360),
-                a3AxisLimit: (-360, 360),
-                a4AxisLimit: (-360, 360),
-                a5AxisLimit: (-360, 360),
-                a6AxisLimit: (-360, 360),
-                correctionLimit: (5.0, 0.1)
-            );
-            RobotConfig config = new RobotConfig(0, limits, null);
-            RobotEmulator emulator = new RobotEmulator(config);
-            emulator.Initialize();
-
-            Task.Run(() => {
-                Thread.Sleep(8000);
-                emulator.MoveTo(new RobotVector(240, 0, 0), RobotVector.Zero, 3);
-            });
-
-            Task.Run(() => {
-                                                                        Thread.Sleep(6000);
-                emulator.MoveTo(new RobotVector(-100, 0, 0), RobotVector.Zero, 5);
-            });
-
-            Task.Run(() => {
-                Thread.Sleep(8000);
-                emulator.MoveTo(new RobotVector(200, 0, 0), RobotVector.Zero, 6);
-            });
-
-            emulator.FrameReceived += fr => {
-                if(isPlotFrozen) {
-                    return;
-                }
-                if (positionChart.IsReady) {
-                    RobotVector actualPosition = emulator.Position;
-                    RobotVector targetPosition = emulator.TargetPosition;
-                    RobotVector theoreticalPosition = emulator.TheoreticalPosition;
-
-                    positionChart.Update(new double[] {
-                        actualPosition.X, targetPosition.X, theoreticalPosition.X,
-                        actualPosition.Y, targetPosition.Y, theoreticalPosition.Y,
-                        actualPosition.Z, targetPosition.Z, theoreticalPosition.Z,
-                        actualPosition.A, targetPosition.A, theoreticalPosition.A,
-                        actualPosition.B, targetPosition.B, theoreticalPosition.B,
-                        actualPosition.C, targetPosition.C, theoreticalPosition.C,
-                    });
-                } else {
-                    positionChart.Tick();
-                }
-            };
         }
 
         public void LoadConfig(string configFile) {
@@ -167,8 +113,12 @@ namespace PingPong {
         private void InitializeRobot() {
             Robot.Initialized += () => {
                 Dispatcher.Invoke(() => {
+                    initializeBtn.IsEnabled = false;
+                    disconnectBtn.IsEnabled = true;
                     calibrateBtn.IsEnabled = true;
                     manualModeBtn.IsEnabled = true;
+                    loadConfigBtn.IsEnabled = false;
+                    saveConfigBtn.IsEnabled = false;
 
                     ipAdress.Text = Robot.Ip;
                     homePositionX.Text = Robot.HomePosition.X.ToString("F3");

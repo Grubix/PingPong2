@@ -39,7 +39,7 @@ namespace PingPong {
             this.robot2 = robot2;
 
             robot1PingApp = new PingApp(robot1, optiTrack, (position) => {
-                return position[0] < 900.0 && position[2] > 250.0;
+                return position[0] < 1000.0 && position[2] > 250.0;
             });
 
             robot1PingApp.DataReady += data => {

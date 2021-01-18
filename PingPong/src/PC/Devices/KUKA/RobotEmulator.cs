@@ -15,6 +15,8 @@ namespace PingPong.KUKA {
 
         private readonly TrajectoryGenerator5T generator;
 
+        private readonly List<RobotVector> correctionBufor;
+
         private bool isInitialized = false;
 
         private bool forceMoveMode = false;
@@ -26,8 +28,6 @@ namespace PingPong.KUKA {
         private RobotVector correction;
 
         private RobotConfig config;
-
-        private List<RobotVector> bufor;
 
         /// <summary>
         /// Robot config
@@ -186,6 +186,7 @@ namespace PingPong.KUKA {
         public event Action<OutputFrame> FrameSent;
 
         public RobotEmulator(RobotConfig config) {
+            correctionBufor = new List<RobotVector>();
             generator = new TrajectoryGenerator5T();
             Config = config;
 
@@ -240,22 +241,17 @@ namespace PingPong.KUKA {
         /// raises <see cref="Robot.FrameRecived">FrameReceived</see> event
         /// </summary>
         private void ReceiveDataAsync() {
-            RobotVector noise = new RobotVector(
-                0, //rand.NextDouble() * 0.1 - 0.05,
-                0,
-                0,
-                0,
-                0,
-                0
-            );
-            bufor.Add(correction);
-            if (bufor.Count > 8) {
-                bufor.RemoveAt(0);
+            RobotVector currectCorrection = RobotVector.Zero;
+
+            correctionBufor.Add(correction);
+            if (correctionBufor.Count > 8) {
+                currectCorrection = correctionBufor[0];
+                correctionBufor.RemoveAt(0);
             }
 
             InputFrame receivedFrame = new InputFrame {
                 IPOC = IPOC + 4,
-                Position = position + bufor[0] + noise,
+                Position = position + currectCorrection,
                 AxisPosition = RobotAxisPosition.Zero
             };
 
