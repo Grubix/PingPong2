@@ -24,12 +24,22 @@ namespace PingPong.KUKA {
             /// </summary>
             public double A { get; private set; }
 
-            public void UpdateCoefficients(double x0, double x1, double v1, double T) {
+            public void UpdateCoefficients(double x0, double x1, double v1, double T, double elapsedTime) {
                 double T1 = T;
                 double T2 = T1 * T1;
                 double T3 = T1 * T2;
                 double T4 = T1 * T3;
                 double T5 = T1 * T4;
+
+                double t1 = elapsedTime;
+                double t2 = t1 * t1;
+                double t3 = t1 * t2;
+                double t4 = t1 * t3;
+                double t5 = t1 * t4;
+
+                x0 = k5 * t5 + k4 * t4 + k3 * t3 + k2 * t2 + k1 * t1 + k0;
+                vn = 5.0 * k5 * t4 + 4.0 * k4 * t3 + 3.0 * k3 * t2 + 2.0 * k2 * t1 + k1;
+                an = 20.0 * k5 * t3 + 12.0 * k4 * t2 + 6.0 * k3 * t1 + 2.0 * k2;
 
                 k0 = x0;
                 k1 = vn;
@@ -164,6 +174,7 @@ namespace PingPong.KUKA {
             bool targetDurationChanged = targetDuration != this.targetDuration;
 
             if (targetDurationChanged || targetPositionChanged || targetVelocityChanged) {
+                double tmpElapsedTime = elapsedTime;
                 lock (syncLock) {
                     targetPositionReached = false;
                     this.targetPosition = targetPosition;
@@ -173,12 +184,12 @@ namespace PingPong.KUKA {
                 }
 
                 //TODO: teraz pytanie czy brac current position robota czy idealny
-                polyX.UpdateCoefficients(currentPosition.X, targetPosition.X, targetVelocity.X, targetDuration);
-                polyY.UpdateCoefficients(currentPosition.Y, targetPosition.Y, targetVelocity.Y, targetDuration);
-                polyZ.UpdateCoefficients(currentPosition.Z, targetPosition.Z, targetVelocity.Z, targetDuration);
-                polyA.UpdateCoefficients(currentPosition.A, targetPosition.A, targetVelocity.A, targetDuration);
-                polyB.UpdateCoefficients(currentPosition.B, targetPosition.B, targetVelocity.B, targetDuration);
-                polyC.UpdateCoefficients(currentPosition.C, targetPosition.C, targetVelocity.C, targetDuration);
+                polyX.UpdateCoefficients(currentPosition.X, targetPosition.X, targetVelocity.X, targetDuration, tmpElapsedTime);
+                polyY.UpdateCoefficients(currentPosition.Y, targetPosition.Y, targetVelocity.Y, targetDuration, tmpElapsedTime);
+                polyZ.UpdateCoefficients(currentPosition.Z, targetPosition.Z, targetVelocity.Z, targetDuration, tmpElapsedTime);
+                polyA.UpdateCoefficients(currentPosition.A, targetPosition.A, targetVelocity.A, targetDuration, tmpElapsedTime);
+                polyB.UpdateCoefficients(currentPosition.B, targetPosition.B, targetVelocity.B, targetDuration, tmpElapsedTime);
+                polyC.UpdateCoefficients(currentPosition.C, targetPosition.C, targetVelocity.C, targetDuration, tmpElapsedTime);
             }
         }
 
