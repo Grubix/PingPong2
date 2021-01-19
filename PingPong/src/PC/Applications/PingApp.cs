@@ -50,7 +50,7 @@ namespace PingPong.Applications {
                 new double[] { 0.0, 0.0, 1.0 }
             );
             destBallPosition = Vector<double>.Build.DenseOfArray(
-                new double[] { 0.0, 850.0, 183.48 }
+                new double[] { 0.44, 793.19, 177.82 }
             );
         }
 
@@ -123,7 +123,7 @@ namespace PingPong.Applications {
 
                 robot.FrameReceived -= ProcessRobotFrame;
                 optiTrack.FrameReceived -= ProcessOptiTrackFrame;
-                robot.Uninitialize();
+                //robot.Uninitialize();
 
                 Stopped?.Invoke();
             }
@@ -134,8 +134,8 @@ namespace PingPong.Applications {
                 if (robotMovedToHitPosition && robot.IsTargetPositionReached) {
                     // Slow down the robot
                     robotMovedToHitPosition = false;
-                    robot.MoveTo(new RobotVector(robot.Position.XYZ, robot.HomePosition.ABC), RobotVector.Zero, 3);
-                    Stop();
+                    //robot.MoveTo(new RobotVector(robot.Position.XYZ, robot.HomePosition.ABC), RobotVector.Zero, 3);
+                    //Stop(); // zakomentować jeśli 195:robot.MoveTo jest zakomentowane
                 }
             }
         }
@@ -158,8 +158,9 @@ namespace PingPong.Applications {
             PingAppData data = new PingAppData {
                 ActualBallPosition = robotBaseBallPosition,
                 ActualRobotPosition = robot.Position,
+                TargetRobotPosition = robot.TargetPosition,
                 PredictedTimeOfFlight = prediction.TimeOfFlight,
-                PredictedBallPosition = Vector<double>.Build.DenseOfArray(new double[] { -1, -1, -1 }),
+                PredictedBallPosition = Vector<double>.Build.DenseOfArray(new double[] { -1, -1, -1 })
             };
 
             if (prediction.IsReady && prediction.TimeToHit >= 0.3) {
@@ -178,24 +179,39 @@ namespace PingPong.Applications {
                 double angleB = Math.Atan2(racketNormalVector[0], racketNormalVector[2]) * 180.0 / Math.PI;
                 double angleC = -90.0 - Math.Atan2(racketNormalVector[1], racketNormalVector[2]) * 180.0 / Math.PI;
 
+                // NIE LEGITNE
                 var robotTargetVelocity = new RobotVector(
                     (upVector[0] + CoR * predBallVelocity[0]) / (1 + CoR),
                     (upVector[1] + CoR * predBallVelocity[1]) / (1 + CoR),
                     (upVector[2] + CoR * predBallVelocity[2]) / (1 + CoR)
                 );
 
+                double coeff = 1;
+
+                if (prediction.TimeToHit > 0.4) {
+                    coeff = Math.Exp(-(prediction.TimeToHit - 0.4) / 0.1);
+                }
+
+                RobotVector actualPosition = robot.Position;
                 RobotVector robotTargetPostion = new RobotVector(
-                    predBallPosition[0], predBallPosition[1], predBallPosition[2], 0, angleB, angleC
+                    actualPosition.X + (predBallPosition[0] - actualPosition.X) * coeff,
+                    actualPosition.Y + (predBallPosition[1] - actualPosition.Y) * coeff,
+                    predBallPosition[2],
+                    0,
+                    actualPosition.B + (angleB - actualPosition.B) * coeff,
+                    actualPosition.C + (angleC - actualPosition.C) * coeff
                 );
 
-                if (robot.Limits.CheckPosition(robotTargetPostion)) {
+                if (robot.Limits.CheckPosition(robotTargetPostion) && Math.Abs(angleB) < 30.0 && angleC < -75 && angleC > -120) {
                     lock (syncLock) {
                         robotMovedToHitPosition = true;
-                        robot.MoveTo(robotTargetPostion, robotTargetVelocity, prediction.TimeToHit);
+                        //robot.MoveTo(robotTargetPostion, new RobotVector(0, 0, 0), prediction.TimeToHit);
+                        Console.WriteLine(robotTargetPostion);
                     }
                 }
 
                 data.PredictedBallPosition = predBallPosition;
+                data.TargetRobotPosition = robotTargetPostion;
             }
 
             DataReady?.Invoke(data);

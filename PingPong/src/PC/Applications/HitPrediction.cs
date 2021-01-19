@@ -20,13 +20,17 @@ namespace PingPong.Applications {
 
         private readonly List<double> predictedTimeSamples;
 
+        private readonly List<double> bufferX;
+
+        private readonly List<double> bufferY;
+
         public List<double> XCoefficients { get; private set; }
 
         public List<double> YCoefficients { get; private set; }
 
         public List<double> ZCoefficients { get; private set; }
 
-        public Vector<double> Position { get; private set;}
+        public Vector<double> Position { get; private set; }
 
         public Vector<double> Velocity { get; private set; }
 
@@ -49,6 +53,8 @@ namespace PingPong.Applications {
             polyfitY = new Polyfit(1);
             polyfitZ = new Polyfit(2);
             predictedTimeSamples = new List<double>();
+            bufferX = new List<double>();
+            bufferY = new List<double>();
         }
 
         public void AddMeasurement(Vector<double> position, double elapsedTime) {
@@ -74,17 +80,42 @@ namespace PingPong.Applications {
             double positionY = YCoefficients[1] * TimeOfFlight + YCoefficients[0];
             double positionZ = TargetHitHeight;
 
+            bufferX.Add(positionX);
+            bufferY.Add(positionY);
+
+            if (bufferX.Count == 5) {
+                predictedTimeSamples.RemoveAt(0);
+            }
+
+            if (bufferY.Count == 5) {
+                predictedTimeSamples.RemoveAt(0);
+            }
+
+            double avgPositionX = 0;
+            double avgPositionY = 0;
+
+            for (int i = 0; i < bufferX.Count; i++) {
+                avgPositionX += bufferX[i];
+            }
+
+            for (int i = 0; i < bufferY.Count; i++) {
+                avgPositionY += bufferY[i];
+            }
+
+            avgPositionX /= bufferX.Count;
+            avgPositionY /= bufferY.Count;
+
             Position = Vector<double>.Build.DenseOfArray(new double[] {
-                positionX, positionY, positionZ
-            });
+                        positionX, positionY, positionZ
+                    });
 
             double velocityX = XCoefficients[1];
             double velocityY = YCoefficients[1];
             double velocityZ = 2.0 * ZCoefficients[2] * TimeOfFlight + ZCoefficients[1];
 
             Velocity = Vector<double>.Build.DenseOfArray(new double[] {
-                velocityX, velocityY, velocityZ
-            });
+                        velocityX, velocityY, velocityZ
+                    });
         }
 
         public void Reset(double targetHitHeight) {
@@ -164,3 +195,4 @@ namespace PingPong.Applications {
 
     }
 }
+

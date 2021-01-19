@@ -12,6 +12,8 @@ namespace PingPong.Applications {
 
         public RobotVector ActualRobotPosition { get; set; }
 
+        public RobotVector TargetRobotPosition { get; set; }
+
         //TODO: mozna dorobic wiecej w zaleznosci od potrzeb
 
     }

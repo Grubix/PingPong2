@@ -24,6 +24,9 @@ namespace PingPong.KUKA {
             /// </summary>
             public double A { get; private set; }
 
+            public void Initialize(double currentX) {
+                k0 = xn = X = currentX;
+            }
             public void UpdateCoefficients(double x0, double x1, double v1, double T, double elapsedTime) {
                 double T1 = T;
                 double T2 = T1 * T1;
@@ -161,6 +164,13 @@ namespace PingPong.KUKA {
                 targetVelocity = RobotVector.Zero;
                 targetDuration = 0.0;
                 elapsedTime = 0.0;
+
+                polyX.Initialize(actualRobotPosition.X);
+                polyY.Initialize(actualRobotPosition.Y);
+                polyZ.Initialize(actualRobotPosition.Z);
+                polyA.Initialize(actualRobotPosition.A);
+                polyB.Initialize(actualRobotPosition.B);
+                polyC.Initialize(actualRobotPosition.C);
             }
         }
 
@@ -179,7 +189,7 @@ namespace PingPong.KUKA {
                     targetPositionReached = false;
                     this.targetPosition = targetPosition;
                     this.targetVelocity = targetVelocity;
-                    this.targetDuration = targetDuration;
+                    this.targetDuration = targetDuration - 0.032;
                     elapsedTime = 0.0;
                 }
 
