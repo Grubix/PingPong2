@@ -30,8 +30,7 @@ namespace PingPong {
             InitializeControls();
             InitializeCharts();
 
-            positionChart.RefreshDelay = 20;
-
+            positionChart.RefreshDelay = 60;
             Robot = new Robot();
             InitializeRobot();
 

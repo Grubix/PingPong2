@@ -50,7 +50,7 @@ namespace PingPong.Applications {
                 new double[] { 0.0, 0.0, 1.0 }
             );
             destBallPosition = Vector<double>.Build.DenseOfArray(
-                new double[] { 0.0, 850.0, 183.48 }
+                new double[] { 0.44, 793.19, 177.82 }
             );
         }
 
@@ -123,7 +123,7 @@ namespace PingPong.Applications {
 
                 robot.FrameReceived -= ProcessRobotFrame;
                 optiTrack.FrameReceived -= ProcessOptiTrackFrame;
-                robot.Uninitialize();
+                //robot.Uninitialize();
 
                 Stopped?.Invoke();
             }
@@ -194,6 +194,7 @@ namespace PingPong.Applications {
                 double angleB = Math.Atan2(racketNormalVector[0], racketNormalVector[2]) * 180.0 / Math.PI;
                 double angleC = -90.0 - Math.Atan2(racketNormalVector[1], racketNormalVector[2]) * 180.0 / Math.PI;
 
+                // NIE LEGITNE
                 var robotTargetVelocity = new RobotVector(
                     (upVector[0] + CoR * predBallVelocity[0]) / (1 + CoR),
                     (upVector[1] + CoR * predBallVelocity[1]) / (1 + CoR),
@@ -216,10 +217,11 @@ namespace PingPong.Applications {
                     robotActualPosition.C + (angleC - robotActualPosition.C) * dampCoeff
                 );
 
-                if (robot.Limits.CheckPosition(robotTargetPostion)) {
+                if (robot.Limits.CheckPosition(robotTargetPostion) && Math.Abs(angleB) < 30.0 && angleC < -75 && angleC > -120) {
                     lock (syncLock) {
                         robotMovedToHitPosition = true;
-                        robot.MoveTo(robotTargetPostion, robotTargetVelocity, prediction.TimeToHit);
+                        //robot.MoveTo(robotTargetPostion, new RobotVector(0, 0, 0), prediction.TimeToHit);
+                        Console.WriteLine(robotTargetPostion);
                     }
                 }
             }

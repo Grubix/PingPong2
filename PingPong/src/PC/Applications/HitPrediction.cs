@@ -151,8 +151,8 @@ namespace PingPong.Applications {
             }
 
             Position = Vector<double>.Build.DenseOfArray(new double[] {
-                positionX, positionY, positionZ
-            });
+                        positionX, positionY, positionZ
+                    });
 
             Velocity = Vector<double>.Build.DenseOfArray(new double[] {
                 velocityX, velocityY, velocityZ
@@ -234,3 +234,4 @@ namespace PingPong.Applications {
 
     }
 }
+
