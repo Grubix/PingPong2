@@ -135,7 +135,11 @@ namespace PingPong.Applications {
                     // Slow down the robot
                     robotMovedToHitPosition = false;
                     robot.MoveTo(new RobotVector(robot.Position.XYZ, robot.HomePosition.ABC), RobotVector.Zero, 3);
-                    Stop();
+                    //Stop();
+
+                    //prediction.Reset(prediction.TargetHitHeight);
+                    //elapsedTime = 0;
+                    //jakas_flaga = true;
                 }
             }
         }
@@ -149,30 +153,42 @@ namespace PingPong.Applications {
                 return;
             }
 
-            if (prediction.PolyfitSamplesCount != 0) {
-                elapsedTime += frame.DeltaTime;
+            lock (syncLock) {
+                if (prediction.SamplesCount != 0) {
+                    elapsedTime += frame.DeltaTime;
+                }
+
+                prediction.AddMeasurement(robotBaseBallPosition, elapsedTime);
             }
 
-            prediction.AddMeasurement(robotBaseBallPosition, elapsedTime);
-
             PingAppData data = new PingAppData {
+                PredictedBallPosition = Vector<double>.Build.Dense(3),
+                PredictedBallVelocity = Vector<double>.Build.Dense(3),
                 ActualBallPosition = robotBaseBallPosition,
                 ActualRobotPosition = robot.Position,
-                PredictedTimeOfFlight = prediction.TimeOfFlight,
-                PredictedBallPosition = Vector<double>.Build.DenseOfArray(new double[] { -1, -1, -1 }),
+                BallSetpointX = destBallPosition[0],
+                BallSetpointY = destBallPosition[1],
+                BallSetpointZ = destBallPosition[2],
+                PredictedTimeToHit = prediction.TimeToHit,
             };
 
             if (prediction.IsReady && prediction.TimeToHit >= 0.3) {
-                prediction.Calculate();
-
                 var predBallPosition = prediction.Position; // predicted ball position on hit
                 var predBallVelocity = prediction.Velocity; // predicted ball velocity on hit
-                double t = Math.Sqrt(2 / 9.81 * (maxBallHeigth - predBallPosition[2])) + Math.Sqrt(2 / 9.81 * (maxBallHeigth - destBallPosition[2]));
+
+                data.PredictedBallPosition = predBallPosition;
+                data.PredictedBallVelocity = predBallVelocity;
+
+                double t1 = Math.Sqrt(2.0 / 9.81 * (maxBallHeigth - predBallPosition[2]) / 1000.0);
+                double t2 = Math.Sqrt(2.0 / 9.81 * (maxBallHeigth - destBallPosition[2]) / 1000.0);
+                double t = t1 + t2;
+
                 upVector = Vector<double>.Build.DenseOfArray(new double[] {
                     (destBallPosition[0] - predBallPosition[0]) / t,
                     (destBallPosition[1] - predBallPosition[1]) / t,
-                    Math.Sqrt(2 * 9.81 * (maxBallHeigth - predBallPosition[2]))
+                    Math.Sqrt(2.0 * 9.81 * 1000 * (maxBallHeigth - predBallPosition[2]))
                 });
+
                 var racketNormalVector = upVector.Normalize(1.0) - predBallVelocity.Normalize(1.0);
 
                 double angleB = Math.Atan2(racketNormalVector[0], racketNormalVector[2]) * 180.0 / Math.PI;
@@ -184,8 +200,20 @@ namespace PingPong.Applications {
                     (upVector[2] + CoR * predBallVelocity[2]) / (1 + CoR)
                 );
 
+                double dampCoeff = 1;
+
+                if (prediction.TimeToHit >= 0.4) {
+                    dampCoeff = Math.Exp(-(prediction.TimeToHit - 0.4) / 0.15);
+                }
+
+                RobotVector robotActualPosition = robot.Position;
                 RobotVector robotTargetPostion = new RobotVector(
-                    predBallPosition[0], predBallPosition[1], predBallPosition[2], 0, angleB, angleC
+                    robotActualPosition.X + (predBallPosition[0] - robotActualPosition.X) * dampCoeff,
+                    robotActualPosition.Y + (predBallPosition[1] - robotActualPosition.Y) * dampCoeff, 
+                    predBallPosition[2], 
+                    0,
+                    robotActualPosition.B + (angleB - robotActualPosition.B) * dampCoeff,
+                    robotActualPosition.C + (angleC - robotActualPosition.C) * dampCoeff
                 );
 
                 if (robot.Limits.CheckPosition(robotTargetPostion)) {
@@ -194,8 +222,6 @@ namespace PingPong.Applications {
                         robot.MoveTo(robotTargetPostion, robotTargetVelocity, prediction.TimeToHit);
                     }
                 }
-
-                data.PredictedBallPosition = predBallPosition;
             }
 
             DataReady?.Invoke(data);

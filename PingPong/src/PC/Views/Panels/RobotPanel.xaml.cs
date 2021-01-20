@@ -3,10 +3,7 @@ using PingPong.KUKA;
 using PingPong.Maths;
 using PingPong.OptiTrack;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -33,8 +30,12 @@ namespace PingPong {
             InitializeControls();
             InitializeCharts();
 
+            positionChart.RefreshDelay = 20;
+
             Robot = new Robot();
             InitializeRobot();
+
+
         }
 
         public void LoadConfig(string configFile) {
@@ -43,6 +44,57 @@ namespace PingPong {
 
             Robot.Config = config;
             UpdateConfigControls(config);
+
+            //if (Robot.Config.Port == 8082) {
+            //    return;
+            //}
+
+            //RobotLimits limits = new RobotLimits(
+            //    lowerWorkspaceLimit: (-800, 200, -800),
+            //    upperWorkspaceLimit: (800, 1200, 800),
+            //    a1AxisLimit: (-360, 360),
+            //    a2AxisLimit: (-360, 360),
+            //    a3AxisLimit: (-360, 360),
+            //    a4AxisLimit: (-360, 360),
+            //    a5AxisLimit: (-360, 360),
+            //    a6AxisLimit: (-360, 360),
+            //    correctionLimit: (2.3, 0.1)
+            //);
+            //RobotConfig config2 = new RobotConfig(0, limits, null);
+            //RobotEmulator emulator = new RobotEmulator(config2);
+            //emulator.Initialize();
+
+            //Task.Run(() => {
+            //    Thread.Sleep(2000);
+            //    emulator.Shift(new RobotVector(180, 0, 0), RobotVector.Zero, 0.6);
+            //});
+
+            //Task.Run(() => {
+            //    Thread.Sleep(4000);
+            //    //emulator.Shift(new RobotVector(-50, -50, -50), RobotVector.Zero, 3);
+            //});
+
+            //emulator.FrameReceived += fr => {
+            //    if (isPlotFrozen) {
+            //        return;
+            //    }
+            //    if (positionChart.IsReady) {
+            //        RobotVector actualPosition = emulator.Position;
+            //        RobotVector targetPosition = emulator.TargetPosition;
+            //        RobotVector theoreticalPosition = emulator.TheoreticalPosition;
+
+            //        positionChart.Update(new double[] {
+            //            actualPosition.X, targetPosition.X, theoreticalPosition.X,
+            //            actualPosition.Y, targetPosition.Y, theoreticalPosition.Y,
+            //            actualPosition.Z, targetPosition.Z, theoreticalPosition.Z,
+            //            actualPosition.A, targetPosition.A, theoreticalPosition.A,
+            //            actualPosition.B, targetPosition.B, theoreticalPosition.B,
+            //            actualPosition.C, targetPosition.C, theoreticalPosition.C,
+            //        });
+            //    } else {
+            //        positionChart.Tick();
+            //    }
+            //};
         }
 
         private void InitializeControls() {
@@ -305,6 +357,8 @@ namespace PingPong {
                 resetZoomBtn.IsEnabled = true;
                 fitToDataBtn.IsEnabled = true;
                 screenshotBtn.IsEnabled = true;
+
+                FitChartsToData(null, null);
             }
         }
 

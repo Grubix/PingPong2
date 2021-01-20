@@ -24,6 +24,10 @@ namespace PingPong.KUKA {
             /// </summary>
             public double A { get; private set; }
 
+            public void Initialize(double currentX) {
+                k0 = xn = X = currentX;
+            }
+
             public void UpdateCoefficients(double x0, double x1, double v1, double T, double elapsedTime) {
                 double T1 = T;
                 double T2 = T1 * T1;
@@ -161,12 +165,23 @@ namespace PingPong.KUKA {
                 targetVelocity = RobotVector.Zero;
                 targetDuration = 0.0;
                 elapsedTime = 0.0;
+
+                polyX.Initialize(actualRobotPosition.X);
+                polyY.Initialize(actualRobotPosition.Y);
+                polyZ.Initialize(actualRobotPosition.Z);
+                polyA.Initialize(actualRobotPosition.A);
+                polyB.Initialize(actualRobotPosition.B);
+                polyC.Initialize(actualRobotPosition.C);
             }
         }
 
         public void SetTargetPosition(RobotVector currentPosition, RobotVector targetPosition, RobotVector targetVelocity, double targetDuration) {
+            targetDuration -= 0.032;
+
+            //TODO: jak to roziwazac ???
+
             if (targetDuration <= 0.0) {
-                throw new ArgumentException($"Duration value must be greater than 0, get: {targetDuration}");
+                throw new ArgumentException($"Duration value must be greater than 0.032, get: {targetDuration}");
             }
 
             bool targetPositionChanged = !targetPosition.Compare(this.targetPosition, 1, 0.1);
@@ -208,7 +223,7 @@ namespace PingPong.KUKA {
                     double na = polyA.GetValueAt(elapsedTime);
                     double nb = polyB.GetValueAt(elapsedTime);
                     double nc = polyC.GetValueAt(elapsedTime);
-
+                    
                     return new RobotVector(nx, ny, nz, na, nb, nc) - Position;
                 } else {
                     targetPositionReached = true;

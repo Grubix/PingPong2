@@ -6,25 +6,49 @@ using System.Collections.Generic;
 namespace PingPong.Applications {
     public class HitPrediction {
 
+        private class BallModel : KalmanModel {
+            public BallModel() {
+                double ts = 0.004;
+
+                F = Matrix<double>.Build.DenseOfArray(new double[,] {
+                    { 1, ts, ts * ts / 2.0 },
+                    { 0, 1, ts },
+                    { 0, 0, 1 }
+                });
+
+                B = Matrix<double>.Build.DenseOfArray(new double[,] {
+                    { 0 },
+                    { 0 },
+                    { 0 }
+                });
+
+                H = Matrix<double>.Build.DenseOfArray(new double[,] {
+                    { 1, 0, 0 }
+                });
+
+                Q = Matrix<double>.Build.DenseOfArray(new double[,] {
+                    { 0.15, 0, 0 },
+                    { 0, 1000, 0 },
+                    { 0, 0, 1000 }
+                });
+
+                R = Matrix<double>.Build.DenseOfArray(new double[,] {
+                    { 1 }
+                });
+            }
+        }
+
         private readonly double timeErrorTolerance = 0.03;
 
         private readonly int timeCheckRange = 5;
 
         private readonly int maxPolyfitSamples = 50;
 
-        private readonly Polyfit polyfitX;
+        private readonly KalmanFilter kalmanX, kalmanY, kalmanZ;
 
-        private readonly Polyfit polyfitY;
-
-        private readonly Polyfit polyfitZ;
+        private readonly Polyfit polyfitX, polyfitY, polyfitZ;
 
         private readonly List<double> predictedTimeSamples;
-
-        public List<double> XCoefficients { get; private set; }
-
-        public List<double> YCoefficients { get; private set; }
-
-        public List<double> ZCoefficients { get; private set; }
 
         public Vector<double> Position { get; private set;}
 
@@ -32,27 +56,29 @@ namespace PingPong.Applications {
 
         public double TargetHitHeight { get; private set; }
 
-        public double TimeOfFlight { get; private set; }
-
         public double TimeToHit { get; private set; }
 
         public bool IsReady { get; private set; }
 
-        public int PolyfitSamplesCount {
-            get {
-                return polyfitZ.Values.Count;
-            }
-        }
+        public int SamplesCount { get; private set; }
 
         public HitPrediction() {
             polyfitX = new Polyfit(1);
             polyfitY = new Polyfit(1);
             polyfitZ = new Polyfit(2);
+
+            KalmanModel ballModel = new BallModel();
+            kalmanX = new KalmanFilter(ballModel);
+            kalmanY = new KalmanFilter(ballModel);
+            kalmanZ = new KalmanFilter(ballModel);
+
             predictedTimeSamples = new List<double>();
+            Position = Vector<double>.Build.Dense(3);
+            Velocity = Vector<double>.Build.Dense(3);
         }
 
         public void AddMeasurement(Vector<double> position, double elapsedTime) {
-            if (PolyfitSamplesCount == maxPolyfitSamples) {
+            if (polyfitZ.Values.Count == maxPolyfitSamples) {
                 ShiftPolyfitSamples();
             }
 
@@ -60,31 +86,80 @@ namespace PingPong.Applications {
             polyfitY.AddPoint(elapsedTime, position[1]);
             polyfitZ.AddPoint(elapsedTime, position[2]);
 
-            TimeOfFlight = CalculatePredictedTimeOfFlight();
-            IsReady = TimeOfFlight > 0.1 && IsPredictedTimeStable(TimeOfFlight);
-            TimeToHit = IsReady ? TimeOfFlight - elapsedTime : -1.0;
-        }
+            kalmanX.Compute(position[0]);
+            kalmanY.Compute(position[1]);
+            kalmanZ.Compute(position[2]);
 
-        public void Calculate() {
-            XCoefficients = polyfitX.CalculateCoefficients();
-            YCoefficients = polyfitY.CalculateCoefficients();
-            // ZCoefficients already calculated in CalculatePredictedTimeOfFlight() method
+            if (SamplesCount < 10) { //TODO: DO TESTOWANIA - KIEDY MA WYSTARTOWAC
+                IsReady = false;
+                SamplesCount++;
+                return;
+            }
 
-            double positionX = XCoefficients[1] * TimeOfFlight + XCoefficients[0];
-            double positionY = YCoefficients[1] * TimeOfFlight + YCoefficients[0];
-            double positionZ = TargetHitHeight;
+            double positionX = 0;
+            double positionY = 0;
+            double positionZ = 0;
+
+            double velocityX = 0;
+            double velocityY = 0;
+            double velocityZ = 0;
+
+            if (SamplesCount < 50) { //TODO: DO TESTOWANIA - KIEDY MA DZIALAC POLYFIT
+                double z = kalmanZ.CorrectedState[0];
+                double v = kalmanZ.CorrectedState[1];
+                double a = -9.81 * 1000.0 / 2.0;
+                double delta = v * v - 4.0 * a * (z - TargetHitHeight);
+
+                if (delta < 0.0) {
+                    TimeToHit = -1.0;
+                } else {
+                    TimeToHit = (-v - Math.Sqrt(delta)) / (2.0 * a);
+
+                    positionX = kalmanX.CorrectedState[1] * TimeToHit + kalmanX.CorrectedState[0];
+                    positionY = kalmanY.CorrectedState[1] * TimeToHit + kalmanY.CorrectedState[0];
+                    positionZ = TargetHitHeight;
+
+                    velocityX = kalmanX.CorrectedState[1];
+                    velocityY = kalmanZ.CorrectedState[1];
+                    velocityZ = 2.0 * a * TimeToHit + v;
+                }
+            } else {
+                var zCoeffs = polyfitZ.CalculateCoefficients();
+
+                double z0 = zCoeffs[0];
+                double v0 = zCoeffs[1];
+                double a0 = zCoeffs[2];
+                double delta = v0 * v0 - 4.0 * a0 * (z0 - TargetHitHeight);
+
+                if (delta < 0.0) {
+                    TimeToHit = -1.0;
+                } else {
+                    double timeOfFlight = (-v0 - Math.Sqrt(delta)) / (2.0 * a0);
+                    TimeToHit = timeOfFlight - elapsedTime;
+
+                    var xCoeffs = polyfitX.CalculateCoefficients();
+                    var yCoeffs = polyfitY.CalculateCoefficients();
+
+                    positionX = xCoeffs[1] * timeOfFlight + xCoeffs[0];
+                    positionY = yCoeffs[1] * timeOfFlight + yCoeffs[0];
+                    positionZ = TargetHitHeight;
+
+                    velocityX = xCoeffs[1];
+                    velocityY = yCoeffs[1];
+                    velocityZ = 2.0 * zCoeffs[2] * timeOfFlight + zCoeffs[1];
+                }
+            }
 
             Position = Vector<double>.Build.DenseOfArray(new double[] {
                 positionX, positionY, positionZ
             });
 
-            double velocityX = XCoefficients[1];
-            double velocityY = YCoefficients[1];
-            double velocityZ = 2.0 * ZCoefficients[2] * TimeOfFlight + ZCoefficients[1];
-
             Velocity = Vector<double>.Build.DenseOfArray(new double[] {
                 velocityX, velocityY, velocityZ
             });
+
+            SamplesCount++;
+            IsReady = TimeToHit > 0;
         }
 
         public void Reset(double targetHitHeight) {
@@ -94,8 +169,12 @@ namespace PingPong.Applications {
             polyfitY.Values.Clear();
             polyfitZ.Values.Clear();
 
+            kalmanX.Reset();
+            kalmanY.Reset();
+            kalmanZ.Reset();
+
             IsReady = false;
-            TimeOfFlight = -1.0;
+            SamplesCount = 0;
             TimeToHit = -1.0;
         }
 
@@ -109,22 +188,13 @@ namespace PingPong.Applications {
             polyfitX.Values.RemoveRange(maxPolyfitSamples / 2, maxPolyfitSamples / 2);
             polyfitY.Values.RemoveRange(maxPolyfitSamples / 2, maxPolyfitSamples / 2);
             polyfitZ.Values.RemoveRange(maxPolyfitSamples / 2, maxPolyfitSamples / 2);
+
         }
 
-        private double CalculatePredictedTimeOfFlight() {
-            if (polyfitZ.Values.Count < 5) {
-                return -1.0;
-            }
-
-            ZCoefficients = polyfitZ.CalculateCoefficients();
-
+        private double CalculatePredictedTime(double z0, double v0, double a0) {
             // z(t) = a0 * t^2 + v0 * t + z0
             // z(T) = a0 * T^2 + v0 * T + z0 = TargetHitHeight
             // T = predicted time of flight
-
-            double a0 = ZCoefficients[2];
-            double v0 = ZCoefficients[1];
-            double z0 = ZCoefficients[0];
 
             if (a0 >= 0.0) { // negative acceleration expected (-g/2)
                 return -1.0;

@@ -200,7 +200,7 @@ namespace PingPong.KUKA {
             worker.DoWork += (sender, args) => {
                 InputFrame receivedFrame = new InputFrame {
                     IPOC = 0,
-                    Position = RobotVector.Zero,
+                    Position = new RobotVector(0.44, 793.19, 177.83, 0, 0, -90),
                     AxisPosition = RobotAxisPosition.Zero
                 };
 

@@ -1,4 +1,6 @@
-﻿using PingPong.KUKA;
+﻿using MathNet.Numerics.LinearAlgebra;
+using PingPong.Applications;
+using PingPong.KUKA;
 using PingPong.Maths;
 using PingPong.OptiTrack;
 using System;
@@ -55,6 +57,53 @@ namespace PingPong {
                     TakeChartScreenshot(null, null);
                 }
             };
+
+            //positionChart.RefreshDelay = 10;
+
+            //BallFlightEmulator bfs = new BallFlightEmulator(x0: 1000, y0: 700, z0: 250, vx0: -1500, vy0: 50, vz0: 2600);
+            ////BallFlightEmulator bfs = new BallFlightEmulator(x0: 0, y0: 800, z0: 180, vx0: 150, vy0: -90, vz0: 1600);
+            //HitPrediction prediction = new HitPrediction();
+            //prediction.Reset(180);
+
+            //RobotLimits limits = new RobotLimits(
+            //    lowerWorkspaceLimit: (-250, 700, 150),
+            //    upperWorkspaceLimit: (250, 950, 400),
+            //    a1AxisLimit: (-360, 360),
+            //    a2AxisLimit: (-360, 360),
+            //    a3AxisLimit: (-360, 360),
+            //    a4AxisLimit: (-360, 360),
+            //    a5AxisLimit: (-360, 360),
+            //    a6AxisLimit: (-360, 360),
+            //    correctionLimit: (6, 0.1)
+            //);
+            //RobotConfig config2 = new RobotConfig(0, limits, null);
+            //RobotEmulator emulator = new RobotEmulator(config2);
+            //emulator.Initialize();
+
+            //bfs.PositionChanged += (position, time) => {
+            //    prediction.AddMeasurement(position, time);
+            //    //Console.WriteLine(prediction.Position);
+
+            //    if (prediction.IsReady && prediction.TimeToHit > 0.1) {
+            //        var targetPos = new RobotVector(prediction.Position, emulator.HomePosition.ABC);
+            //        Console.WriteLine(targetPos);
+            //        if (emulator.Limits.CheckPosition(targetPos)) {
+            //            emulator.MoveTo(targetPos, RobotVector.Zero, prediction.TimeToHit);
+            //        }
+            //    }
+
+            //    if (positionChart.IsReady) {
+            //        var pos = emulator.Position;
+
+            //        positionChart.Update(new double[] {
+            //            position[0], position[1], position[2], prediction.Position[0], prediction.Position[1], prediction.Position[2], pos.X, pos.Y, pos.Z
+            //         });
+            //    } else {
+            //        positionChart.Tick();
+            //    }
+            //};
+
+            //bfs.Start(5, 5, 5);
         }
 
         public void Initialize(Robot robot1, Robot robot2) {
@@ -139,6 +188,12 @@ namespace PingPong {
             positionChart.AddSeries("Ball position X [mm]", "X", true);
             positionChart.AddSeries("Ball position Y [mm]", "Y", true);
             positionChart.AddSeries("Ball position Z [mm]", "Z", true);
+            positionChart.AddSeries("Ball pred. position X [mm]", "Xp", false);
+            positionChart.AddSeries("Ball pred. position Y [mm]", "Yp", false);
+            positionChart.AddSeries("Ball pred. position Z [mm]", "Zp", false);
+            positionChart.AddSeries("Robot position X [mm]", "X_R", true);
+            positionChart.AddSeries("Robot position Y [mm]", "Y_R", true);
+            positionChart.AddSeries("Robot position Z [mm]", "Z_R", true);
 
             robot1PositionChart.YAxisTitle = "Position (robot1 base)";
             robot1PositionChart.AddSeries("Robot 1 base ball position X [mm]", "X", true);
@@ -207,6 +262,8 @@ namespace PingPong {
                 resetZoomBtn.IsEnabled = true;
                 fitToDataBtn.IsEnabled = true;
                 screenshotBtn.IsEnabled = true;
+
+                FitChartsToData(null, null);
             }
         }
 

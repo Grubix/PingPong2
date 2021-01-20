@@ -120,13 +120,12 @@
     <Compile Include="src\PC\Devices\KUKA\RSI\InputFrame.cs" />
     <Compile Include="src\PC\Devices\KUKA\RSI\OutputFrame.cs" />
     <Compile Include="src\PC\Devices\KUKA\RSI\RSIAdapter.cs" />
-    <Compile Include="src\PC\Devices\KUKA\TrajectoryGenerator5.cs" />
     <Compile Include="src\PC\Devices\KUKA\TrajectoryGenerator5T.cs" />
-    <Compile Include="src\PC\Devices\KUKA\TrajectoryGenerator7.cs" />
-    <Compile Include="src\PC\Devices\KUKA\TrajectoryGenerator7T.cs" />
-    <Compile Include="src\PC\Devices\KUKA\TrajectoryGenerator7_32ms.cs" />
+    <Compile Include="src\PC\Devices\OptiTrack\BallFlightEmulator.cs" />
     <Compile Include="src\PC\Devices\OptiTrack\InputFrame.cs" />
     <Compile Include="src\PC\Devices\OptiTrack\OptiTrackSystem.cs" />
+    <Compile Include="src\PC\Maths\KalmanFilter.cs" />
+    <Compile Include="src\PC\Maths\KalmanModel.cs" />
     <Compile Include="src\PC\Maths\PIDRegulator.cs" />
     <Compile Include="src\PC\Maths\Polyfit.cs" />
     <Compile Include="src\PC\Maths\Transformation.cs" />
@@ -218,9 +217,13 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <None Include="src\KUKA\robot1.config.json" />
+    <None Include="src\KUKA\Robot1\robot1.config.json" />
     <None Include="bin\Debug\Config\robot2.config.json" />
-    <None Include="src\KUKA\robot2.config.json" />
+    <None Include="src\KUKA\Robot1\RSI_Ethernet.rsix" />
+    <None Include="src\KUKA\Robot1\RSI_Ethernet.src" />
+    <None Include="src\KUKA\Robot2\robot2.config.json" />
+    <None Include="src\KUKA\Robot2\RSI_Ethernet.rsix" />
+    <None Include="src\KUKA\Robot2\RSI_Ethernet.src" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -244,6 +247,12 @@
     <None Include="Resources\favicon.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="src\KUKA\Robot1\RSI_EthernetConfig.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="src\KUKA\Robot2\RSI_EthernetConfig.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

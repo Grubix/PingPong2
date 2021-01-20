@@ -17,7 +17,7 @@ namespace PingPong.KUKA {
 
         private readonly RSIAdapter rsiAdapter;
 
-        private readonly TrajectoryGenerator5 generator;
+        private readonly TrajectoryGenerator5T generator;
 
         private CancellationTokenSource cancellationTokenSource;
 
@@ -191,7 +191,7 @@ namespace PingPong.KUKA {
 
         public Robot(RobotConfig config) {
             rsiAdapter = new RSIAdapter();
-            generator = new TrajectoryGenerator5();
+            generator = new TrajectoryGenerator5T();
             Config = config;
 
             position = RobotVector.Zero;
@@ -283,7 +283,7 @@ namespace PingPong.KUKA {
         /// Sends data (IPOC, correction) to the robot, raises <see cref="Robot.FrameSent">FrameSent</see> event
         /// </summary>
         private void SendData() {
-            RobotVector correction = generator.GetNextCorrection(position);
+            RobotVector correction = generator.GetNextCorrection();
 
             if (!Limits.CheckRelativeCorrection(correction)) {
                 Uninitialize();
@@ -328,7 +328,7 @@ namespace PingPong.KUKA {
                 }
             }
 
-            generator.SetTargetPosition(targetPosition, targetVelocity, targetDuration);
+            generator.SetTargetPosition(position, targetPosition, targetVelocity, targetDuration);
         }
 
         /// <summary>
