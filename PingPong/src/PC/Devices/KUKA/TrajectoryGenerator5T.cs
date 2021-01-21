@@ -176,6 +176,8 @@ namespace PingPong.KUKA {
         }
 
         public void SetTargetPosition(RobotVector currentPosition, RobotVector targetPosition, RobotVector targetVelocity, double targetDuration) {
+            targetDuration -= 0.032;
+
             if (targetDuration <= 0.0) {
                 throw new ArgumentException($"Duration value must be greater than 0, get: {targetDuration}");
             }
@@ -191,7 +193,7 @@ namespace PingPong.KUKA {
                     targetPositionReached = false;
                     this.targetPosition = targetPosition;
                     this.targetVelocity = targetVelocity;
-                    this.targetDuration = targetDuration - 0.032; //TODO: czy to napewno powinno byc tutaj ???
+                    this.targetDuration = targetDuration; //TODO: czy to napewno powinno byc tutaj ???
                     elapsedTime = 0.0;
                 }
 

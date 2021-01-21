@@ -101,7 +101,7 @@ namespace PingPong {
         }
 
         private void InitializeCharts() {
-            //robot1PingChart.RefreshDelay = 60;
+            robot1PingChart.RefreshDelay = 30;
             robot1PingChart.YAxisTitle = "Ping app (robot 1)";
 
             robot1PingChart.AddSeries("Pred. time to hit [ms]", "T_Hpr", false);
