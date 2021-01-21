@@ -4,6 +4,7 @@ using PingPong.OptiTrack;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace PingPong.Applications {
     class PingApp : IApplication<PingAppData> {
@@ -196,10 +197,13 @@ namespace PingPong.Applications {
 
                 // NIE LEGITNE
                 var robotTargetVelocity = new RobotVector(0, 0, 0
-                    /*(upVector[0] + CoR * predBallVelocity[0]) / (1 + CoR),
-                    (upVector[1] + CoR * predBallVelocity[1]) / (1 + CoR),
-                    (upVector[2] + CoR * predBallVelocity[2]) / (1 + CoR)*/
+                /*(upVector[0] + CoR * predBallVelocity[0]) / (1 + CoR),
+                (upVector[1] + CoR * predBallVelocity[1]) / (1 + CoR),
+                (upVector[2] + CoR * predBallVelocity[2]) / (1 + CoR)*/
                 );
+                
+                var normalProjection = Projection(racketNormalVector);
+                double speed = Norm(normalProjection * upVector) - Norm(normalProjection * predBallVelocity);
 
                 double dampCoeff = 1;
 
@@ -215,11 +219,11 @@ namespace PingPong.Applications {
                     robotActualPosition.B + (angleB - robotActualPosition.B) * dampCoeff,
                     robotActualPosition.C + (angleC - robotActualPosition.C) * dampCoeff
                 );
-                
+
                 if (robot.Limits.CheckPosition(robotTargetPostion) && Math.Abs(angleB) < 30.0 && angleC < -75 && angleC > -120) {
                     lock (syncLock) {
                         robotMovedToHitPosition = true;
-                        if (!koniec_odbicia || 1==1) {
+                        if (!koniec_odbicia || 1 == 1) {
                             racketNormalVector = racketNormalVector.Normalize(1.0);
                             robotTargetVelocity = new RobotVector(racketNormalVector[0] * 50, racketNormalVector[1] * 50, racketNormalVector[2] * 50);
                             robot.MoveTo(robotTargetPostion, robotTargetVelocity, predTimeToHit);
@@ -228,6 +232,7 @@ namespace PingPong.Applications {
                         }
                         Console.WriteLine("vr: " + robotTargetPostion);
                         Console.WriteLine("vp: " + upVector);
+                        Console.WriteLine("Speed: " + speed);
                     }
                 }
             }
@@ -255,6 +260,44 @@ namespace PingPong.Applications {
         public bool IsStarted() {
             return isStarted;
         }
+
+        private Matrix<double> Projection(Vector<double> vec) {
+            var mat = Matrix<double>.Build.Dense(vec.Count, vec.Count);
+            double denom = 0.0;
+
+            for (int i = 0; i < vec.Count; i++) {
+                for(int j = 0; j < vec.Count; j++) {
+                    mat[i, j] = vec[i] * vec[j];
+                }
+                denom += vec[i] * vec[i];
+            }
+
+            mat /= denom;
+            return mat;
+        }
+
+        private double Norm(Vector<double> vec) {
+            double n = 0.0;
+            for (int i = 0; i < vec.Count; i++) {
+                n += vec[i] * vec[i];
+            }
+            return Math.Sqrt(n);
+        }
+
+        /*private Vector Multiply(Matrix<double> mat, Vector<double> vec) {
+            if (mat.ColumnCount != vec.Count) {
+                //return null;
+            }
+            var v = new Vector();
+
+            for (int i = 0; i < mat.RowCount; i++) {
+                v[i] = 0.0;
+                for (int j = 0; j < vec.Count; j++) {
+                    v[i] += mat[i, j] * vec[j];
+                }
+            }
+            return v;
+        }*/
 
     }
 }
