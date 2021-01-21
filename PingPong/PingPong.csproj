@@ -203,6 +203,7 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="bin\Debug\Config\robot1.config.json" />
+    <None Include="ClassDiagram1.cd" />
     <None Include="Docs\eggert_comparison_mva97.pdf" />
     <None Include="Docs\LN9_TrajectoryGeneration.pdf" />
     <None Include="Docs\Meissner feat. Pazda.pdf" />

@@ -15,6 +15,7 @@ namespace PingPong.Applications {
 
         bool IsStarted();
 
+        //TODO: start PingPonga z wlaczanego Pinga i odwrotnie??
         //void Start(IApplication application);
 
     }

@@ -27,7 +27,6 @@ namespace PingPong {
 
             private int samplesPerPoint;
 
-
             public event Action Start;
 
             public event Action<int, Transformation> ProgressChanged;
@@ -50,18 +49,17 @@ namespace PingPong {
                     Start?.Invoke();
 
                     // Move robot to first calibration point and wait
-
-                    //MoveRobotToPoint(robot, calibrationPoints[0], robot.Limits.MaxVelocity.XYZ / 3.0);
-                    robot.ForceMoveTo(new RobotVector(calibrationPoints[0], robot.Position.ABC), RobotVector.Zero, 10.0);
+                    MoveRobotToCalibrationPoint(calibrationPoints[0], 150);
+                    //robot.ForceMoveTo(new RobotVector(calibrationPoints[0], robot.Position.ABC), RobotVector.Zero, 10.0);
 
                     for (int i = 0; i < calibrationPoints.Count; i++) {
                         if (worker.CancellationPending) {
                             break;
                         }
-                        // Move robot to next calibration point and wait
 
-                        //MoveRobotToPoint(robot, calibrationPoints[0], robot.Limits.MaxVelocity.XYZ / 3.0);
-                        robot.ForceMoveTo(new RobotVector(calibrationPoints[i], robot.Position.ABC), RobotVector.Zero, 4.0);
+                        // Move robot to the next calibration point and wait
+                        MoveRobotToCalibrationPoint(calibrationPoints[i], 150);
+                        //robot.ForceMoveTo(new RobotVector(calibrationPoints[i], robot.Position.ABC), RobotVector.Zero, 4.0);
 
                         // Add robot XYZ position to list
                         var kukaPoint = robot.Position.XYZ;
@@ -94,14 +92,16 @@ namespace PingPong {
                 };
             }
 
-            private void MoveRobotToPoint(Robot robot, Vector<double> point, double velocity) {
+            private void MoveRobotToCalibrationPoint(Vector<double> point, double velocity) {
+                velocity = Math.Min(velocity, 200);
+
                 // Find greatest XYZ displacement
                 double deltaX = Math.Abs(point[0] - robot.Position.X);
                 double deltaY = Math.Abs(point[1] - robot.Position.Y);
                 double deltaZ = Math.Abs(point[2] - robot.Position.Z);
                 double deltaMax = Math.Max(Math.Max(deltaX, deltaY), deltaZ);
 
-                // Robot Vx=Vy=Vz=Ax=Ay=Az=0 => v(T/2)=Vmax => T=15*(x1-x0)/(8*Vmax)
+                // v(T/2)=Vmax => T=15*(x1-x0)/(8*Vmax)
                 double duration = 15.0 * deltaMax / (8.0 * Math.Abs(velocity));
 
                 robot.ForceMoveTo(new RobotVector(point, robot.Position.ABC), RobotVector.Zero, duration);

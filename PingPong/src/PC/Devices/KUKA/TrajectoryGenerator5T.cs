@@ -186,11 +186,12 @@ namespace PingPong.KUKA {
 
             if (targetDurationChanged || targetPositionChanged || targetVelocityChanged) {
                 double tmpElapsedTime = elapsedTime;
+
                 lock (syncLock) {
                     targetPositionReached = false;
                     this.targetPosition = targetPosition;
                     this.targetVelocity = targetVelocity;
-                    this.targetDuration = targetDuration - 0.032;
+                    this.targetDuration = targetDuration - 0.032; //TODO: czy to napewno powinno byc tutaj ???
                     elapsedTime = 0.0;
                 }
 
