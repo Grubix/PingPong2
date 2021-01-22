@@ -185,7 +185,9 @@ namespace PingPong.KUKA {
         /// </summary>
         public event Action<OutputFrame> FrameSent;
 
-        public RobotEmulator(RobotConfig config) {
+        public event Action<Exception> ErrorOccured;
+
+        public RobotEmulator(RobotConfig config, RobotVector homePosition) {
             correctionBufor = new List<RobotVector>();
             generator = new TrajectoryGenerator5T();
             Config = config;
@@ -200,7 +202,7 @@ namespace PingPong.KUKA {
             worker.DoWork += (sender, args) => {
                 InputFrame receivedFrame = new InputFrame {
                     IPOC = 0,
-                    Position = new RobotVector(0.44, 793.19, 177.83, 0, 0, -90),
+                    Position = homePosition,
                     AxisPosition = RobotAxisPosition.Zero
                 };
 
@@ -227,13 +229,16 @@ namespace PingPong.KUKA {
                     SendData();
                     Thread.Sleep(4);
                 }
+            };
+
+            worker.RunWorkerCompleted += (s, e) => {
+                if (e.Error != null) {
+                    ErrorOccured?.Invoke(e.Error);
+                }
 
                 isInitialized = false;
                 Uninitialized?.Invoke();
             };
-        }
-
-        public RobotEmulator() : this(null) {
         }
 
         /// <summary>
@@ -379,7 +384,7 @@ namespace PingPong.KUKA {
         }
 
         public void Initialize() {
-            if (!isInitialized) {
+            if (!isInitialized && !worker.IsBusy) {
                 if (config == null) {
                     throw new InvalidOperationException("Robot configuration is not set.");
                 }

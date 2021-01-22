@@ -188,12 +188,12 @@ namespace PingPong {
             positionChart.AddSeries("Ball position X [mm]", "X", true);
             positionChart.AddSeries("Ball position Y [mm]", "Y", true);
             positionChart.AddSeries("Ball position Z [mm]", "Z", true);
-            positionChart.AddSeries("Ball pred. position X [mm]", "Xp", false);
-            positionChart.AddSeries("Ball pred. position Y [mm]", "Yp", false);
-            positionChart.AddSeries("Ball pred. position Z [mm]", "Zp", false);
-            positionChart.AddSeries("Robot position X [mm]", "X_R", true);
-            positionChart.AddSeries("Robot position Y [mm]", "Y_R", true);
-            positionChart.AddSeries("Robot position Z [mm]", "Z_R", true);
+            //positionChart.AddSeries("Ball pred. position X [mm]", "Xp", false);
+            //positionChart.AddSeries("Ball pred. position Y [mm]", "Yp", false);
+            //positionChart.AddSeries("Ball pred. position Z [mm]", "Zp", false);
+            //positionChart.AddSeries("Robot position X [mm]", "X_R", true);
+            //positionChart.AddSeries("Robot position Y [mm]", "Y_R", true);
+            //positionChart.AddSeries("Robot position Z [mm]", "Z_R", true);
 
             robot1PositionChart.YAxisTitle = "Position (robot1 base)";
             robot1PositionChart.AddSeries("Robot 1 base ball position X [mm]", "X", true);

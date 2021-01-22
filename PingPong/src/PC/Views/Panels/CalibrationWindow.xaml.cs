@@ -49,8 +49,7 @@ namespace PingPong {
                     Start?.Invoke();
 
                     // Move robot to first calibration point and wait
-                    MoveRobotToCalibrationPoint(calibrationPoints[0], 150);
-                    //robot.ForceMoveTo(new RobotVector(calibrationPoints[0], robot.Position.ABC), RobotVector.Zero, 10.0);
+                    MoveRobotToCalibrationPoint(calibrationPoints[0], 100);
 
                     for (int i = 0; i < calibrationPoints.Count; i++) {
                         if (worker.CancellationPending) {
@@ -59,7 +58,6 @@ namespace PingPong {
 
                         // Move robot to the next calibration point and wait
                         MoveRobotToCalibrationPoint(calibrationPoints[i], 150);
-                        //robot.ForceMoveTo(new RobotVector(calibrationPoints[i], robot.Position.ABC), RobotVector.Zero, 4.0);
 
                         // Add robot XYZ position to list
                         var kukaPoint = robot.Position.XYZ;
@@ -93,7 +91,8 @@ namespace PingPong {
             }
 
             private void MoveRobotToCalibrationPoint(Vector<double> point, double velocity) {
-                velocity = Math.Min(velocity, 200);
+                // Clamp velocity between 1 and 300 [mm/s]
+                velocity = Math.Max(1, Math.Min(velocity, 300));
 
                 // Find greatest XYZ displacement
                 double deltaX = Math.Abs(point[0] - robot.Position.X);
@@ -101,9 +100,11 @@ namespace PingPong {
                 double deltaZ = Math.Abs(point[2] - robot.Position.Z);
                 double deltaMax = Math.Max(Math.Max(deltaX, deltaY), deltaZ);
 
-                // v(T/2)=Vmax => T=15*(x1-x0)/(8*Vmax)
+                // v(T/2) = Vmax => T = 15 * (x1 - x0) / (8 * Vmax)
                 double duration = 15.0 * deltaMax / (8.0 * Math.Abs(velocity));
 
+                // Limit min duration to 1 [s]
+                duration = Math.Max(duration, 1);
                 robot.ForceMoveTo(new RobotVector(point, robot.Position.ABC), RobotVector.Zero, duration);
             }
 

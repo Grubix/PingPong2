@@ -189,6 +189,11 @@ namespace PingPong.KUKA {
         /// </summary>
         public event Action<OutputFrame> FrameSent;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        //public event Action<Exception> ErrorOccured; 
+
         public Robot(RobotConfig config) {
             rsiAdapter = new RSIAdapter();
             generator = new TrajectoryGenerator5T();
