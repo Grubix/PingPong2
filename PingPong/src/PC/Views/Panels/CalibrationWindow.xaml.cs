@@ -49,7 +49,7 @@ namespace PingPong {
                     Start?.Invoke();
 
                     // Move robot to first calibration point and wait
-                    MoveRobotToCalibrationPoint(calibrationPoints[0], 150);
+                    MoveRobotToCalibrationPoint(calibrationPoints[0], 100);
                     //robot.ForceMoveTo(new RobotVector(calibrationPoints[0], robot.Position.ABC), RobotVector.Zero, 10.0);
 
                     for (int i = 0; i < calibrationPoints.Count; i++) {
@@ -102,7 +102,7 @@ namespace PingPong {
                 double deltaMax = Math.Max(Math.Max(deltaX, deltaY), deltaZ);
 
                 // v(T/2)=Vmax => T=15*(x1-x0)/(8*Vmax)
-                double duration = 15.0 * deltaMax / (8.0 * Math.Abs(velocity));
+                double duration = Math.Max(15.0 * deltaMax / (8.0 * Math.Abs(velocity)), 1.0);
 
                 robot.ForceMoveTo(new RobotVector(point, robot.Position.ABC), RobotVector.Zero, duration);
             }

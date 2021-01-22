@@ -108,7 +108,7 @@ namespace PingPong.Applications {
                 double z = kalmanZ.CorrectedState[0];
                 double v = kalmanZ.CorrectedState[1];
                 double a = -9.81 * 1000.0 / 2.0;
-                double delta = v * v - 4.0 * a * (z - TargetHitHeight);
+                double delta = v * v - 4.0 * a * (z - TargetHitHeight + 20);
 
                 if (delta < 0.0) {
                     TimeToHit = -1.0;
@@ -129,7 +129,7 @@ namespace PingPong.Applications {
                 double z0 = zCoeffs[0];
                 double v0 = zCoeffs[1];
                 double a0 = zCoeffs[2];
-                double delta = v0 * v0 - 4.0 * a0 * (z0 - TargetHitHeight);
+                double delta = v0 * v0 - 4.0 * a0 * (z0 - TargetHitHeight + 20);
 
                 if (delta < 0.0) {
                     TimeToHit = -1.0;
