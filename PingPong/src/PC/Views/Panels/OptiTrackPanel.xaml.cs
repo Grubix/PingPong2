@@ -30,13 +30,13 @@ namespace PingPong {
             InitializeComponent();
             InitializeCharts();
 
-            OptiTrack = new OptiTrackSystem();
-            OptiTrack.Initialized += () => {
-                hostApp.Text = OptiTrack.ServerDescription.HostApp;
-                hostName.Text = OptiTrack.ServerDescription.HostComputerName;
-                hostAdress.Text = OptiTrack.ServerDescription.HostComputerAddress.ToString(); //TODO:
-                natnetVersion.Text = OptiTrack.ServerDescription.NatNetVersion.ToString(); //TODO:
-            };
+            //OptiTrack = new OptiTrackSystem();
+            //OptiTrack.Initialized += () => {
+            //    hostApp.Text = OptiTrack.ServerDescription.HostApp;
+            //    hostName.Text = OptiTrack.ServerDescription.HostComputerName;
+            //    hostAdress.Text = OptiTrack.ServerDescription.HostComputerAddress.ToString(); //TODO:
+            //    natnetVersion.Text = OptiTrack.ServerDescription.NatNetVersion.ToString(); //TODO:
+            //};
 
             connectBtn.Click += Connect;
             disconnectBtn.Click += Disconnect;

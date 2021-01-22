@@ -32,11 +32,9 @@ namespace PingPong {
             InitializeControls();
             InitializeCharts();
 
-            positionChart.RefreshDelay = 60;
+            positionChart.RefreshDelay = 100;
             Robot = new Robot();
             InitializeRobot();
-
-
         }
 
         public void LoadConfig(string configFile) {
@@ -65,11 +63,13 @@ namespace PingPong {
             RobotEmulator emulator = new RobotEmulator(config2, new RobotVector(0.44, 793.19, 177.83, 0, 0, -90));
             emulator.Initialize();
 
-            emulator.ErrorOccured += e => MainWindow.ShowErrorDialog("An exception was raised on the robot thread.", e);
+            emulator.ErrorOccured += (addr, ex) => {
+                MainWindow.ShowErrorDialog($"An exception was raised on the robot ({addr}) thread.", ex);
+            };
 
             Task.Run(() => {
-                Thread.Sleep(2000);
-                emulator.Shift(new RobotVector(180, 0, 0), RobotVector.Zero, 0.63);
+                Thread.Sleep(3000);
+                emulator.Shift(new RobotVector(180, 0, 0), RobotVector.Zero, 0.6);
             });
 
             Task.Run(() => {

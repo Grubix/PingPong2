@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace PingPong.KUKA {
     class RobotEmulator : IDevice {
@@ -11,7 +12,7 @@ namespace PingPong.KUKA {
 
         private readonly object forceMoveSyncLock = new object();
 
-        private readonly BackgroundWorker worker;
+        private readonly object cancellationSyncLock = new object();
 
         private readonly TrajectoryGenerator5T generator;
 
@@ -28,6 +29,23 @@ namespace PingPong.KUKA {
         private RobotVector correction;
 
         private RobotConfig config;
+
+        Task communicationTask;
+
+        bool cancellationPending = true;
+
+        private bool CancellationPending {
+            get {
+                lock (cancellationSyncLock) {
+                    return cancellationPending;
+                }
+            }
+            set {
+                lock (cancellationSyncLock) {
+                    cancellationPending = value;
+                }
+            }
+        }
 
         /// <summary>
         /// Robot config
@@ -185,7 +203,10 @@ namespace PingPong.KUKA {
         /// </summary>
         public event Action<OutputFrame> FrameSent;
 
-        public event Action<Exception> ErrorOccured;
+        /// <summary>
+        /// Occurs when error occured on robot thread, while receiving or sending data
+        /// </summary>
+        public event Action<string, Exception> ErrorOccured;
 
         public RobotEmulator(RobotConfig config, RobotVector homePosition) {
             correctionBufor = new List<RobotVector>();
@@ -195,11 +216,9 @@ namespace PingPong.KUKA {
             position = RobotVector.Zero;
             correction = RobotVector.Zero;
 
-            worker = new BackgroundWorker() {
-                WorkerSupportsCancellation = true
-            };
+            communicationTask = new Task(() => {
+                CancellationPending = false;
 
-            worker.DoWork += (sender, args) => {
                 InputFrame receivedFrame = new InputFrame {
                     IPOC = 0,
                     Position = homePosition,
@@ -224,21 +243,25 @@ namespace PingPong.KUKA {
                 Initialized?.Invoke();
 
                 // Start loop for receiving and sending data
-                while (!worker.CancellationPending) {
+                while (!CancellationPending) {
                     ReceiveDataAsync();
                     SendData();
                     Thread.Sleep(4);
                 }
-            };
+            });
 
-            worker.RunWorkerCompleted += (s, e) => {
-                if (e.Error != null) {
-                    ErrorOccured?.Invoke(e.Error);
+            communicationTask.ContinueWith(t => {
+                string robotAdress = ToString();
+
+                // rsi uninitialize()
+
+                if (t.IsFaulted) {
+                    ErrorOccured?.Invoke(robotAdress, t.Exception.GetBaseException());
                 }
 
                 isInitialized = false;
                 Uninitialized?.Invoke();
-            };
+            });
         }
 
         /// <summary>
@@ -384,17 +407,18 @@ namespace PingPong.KUKA {
         }
 
         public void Initialize() {
-            if (!isInitialized && !worker.IsBusy) {
+            if (!isInitialized && !communicationTask.IsCompleted) {
                 if (config == null) {
                     throw new InvalidOperationException("Robot configuration is not set.");
                 }
 
-                worker.RunWorkerAsync();
+                communicationTask.Start();
             }
         }
 
         public void Uninitialize() {
-            worker.CancelAsync();
+            CancellationPending = true;
+            //worker.CancelAsync();
         }
 
         public bool IsInitialized() {
