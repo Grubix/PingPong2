@@ -124,6 +124,9 @@ namespace PingPong {
                     actualPosition.B, targetPosition.B, theoreticalPosition.B,
                     actualPosition.C, targetPosition.C, theoreticalPosition.C,
                 });
+
+                velocityChart.Update(emulator.Velocity.ToArray());
+                accelerationChart.Update(emulator.Acceleration.ToArray());
             };
         }
 
@@ -195,7 +198,7 @@ namespace PingPong {
             };
 
             Robot.FrameReceived += (s, e) => {
-                RobotVector actualPosition = e.ActualPosition;
+                RobotVector actualPosition = e.Position;
                 RobotVector targetPosition = Robot.TargetPosition;
                 RobotVector theoreticalPosition = Robot.TheoreticalPosition;
 

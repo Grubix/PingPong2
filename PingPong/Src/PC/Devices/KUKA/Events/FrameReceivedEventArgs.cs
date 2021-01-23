@@ -5,7 +5,7 @@ namespace PingPong.KUKA {
 
         public InputFrame ReceivedFrame { get; set; }
 
-        public RobotVector ActualPosition {
+        public RobotVector Position {
             get {
                 return ReceivedFrame.Position;
             }

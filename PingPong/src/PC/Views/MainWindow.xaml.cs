@@ -12,7 +12,7 @@ namespace PingPong {
         public MainWindow() {
             InitializeComponent();
 
-            // Set timer resolution to 1 [ms]
+            // Set timer resolution to 1ms (15.6ms is default)
             WinApi.TimeBeginPeriod(1);
 
             mainWindow = this;
