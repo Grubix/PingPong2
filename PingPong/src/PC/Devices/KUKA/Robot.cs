@@ -1,7 +1,5 @@
 ﻿using PingPong.Maths;
 using System;
-using System.ComponentModel;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,21 +13,11 @@ namespace PingPong.KUKA {
 
         private readonly object cancellationSyncLock = new object();
 
-        private readonly Task communicationTask;
-
-        private readonly BackgroundWorker worker;
-
         private readonly RSIAdapter rsiAdapter;
 
         private readonly TrajectoryGenerator5T generator;
 
-        private CancellationTokenSource cancellationTokenSource;
-
-        private bool isInitialized = false;
-
-        private bool forceMoveMode = false;
-
-        private long IPOC; // timestamp
+        private CancellationTokenSource cts;
 
         private RobotVector position;
 
@@ -37,17 +25,21 @@ namespace PingPong.KUKA {
 
         private RobotConfig config;
 
-        private bool cancellationPending = true;
+        private bool isInitialized = false; // lock ??
 
-        private bool CancellationPending {
+        private bool isForceMoveModeEnabled = false;
+
+        private bool isCancellationRequested = false;
+
+        private bool IsCancellationRequested {
             get {
                 lock (cancellationSyncLock) {
-                    return cancellationPending;
+                    return isCancellationRequested;
                 }
             }
             set {
                 lock (cancellationSyncLock) {
-                    cancellationPending = value;
+                    isCancellationRequested = value;
                 }
             }
         }
@@ -191,144 +183,85 @@ namespace PingPong.KUKA {
         /// <summary>
         /// Occurs when the robot is initialized (connection has been established)
         /// </summary>
-        public event Action Initialized;
+        public event EventHandler Initialized;
 
         /// <summary>
         /// TODO
         /// </summary>
-        public event Action Uninitialized;
+        public event EventHandler Uninitialized;
 
         /// <summary>
-        /// Occurs when <see cref="InputFrame"/> frame is received
+        /// Occurs when frame is received
         /// </summary>
-        public event Action<InputFrame> FrameReceived;
+        public event EventHandler<FrameReceivedEventArgs> FrameReceived;
 
         /// <summary>
-        /// Occurs when <see cref="OutputFrame"/> frame is sent
+        /// Occurs when frame is sent
         /// </summary>
-        public event Action<OutputFrame> FrameSent;
+        public event EventHandler<FrameSentEventArgs> FrameSent;
 
         /// <summary>
         /// Occurs when exception was thrown on robot thread, while receiving or sending data
         /// </summary>
-        public event Action<string, Exception> ErrorOccured; 
+        public event EventHandler<ErrorOccuredEventArgs> ErrorOccured; 
 
-        public Robot(RobotConfig config) {
+        public Robot() {
             rsiAdapter = new RSIAdapter();
             generator = new TrajectoryGenerator5T();
-            Config = config;
-
             position = RobotVector.Zero;
             axisPosition = RobotAxisPosition.Zero;
-
-            communicationTask = new Task(async () => {
-                cancellationTokenSource = new CancellationTokenSource();
-                CancellationPending = false;
-                InputFrame receivedFrame = null;
-
-                try {
-                    // Connect with the robot
-                    Task.Run(async () => {
-                        receivedFrame = await rsiAdapter.Connect(Config.Port);
-                    }).Wait(cancellationTokenSource.Token);
-                } catch (OperationCanceledException) {
-                    rsiAdapter.Disconnect();
-                    return;
-                }
-
-                generator.Initialize(receivedFrame.Position);
-
-                lock (receivedDataSyncLock) {
-                    IPOC = receivedFrame.IPOC;
-                    position = receivedFrame.Position;
-                    HomePosition = receivedFrame.Position;
-                }
-
-                // Send first response
-                OutputFrame response = new OutputFrame() {
-                    Correction = RobotVector.Zero,
-                    IPOC = IPOC
-                };
-
-                isInitialized = true;
-                Initialized?.Invoke();
-
-                // Start loop for receiving and sending data
-                while (!CancellationPending) {
-                    await ReceiveDataAsync();
-                    SendData();
-                }
-            }).ContinueWith(t => {
-                string robotAdress = $"{Ip}:{Port}";
-                rsiAdapter.Disconnect();
-
-                if (t.IsFaulted) {
-                    ErrorOccured?.Invoke(robotAdress, t.Exception.GetBaseException());
-                }
-
-                isInitialized = false;
-                Uninitialized?.Invoke();
-            });
-
-            worker = new BackgroundWorker() {
-                WorkerSupportsCancellation = true
-            };
-
-            worker.DoWork += async (sender, args) => {
-                cancellationTokenSource = new CancellationTokenSource();
-                InputFrame receivedFrame = null;
-
-                try {
-                    // Connect with the robot
-                    Task connectTask = Task.Run(async () => {
-                        receivedFrame = await rsiAdapter.Connect(Config.Port);
-                    });
-
-                    connectTask.Wait(cancellationTokenSource.Token);
-                } catch (OperationCanceledException) {
-                    // Connect operation cancelled (Disconnect() method)
-                    rsiAdapter.Disconnect();
-                    return;
-                }
-
-                generator.Initialize(receivedFrame.Position);
-
-                lock (receivedDataSyncLock) {
-                    IPOC = receivedFrame.IPOC;
-                    position = receivedFrame.Position;
-                    HomePosition = receivedFrame.Position;
-                }
-
-                // Send first response
-                rsiAdapter.SendData(new OutputFrame() {
-                    Correction = new RobotVector(),
-                    IPOC = IPOC
-                });
-
-                isInitialized = true;
-                Initialized?.Invoke();
-
-                // Start loop for receiving and sending data
-                while (!worker.CancellationPending) {
-                    await ReceiveDataAsync();
-                    SendData();
-                }
-
-                isInitialized = false;
-                rsiAdapter.Disconnect();
-
-                Uninitialized?.Invoke();
-            };
         }
 
-        public Robot() : this(null) {
+        public Robot(RobotConfig config) : this() {
+            Config = config;
+        }
+
+        private async Task Connect() {
+            cts = new CancellationTokenSource();
+            IsCancellationRequested = false;
+            InputFrame receivedFrame = null;
+
+            throw new ArgumentException("abc");
+
+            // Connect with the robot
+            try {
+                Task.Run(async () => {
+                    receivedFrame = await rsiAdapter.Connect(Config.Port);
+                }).Wait(cts.Token);
+            } catch (OperationCanceledException) {
+                rsiAdapter.Disconnect();
+                return;
+            }
+
+            generator.Initialize(receivedFrame.Position);
+
+            lock (receivedDataSyncLock) {
+                position = receivedFrame.Position;
+                HomePosition = receivedFrame.Position;
+            }
+
+            // Send first response
+            OutputFrame response = new OutputFrame() {
+                Correction = RobotVector.Zero,
+                IPOC = receivedFrame.IPOC
+            };
+
+            isInitialized = true;
+            Initialized?.Invoke(this, EventArgs.Empty);
+
+            // Start loop for receiving and sending data
+            while (!IsCancellationRequested) {
+                long IPOC = await ReceiveDataAsync();
+                SendData(IPOC);
+            }
         }
 
         /// <summary>
         /// Receives data (IPOC, cartesian and axis position) from the robot asynchronously, 
         /// raises <see cref="Robot.FrameRecived">FrameReceived</see> event
         /// </summary>
-        private async Task ReceiveDataAsync() {
+        /// <returns>current IPOC timestamp</returns>
+        private async Task<long> ReceiveDataAsync() {
             InputFrame receivedFrame = await rsiAdapter.ReceiveDataAsync();
 
             if (!Limits.CheckAxisPosition(receivedFrame.AxisPosition)) {
@@ -344,20 +277,30 @@ namespace PingPong.KUKA {
             }
 
             lock (receivedDataSyncLock) {
-                IPOC = receivedFrame.IPOC;
                 position = receivedFrame.Position;
                 axisPosition = receivedFrame.AxisPosition;
             }
 
-            FrameReceived?.Invoke(receivedFrame);
+            var args = new FrameReceivedEventArgs {
+                ReceivedFrame = receivedFrame,
+                ActualPosition = receivedFrame.Position,
+                TargetPosition = generator.TargetPosition,
+                GenPosition = generator.Position,
+                GenVelocity = generator.Velocity,
+                GenAcceleration = generator.Acceleration,
+                IsTargetPositionReached = generator.IsTargetPositionReached
+            };
+
+            FrameReceived?.Invoke(this, args);
+
+            return receivedFrame.IPOC;
         }
 
         /// <summary>
         /// Sends data (IPOC, correction) to the robot, raises <see cref="Robot.FrameSent">FrameSent</see> event
         /// </summary>
-        private void SendData() {
+        private void SendData(long IPOC) {
             RobotVector correction = generator.GetNextCorrection();
-            //correction = new RobotVector(correction.X, 0, 0, 0, 0, 0);
 
             if (!Limits.CheckRelativeCorrection(correction)) {
                 Uninitialize();
@@ -371,7 +314,17 @@ namespace PingPong.KUKA {
             };
 
             rsiAdapter.SendData(outputFrame);
-            FrameSent?.Invoke(outputFrame);
+
+            var args = new FrameSentEventArgs {
+                FrameSent = outputFrame,
+                ActualPosition = position,
+                TargetPosition = generator.TargetPosition,
+                GenPosition = generator.Position,
+                GenVelocity = generator.Velocity,
+                GenAcceleration = generator.Acceleration
+            };
+
+            FrameSent?.Invoke(this, args);
         }
 
         /// <summary>
@@ -397,7 +350,7 @@ namespace PingPong.KUKA {
             }
 
             lock (forceMoveSyncLock) {
-                if (forceMoveMode) {
+                if (isForceMoveModeEnabled) {
                     return;
                 }
             }
@@ -416,13 +369,13 @@ namespace PingPong.KUKA {
             MoveTo(targetPosition, targetVelocity, targetDuration);
 
             lock (forceMoveSyncLock) {
-                forceMoveMode = true;
+                isForceMoveModeEnabled = true;
             }
 
             ManualResetEvent targetPositionReached = new ManualResetEvent(false);
 
-            void processFrame(InputFrame frameReceived) {
-                if (generator.IsTargetPositionReached) {
+            void processFrame(object sender, FrameReceivedEventArgs args) {
+                if (args.IsTargetPositionReached) {
                     targetPositionReached.Set();
                 }
             };
@@ -432,7 +385,7 @@ namespace PingPong.KUKA {
             FrameReceived -= processFrame;
 
             lock (forceMoveSyncLock) {
-                forceMoveMode = false;
+                isForceMoveModeEnabled = false;
             }
         }
 
@@ -458,21 +411,42 @@ namespace PingPong.KUKA {
         }
 
         public void Initialize() {
-            if (!isInitialized) {
-                if (config == null) {
-                    throw new InvalidOperationException("Robot configuration is not set.");
-                }
-
-                worker.RunWorkerAsync();
+            if (isInitialized) {
+                return;
             }
+
+            if (config == null) {
+                throw new InvalidOperationException("Robot configuration is not set.");
+            }
+
+            Task.Run(() => {
+                Task communicationTask = Connect();
+
+                communicationTask.ContinueWith(task => {
+                    string robotAdress = ToString();
+                    rsiAdapter.Disconnect();
+
+                    if (task.IsFaulted) {
+                        var args = new ErrorOccuredEventArgs {
+                            RobotIp = robotAdress,
+                            Exception = task.Exception.GetBaseException()
+                        };
+
+                        ErrorOccured?.Invoke(this, args);
+                    }
+
+                    isInitialized = false;
+                    Uninitialized?.Invoke(this, EventArgs.Empty);
+                });
+            });
         }
 
         public void Uninitialize() {
-            if (cancellationTokenSource != null) {
-                cancellationTokenSource.Cancel();
+            if (cts != null) {
+                cts.Cancel();
             }
 
-            worker.CancelAsync();
+            IsCancellationRequested = true;
         }
 
         public bool IsInitialized() {
@@ -483,7 +457,7 @@ namespace PingPong.KUKA {
             if (Ip != null) {
                 return $"{Ip}:{Port}";
             } else {
-                return $"192.168.1.2:8081";
+                return $"0.0.0.0:000";
             }
         }
 

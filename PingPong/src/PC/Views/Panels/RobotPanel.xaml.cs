@@ -167,7 +167,7 @@ namespace PingPong {
         }
 
         private void InitializeRobot() {
-            Robot.Initialized += () => {
+            Robot.Initialized += (s, e) => {
                 Dispatcher.Invoke(() => {
                     initializeBtn.IsEnabled = false;
                     disconnectBtn.IsEnabled = true;
@@ -186,7 +186,7 @@ namespace PingPong {
                 });
             };
 
-            Robot.Uninitialized += () => {
+            Robot.Uninitialized += (s, e) => {
                 Dispatcher.Invoke(() => {
                     initializeBtn.IsEnabled = true;
                     disconnectBtn.IsEnabled = false;
@@ -195,52 +195,48 @@ namespace PingPong {
                 });
             };
 
-            Robot.FrameReceived += frame => {
+            Robot.FrameReceived += (s, e) => {
                 if (isPlotFrozen) {
                     return;
                 }
 
                 if (positionChart.IsReady) {
-                    RobotVector actualPosition = Robot.Position;
-                    RobotVector targetPosition = Robot.TargetPosition;
-                    RobotVector theoreticalPosition = Robot.TheoreticalPosition;
-
                     positionChart.Update(new double[] {
-                        actualPosition.X, targetPosition.X, theoreticalPosition.X,
-                        actualPosition.Y, targetPosition.Y, theoreticalPosition.Y,
-                        actualPosition.Z, targetPosition.Z, theoreticalPosition.Z,
-                        actualPosition.A, targetPosition.A, theoreticalPosition.A,
-                        actualPosition.B, targetPosition.B, theoreticalPosition.B,
-                        actualPosition.C, targetPosition.C, theoreticalPosition.C,
+                        e.ActualPosition.X, e.TargetPosition.X, e.GenPosition.X,
+                        e.ActualPosition.Y, e.TargetPosition.Y, e.GenPosition.Y,
+                        e.ActualPosition.Z, e.TargetPosition.Z, e.GenPosition.Z,
+                        e.ActualPosition.A, e.TargetPosition.A, e.GenPosition.A,
+                        e.ActualPosition.B, e.TargetPosition.B, e.GenPosition.B,
+                        e.ActualPosition.C, e.TargetPosition.C, e.GenPosition.C,
                     });
 
                     Dispatcher.Invoke(() => {
-                        actualPositionX.Text = actualPosition.X.ToString("F3");
-                        actualPositionY.Text = actualPosition.Y.ToString("F3");
-                        actualPositionZ.Text = actualPosition.Z.ToString("F3");
-                        actualPositionA.Text = actualPosition.A.ToString("F3");
-                        actualPositionB.Text = actualPosition.B.ToString("F3");
-                        actualPositionC.Text = actualPosition.C.ToString("F3");
+                        actualPositionX.Text = e.ActualPosition.X.ToString("F3");
+                        actualPositionY.Text = e.ActualPosition.Y.ToString("F3");
+                        actualPositionZ.Text = e.ActualPosition.Z.ToString("F3");
+                        actualPositionA.Text = e.ActualPosition.A.ToString("F3");
+                        actualPositionB.Text = e.ActualPosition.B.ToString("F3");
+                        actualPositionC.Text = e.ActualPosition.C.ToString("F3");
 
-                        targetPositionX.Text = targetPosition.X.ToString("F3");
-                        targetPositionY.Text = targetPosition.Y.ToString("F3");
-                        targetPositionZ.Text = targetPosition.Z.ToString("F3");
-                        targetPositionA.Text = targetPosition.A.ToString("F3");
-                        targetPositionB.Text = targetPosition.B.ToString("F3");
-                        targetPositionC.Text = targetPosition.C.ToString("F3");
+                        targetPositionX.Text = e.TargetPosition.X.ToString("F3");
+                        targetPositionY.Text = e.TargetPosition.Y.ToString("F3");
+                        targetPositionZ.Text = e.TargetPosition.Z.ToString("F3");
+                        targetPositionA.Text = e.TargetPosition.A.ToString("F3");
+                        targetPositionB.Text = e.TargetPosition.B.ToString("F3");
+                        targetPositionC.Text = e.TargetPosition.C.ToString("F3");
                     });
                 } else {
                     positionChart.Tick();
                 }
 
                 if (velocityChart.IsReady) {
-                    velocityChart.Update(Robot.Velocity.ToArray());
+                    velocityChart.Update(e.GenVelocity.ToArray());
                 } else {
                     velocityChart.Tick();
                 }
 
                 if (accelerationChart.IsReady) {
-                    accelerationChart.Update(Robot.Acceleration.ToArray());
+                    accelerationChart.Update(e.GenVelocity.ToArray());
                 } else {
                     accelerationChart.Tick();
                 }

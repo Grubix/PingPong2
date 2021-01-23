@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace PingPong.Applications {
-    class PingApp : IApplication<PingAppData> {
+    class PingApp : IApplication<PingDataReadyEventArgs> {
 
         private bool isStarted;
 
@@ -32,11 +32,11 @@ namespace PingPong.Applications {
 
         private readonly double CoR = 0.8;
 
-        public event Action Started;
+        public event EventHandler Started;
 
-        public event Action Stopped;
+        public event EventHandler Stopped;
 
-        public event Action<PingAppData> DataReady;
+        public event EventHandler<PingDataReadyEventArgs> DataReady;
 
         public PingApp(Robot robot, OptiTrackSystem optiTrack, Func<Vector<double>, bool> checkFunction) {
             this.robot = robot;
@@ -78,14 +78,14 @@ namespace PingPong.Applications {
 
                 bool firstFrame = true;
 
-                void checkBallVisiblity(OptiTrack.InputFrame frame) {
+                void checkBallVisiblity(object sender, OptiTrack.FrameReceivedEventArgs args) {
                     if (firstFrame) {
                         firstFrame = false;
-                        prevBallPosition = frame.BallPosition;
+                        prevBallPosition = args.BallPosition;
                         return;
                     }
 
-                    ballPosition = robot.OptiTrackTransformation.Convert(frame.BallPosition);
+                    ballPosition = robot.OptiTrackTransformation.Convert(args.BallPosition);
 
                     bool ballVisible =
                         ballPosition[0] != translation[0] &&
@@ -112,7 +112,7 @@ namespace PingPong.Applications {
                 // start application
                 robot.FrameReceived += ProcessRobotFrame;
                 optiTrack.FrameReceived += ProcessOptiTrackFrame;
-                Started?.Invoke();
+                Started?.Invoke(this, EventArgs.Empty);
             });
         }
 
@@ -125,13 +125,13 @@ namespace PingPong.Applications {
                 optiTrack.FrameReceived -= ProcessOptiTrackFrame;
                 //robot.Uninitialize();
 
-                Stopped?.Invoke();
+                Stopped?.Invoke(this, EventArgs.Empty);
             }
         }
 
-        private void ProcessRobotFrame(KUKA.InputFrame frame) {
+        private void ProcessRobotFrame(object sender, KUKA.FrameReceivedEventArgs args) {
             lock (syncLock) {
-                if (robotMovedToHitPosition && robot.IsTargetPositionReached) {
+                if (robotMovedToHitPosition && args.IsTargetPositionReached) {
                     // Slow down the robot
                     robotMovedToHitPosition = false;
                     robot.MoveTo(robot.HomePosition, RobotVector.Zero, 3);
@@ -145,8 +145,8 @@ namespace PingPong.Applications {
             }
         }
 
-        private void ProcessOptiTrackFrame(OptiTrack.InputFrame frame) {
-            Vector<double> robotBaseBallPosition = robot.OptiTrackTransformation.Convert(frame.BallPosition);
+        private void ProcessOptiTrackFrame(object sender, OptiTrack.FrameReceivedEventArgs args) {
+            Vector<double> robotBaseBallPosition = robot.OptiTrackTransformation.Convert(args.BallPosition);
 
             // if true -> ball fell, stop application
             if (robotBaseBallPosition[2] < prediction.TargetHitHeight - 50.0) {
@@ -162,7 +162,7 @@ namespace PingPong.Applications {
 
             lock (syncLock) {
                 if (prediction.SamplesCount != 0) {
-                    elapsedTime += frame.DeltaTime;
+                    elapsedTime += args.ReceivedFrame.DeltaTime;
                 }
 
                 prediction.AddMeasurement(robotBaseBallPosition, elapsedTime);
@@ -219,7 +219,7 @@ namespace PingPong.Applications {
                 }
             }
 
-            PingAppData data = new PingAppData {
+            PingDataReadyEventArgs data = new PingDataReadyEventArgs {
                 PredictedBallPosition = predBallPosition,
                 PredictedBallVelocity = predBallVelocity,
                 ActualBallPosition =  robotBaseBallPosition,
@@ -230,7 +230,7 @@ namespace PingPong.Applications {
                 BallSetpointZ = destBallPosition[2]
             };
 
-            DataReady?.Invoke(data);
+            DataReady?.Invoke(this, data);
         }
 
         public bool IsStarted() {

@@ -42,36 +42,36 @@ namespace PingPong {
                 return position[0] < 1000.0 && position[2] > 250.0;
             });
 
-            robot1PingApp.DataReady += data => {
+            robot1PingApp.DataReady += (s, args) => {
                 if (isPlotFrozen) {
                     return;
                 }
 
                 if (robot1PingChart.IsReady) {
                     robot1PingChart.Update(new double[] {
-                        data.PredictedTimeToHit,
-                        data.BallSetpointX,
-                        data.BallSetpointY,
-                        data.BallSetpointZ,
+                        args.PredictedTimeToHit,
+                        args.BallSetpointX,
+                        args.BallSetpointY,
+                        args.BallSetpointZ,
 
-                        data.ActualBallPosition[0],
-                        data.PredictedBallPosition[0],
-                        data.PredictedBallVelocity[0],
+                        args.ActualBallPosition[0],
+                        args.PredictedBallPosition[0],
+                        args.PredictedBallVelocity[0],
 
-                        data.ActualBallPosition[1],
-                        data.PredictedBallPosition[1],
-                        data.PredictedBallVelocity[1],
+                        args.ActualBallPosition[1],
+                        args.PredictedBallPosition[1],
+                        args.PredictedBallVelocity[1],
 
-                        data.ActualBallPosition[2],
-                        data.PredictedBallPosition[2],
-                        data.PredictedBallVelocity[2],
+                        args.ActualBallPosition[2],
+                        args.PredictedBallPosition[2],
+                        args.PredictedBallVelocity[2],
 
-                        data.ActualRobotPosition.X,
-                        data.ActualRobotPosition.Y,
-                        data.ActualRobotPosition.Z,
-                        data.ActualRobotPosition.A,
-                        data.ActualRobotPosition.B,
-                        data.ActualRobotPosition.C,
+                        args.ActualRobotPosition.X,
+                        args.ActualRobotPosition.Y,
+                        args.ActualRobotPosition.Z,
+                        args.ActualRobotPosition.A,
+                        args.ActualRobotPosition.B,
+                        args.ActualRobotPosition.C,
                     });
                 } else {
                     robot1PingChart.Tick();
@@ -79,11 +79,11 @@ namespace PingPong {
             };
 
             // AUTOMATYCZNA INICJALIZACJA OPTITRACKA, ROBOTA I PINGA
-            startBtn.Click += (s, e) => {
+            startBtn.Click += (bs, be) => {
                 try {
                     optiTrack.Initialize();
                     robot1.Initialize();
-                    robot1.Initialized += () => robot1PingApp.Start();
+                    robot1.Initialized += (s, e) => robot1PingApp.Start();
 
                     startBtn.IsEnabled = false;
                 } catch (Exception ex) {

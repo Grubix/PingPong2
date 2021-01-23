@@ -7,9 +7,12 @@ using System.Windows;
 namespace PingPong {
     public partial class MainWindow : Window {
 
+        private static MainWindow mainWindow;
+
         public MainWindow() {
             InitializeComponent();
 
+            mainWindow = this;
             // Force change number separator to dot
             CultureInfo culuteInfo = new CultureInfo("en-US");
             culuteInfo.NumberFormat.NumberDecimalSeparator = ".";
@@ -20,9 +23,15 @@ namespace PingPong {
             Loaded += (s, e) => {
                 robot1Panel.MainWindowHandle = this;
                 robot1Panel.OptiTrack = optiTrackPanel.OptiTrack;
+                robot1Panel.Robot.ErrorOccured += (sender, args) => {
+                    ShowErrorDialog($"An exception was raised on the robot ({args.RobotIp}) thread.", args.Exception);
+                };
 
                 robot2Panel.MainWindowHandle = this;
                 robot2Panel.OptiTrack = optiTrackPanel.OptiTrack;
+                robot2Panel.Robot.ErrorOccured += (sender, args) => {
+                    ShowErrorDialog($"An exception was raised on the robot ({args.RobotIp}) thread.", args.Exception);
+                };
 
                 try {
                     robot1Panel.LoadConfig("Config/robot1.config.json");
@@ -62,7 +71,9 @@ namespace PingPong {
                 errorMessage += $"\nOriginal error: \"{exception.Message}\"";
             }
 
-            MessageBox.Show(errorMessage, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            mainWindow.Dispatcher.Invoke(() => {
+                MessageBox.Show(mainWindow, errorMessage, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            });
         }
 
     }

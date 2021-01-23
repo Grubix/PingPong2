@@ -1,8 +1,9 @@
 ﻿using MathNet.Numerics.LinearAlgebra;
 using PingPong.KUKA;
+using System;
 
 namespace PingPong.Applications {
-    class PingAppData {
+    class PingDataReadyEventArgs : EventArgs {
 
         public Vector<double> PredictedBallPosition { get; set; }
 

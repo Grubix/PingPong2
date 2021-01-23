@@ -3,11 +3,11 @@
 namespace PingPong.Applications {
     interface IApplication<T> {
 
-        event Action Started;
+        event EventHandler Started;
 
-        event Action Stopped;
+        event EventHandler Stopped;
 
-        event Action<T> DataReady;
+        event EventHandler<T> DataReady;
 
         void Start();
 

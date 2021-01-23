@@ -30,13 +30,13 @@ namespace PingPong {
             InitializeComponent();
             InitializeCharts();
 
-            //OptiTrack = new OptiTrackSystem();
-            //OptiTrack.Initialized += () => {
-            //    hostApp.Text = OptiTrack.ServerDescription.HostApp;
-            //    hostName.Text = OptiTrack.ServerDescription.HostComputerName;
-            //    hostAdress.Text = OptiTrack.ServerDescription.HostComputerAddress.ToString(); //TODO:
-            //    natnetVersion.Text = OptiTrack.ServerDescription.NatNetVersion.ToString(); //TODO:
-            //};
+            OptiTrack = new OptiTrackSystem();
+            OptiTrack.Initialized += (s, e) => {
+                hostApp.Text = OptiTrack.ServerDescription.HostApp;
+                hostName.Text = OptiTrack.ServerDescription.HostComputerName;
+                hostAdress.Text = OptiTrack.ServerDescription.HostComputerAddress.ToString(); //TODO:
+                natnetVersion.Text = OptiTrack.ServerDescription.NatNetVersion.ToString(); //TODO:
+            };
 
             connectBtn.Click += Connect;
             disconnectBtn.Click += Disconnect;
@@ -118,35 +118,35 @@ namespace PingPong {
                 robot2Transformation = robot2.OptiTrackTransformation;
             }
 
-            robot1.Initialized += () => robot1Transformation = robot1.OptiTrackTransformation;
-            robot2.Initialized += () => robot2Transformation = robot2.OptiTrackTransformation;
+            robot1.Initialized += (s, e) => robot1Transformation = robot1.OptiTrackTransformation;
+            robot2.Initialized += (s, e) => robot2Transformation = robot2.OptiTrackTransformation;
         }
 
-        private void UpdateOptiTrackBasePositionChart(OptiTrack.InputFrame frame) {
+        private void UpdateOptiTrackBasePositionChart(object sender, OptiTrack.FrameReceivedEventArgs args) {
             if (isPlotFrozen) {
                 return;
             }
 
             if (positionChart.IsReady) {
                 positionChart.Update(new double[] {
-                    frame.BallPosition[0], frame.BallPosition[1], frame.BallPosition[2]
+                    args.BallPosition[0], args.BallPosition[1], args.BallPosition[2]
                 });
                 Dispatcher.Invoke(() => {
-                    actualPositionX.Text = frame.BallPosition[0].ToString("F3");
-                    actualPositionY.Text = frame.BallPosition[1].ToString("F3");
-                    actualPositionZ.Text = frame.BallPosition[2].ToString("F3");
+                    actualPositionX.Text = args.BallPosition[0].ToString("F3");
+                    actualPositionY.Text = args.BallPosition[1].ToString("F3");
+                    actualPositionZ.Text = args.BallPosition[2].ToString("F3");
                 });
             } else {
                 positionChart.Tick();
             }
         }
 
-        private void UpdateRobot1BasePositionChart(OptiTrack.InputFrame frame) {
+        private void UpdateRobot1BasePositionChart(object sender, OptiTrack.FrameReceivedEventArgs args) {
             if (isPlotFrozen) {
                 return;
             }
 
-            var robot1BasePosition = robot1Transformation.Convert(frame.BallPosition);
+            var robot1BasePosition = robot1Transformation.Convert(args.BallPosition);
 
             if (robot1PositionChart.IsReady) {
                 robot1PositionChart.Update(new double[] {
@@ -162,12 +162,12 @@ namespace PingPong {
             }
         }
 
-        private void UpdateRobot2BasePositionChart(OptiTrack.InputFrame frame) {
+        private void UpdateRobot2BasePositionChart(object sender, OptiTrack.FrameReceivedEventArgs args) {
             if (isPlotFrozen) {
                 return;
             }
 
-            var robot2BasePosition = robot2Transformation.Convert(frame.BallPosition);
+            var robot2BasePosition = robot2Transformation.Convert(args.BallPosition);
 
             if (robot2PositionChart.IsReady) {
                 robot2PositionChart.Update(new double[] {

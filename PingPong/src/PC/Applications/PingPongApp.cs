@@ -4,7 +4,7 @@ using PingPong.OptiTrack;
 using System;
 
 namespace PingPong.Applications {
-    class PingPongApp : IApplication<PingPongAppData> {
+    class PingPongApp : IApplication<PingPongDataReadyEventArgs> {
 
         private bool isStarted;
 
@@ -16,11 +16,11 @@ namespace PingPong.Applications {
 
         private readonly Func<Vector<double>, bool> checkFunction;
 
-        public event Action Started;
+        public event EventHandler Started;
 
-        public event Action Stopped;
+        public event EventHandler Stopped;
 
-        public event Action<PingPongAppData> DataReady;
+        public event EventHandler<PingPongDataReadyEventArgs> DataReady;
 
         public PingPongApp(Robot robot1, Robot robot2, OptiTrackSystem optiTrack, Func<Vector<double>, bool> checkFunction) {
             this.robot1 = robot1;

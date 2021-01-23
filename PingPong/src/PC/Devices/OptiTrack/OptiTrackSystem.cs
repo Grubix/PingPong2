@@ -12,11 +12,11 @@ namespace PingPong.OptiTrack {
 
         private double frameTimestamp;
 
-        public event Action Initialized;
+        public event EventHandler Initialized;
 
-        public event Action Uninitialized;
+        public event EventHandler Uninitialized;
 
-        public event Action<InputFrame> FrameReceived;
+        public event EventHandler<FrameReceivedEventArgs> FrameReceived;
 
         public ServerDescription ServerDescription { get; }
 
@@ -28,7 +28,12 @@ namespace PingPong.OptiTrack {
         private void ProcessFrame(FrameOfMocapData data, NatNetClientML client) {
             double frameDeltaTime = data.fTimestamp - frameTimestamp;
             frameTimestamp = data.fTimestamp;
-            FrameReceived?.Invoke(new InputFrame(data, frameDeltaTime));
+
+            var args = new FrameReceivedEventArgs {
+                ReceivedFrame = new InputFrame(data, frameDeltaTime)
+            };
+
+            FrameReceived?.Invoke(this, args);
         }
 
         public void Initialize() {
@@ -49,7 +54,7 @@ namespace PingPong.OptiTrack {
             }
 
             isInitialized = true;
-            Initialized?.Invoke();
+            Initialized?.Invoke(this, EventArgs.Empty);
 
             natNetClient.OnFrameReady += ProcessFrame;
         }
@@ -64,11 +69,10 @@ namespace PingPong.OptiTrack {
                 natNetClient.OnFrameReady -= ProcessFrame;
                 natNetClient.Uninitialize();
 
-                Uninitialized?.Invoke();
+                Uninitialized?.Invoke(this, EventArgs.Empty);
             }
         }
 
-        // TODO: async, Task, token source ?
         public List<InputFrame> WaitForFrames(int numOfFrames) {
             if (!isInitialized) {
                 throw new InvalidOperationException("OptiTrack system is not initialized");
@@ -77,8 +81,8 @@ namespace PingPong.OptiTrack {
             ManualResetEvent getSamplesEvent = new ManualResetEvent(false);
             var frames = new List<InputFrame>();
 
-            void processFrame(InputFrame frame) {
-                frames.Add(frame);
+            void processFrame(object sender, FrameReceivedEventArgs args) {
+                frames.Add(args.ReceivedFrame);
 
                 if (frames.Count == numOfFrames) {
                     FrameReceived -= processFrame;
