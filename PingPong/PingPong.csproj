@@ -127,6 +127,7 @@
     <Compile Include="src\PC\Maths\KalmanFilter.cs" />
     <Compile Include="src\PC\Maths\KalmanModel.cs" />
     <Compile Include="src\PC\Maths\PIDRegulator.cs" />
+    <Compile Include="src\PC\Maths\PIRegulator.cs" />
     <Compile Include="src\PC\Maths\Polyfit.cs" />
     <Compile Include="src\PC\Maths\Transformation.cs" />
     <Compile Include="src\PC\Views\Panels\CalibrationWindow.xaml.cs">

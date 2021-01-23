@@ -42,11 +42,9 @@ namespace PingPong.Applications {
 
         private bool koniec_odbicia = false;
 
-        private PIDRegulator regB;
+        private PIRegulator regB;
 
-        private PIDRegulator regC;
-
-        private Vector<double> error;
+        private PIRegulator regC;
 
         public PingApp(Robot robot, OptiTrackSystem optiTrack, Func<Vector<double>, bool> checkFunction) {
             this.robot = robot;
@@ -62,11 +60,8 @@ namespace PingPong.Applications {
             destBallPosition = Vector<double>.Build.DenseOfArray(
                 new double[] { 0.44, 793.19, 177.82 }
             );
-            regB = new PIDRegulator(0.0075, 0.001, 0, 0.004);
-            regC = new PIDRegulator(0.0075, 0.001, 0, 0.004);
-            error = Vector<double>.Build.DenseOfArray(
-                new double[] { 0.0, 0.0}
-            );
+            regB = new PIRegulator(0.0075, 0.001, 0.004, 0.0);
+            regC = new PIRegulator(0.0075, 0.001, 0.004, 793.19);
         }
 
         ~PingApp() {
@@ -148,11 +143,8 @@ namespace PingPong.Applications {
             lock (syncLock) {
                 if (robotMovedToHitPosition && robot.IsTargetPositionReached) {
                     // Slow down the robot
-                    error[0] = regB.Compute(0.0, robot.TargetPosition.X);
-                    error[1] = regC.Compute(793.19, robot.TargetPosition.Y);
-                    Console.WriteLine("Berr: " + error[0] + "   B: " + robot.TargetPosition.B);
-                    Console.WriteLine("Cerr: " + error[1] + "   C: " + robot.TargetPosition.C);
-
+                    regB.Shift();
+                    regC.Shift();
 
                     robotMovedToHitPosition = false;
                     robot.MoveTo(robot.HomePosition, RobotVector.Zero, 3);
@@ -210,6 +202,12 @@ namespace PingPong.Applications {
 
                 double angleB = Math.Atan2(racketNormalVector[0], racketNormalVector[2]) * 180.0 / Math.PI;
                 double angleC = -90.0 - Math.Atan2(racketNormalVector[1], racketNormalVector[2]) * 180.0 / Math.PI;
+                //angleB += regB.ComputeU(predBallPosition[0], elapsedTime + predTimeToHit);
+                //angleC -= regC.ComputeU(predBallPosition[1], elapsedTime + predTimeToHit);
+                Console.WriteLine("regB: " + regB.ComputeU(predBallPosition[0], elapsedTime + predTimeToHit));
+                Console.WriteLine("regC: " + regC.ComputeU(predBallPosition[1], elapsedTime + predTimeToHit));
+                angleB = Math.Min(Math.Max(angleB, -20.0), 20.0);
+                angleC = Math.Min(Math.Max(angleC, -110.0), -70.0);
 
                 // NIE LEGITNE
                 var robotTargetVelocity = new RobotVector(0, 0, 0
@@ -237,7 +235,7 @@ namespace PingPong.Applications {
                     robotActualPosition.C + (angleC - robotActualPosition.C) * dampCoeff
                 );
 
-                if (robot.Limits.CheckPosition(robotTargetPostion) && Math.Abs(angleB) < 30.0 && angleC < -75 && angleC > -120) {
+                if (robot.Limits.CheckPosition(robotTargetPostion)) {
                     lock (syncLock) {
                         robotMovedToHitPosition = true;
                         if (!koniec_odbicia || 1 == 1) {
@@ -305,21 +303,5 @@ namespace PingPong.Applications {
             }
             return Math.Sqrt(n);
         }
-
-        /*private Vector Multiply(Matrix<double> mat, Vector<double> vec) {
-            if (mat.ColumnCount != vec.Count) {
-                //return null;
-            }
-            var v = new Vector();
-
-            for (int i = 0; i < mat.RowCount; i++) {
-                v[i] = 0.0;
-                for (int j = 0; j < vec.Count; j++) {
-                    v[i] += mat[i, j] * vec[j];
-                }
-            }
-            return v;
-        }*/
-
     }
 }

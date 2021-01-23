@@ -55,12 +55,12 @@
         public double Compute(double setpoint, double feedback) {
             double e0 = setpoint - feedback;
 
+            u0 = ke0 * e0 + ke1 * e1 + ke2 * e2 - ku1 * u1 - ku2 * u2;
+
             e2 = e1;
             e1 = e0;
             u2 = u1;
             u1 = u0;
-
-            u0 = ke0 * e0 + ke1 * e1 + ke2 * e2 - ku1 * u1 - ku2 * u2;
 
             //TODO: limity wyjscia, anti windup, cos?
 
