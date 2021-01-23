@@ -12,9 +12,35 @@ using System.Windows.Shapes;
 namespace PingPong {
     public partial class LiveChart : UserControl {
 
-        private readonly object syncLock = new object();
+        private class SeriesWrapper {
+
+            public List<DataPoint> Points { get; }
+
+            public List<DataPoint> DelayedPoints { get; }
+
+            public Series Series { get; }
+
+            public SeriesWrapper(string title) {
+                Series = new LineSeries {
+                    Title = title
+                };
+
+                Points = new List<DataPoint>();
+                DelayedPoints = new List<DataPoint>();
+
+                Series.ItemsSource = DelayedPoints;
+            }
+
+            public void Clear() {
+                Points.Clear();
+                DelayedPoints.Clear();
+            }
+
+        }
 
         private readonly Stopwatch stopWatch = new Stopwatch();
+
+        private readonly List<SeriesWrapper> wrappedSeries  = new List<SeriesWrapper>();
 
         private long deltaTime = 0;
 
@@ -24,57 +50,13 @@ namespace PingPong {
 
         private int clearCounter = 0;
 
-        private int refreshDelay = 80;
+        public int RefreshDelay { get; set; } = 220;
 
-        private int maxSamples = 5000;
+        public int MaxSamples { get; set; } = 5000;
 
-        public int RefreshDelay {
-            get {
-                lock (syncLock) {
-                    return refreshDelay;
-                }
-            }
-            set {
-                lock (syncLock) {
-                    refreshDelay = value;
-                }
-            }
-        }
+        public bool IsFrozen { get; private set; }
 
-        public int MaxSamples {
-            get {
-                lock (syncLock) {
-                    return maxSamples;
-                }
-            }
-            set {
-                lock (syncLock) {
-                    maxSamples = value;
-                }
-                Clear();
-            }
-        }
-
-        public bool IsReady {
-            get {
-                stopWatch.Stop();
-
-                deltaTime += stopWatch.ElapsedMilliseconds;
-
-                stopWatch.Reset();
-                stopWatch.Start();
-
-                bool isReady = deltaTime >= RefreshDelay;
-
-                if (isReady) {
-                    deltaTime = 0;
-                }
-
-                return isReady;
-            }
-        }
-
-        public string YAxisTitle {
+        public string Title {
             get {
                 return chart.Axes[1].Title;
             }
@@ -86,19 +68,16 @@ namespace PingPong {
         public LiveChart() {
             InitializeComponent();
             chart.Axes[0].Minimum = 0;
-            chart.Axes[0].Maximum = maxSamples;
+            chart.Axes[0].Maximum = MaxSamples;
             chart.Axes[0].AbsoluteMinimum = 0;
-            chart.Axes[0].AbsoluteMaximum = maxSamples;
+            chart.Axes[0].AbsoluteMaximum = MaxSamples;
             chart.Axes[0].MinimumRange = 10;
         }
 
         public void AddSeries(string title, string text, bool visible, bool addSeparator = false) {
-            LineSeries series = new LineSeries {
-                Title = title
-            };
-
-            chart.Series.Add(series);
-            series.ItemsSource = new List<DataPoint>();
+            SeriesWrapper seriesWrapper = new SeriesWrapper(title);
+            chart.Series.Add(seriesWrapper.Series);
+            wrappedSeries.Add(seriesWrapper);
 
             CheckBox checkbox = new CheckBox {
                 VerticalAlignment = System.Windows.VerticalAlignment.Center,
@@ -108,7 +87,7 @@ namespace PingPong {
             if (visible) {
                 checkbox.IsChecked = true;
             } else {
-                series.Visibility = Visibility.Hidden;
+                seriesWrapper.Series.Visibility = Visibility.Hidden;
             }
 
             if (visibleSeries.Children.Count != 0) {
@@ -117,9 +96,9 @@ namespace PingPong {
 
             checkbox.Click += (s, e) => {
                 if ((bool)checkbox.IsChecked) {
-                    series.Visibility = Visibility.Visible;
+                    seriesWrapper.Series.Visibility = Visibility.Visible;
                 } else {
-                    series.Visibility = Visibility.Hidden;
+                    seriesWrapper.Series.Visibility = Visibility.Hidden;
                 }
             };
 
@@ -178,65 +157,75 @@ namespace PingPong {
         }
 
         public void Update(double[] data) {
+            if (IsFrozen) {
+                return;
+            }
+
             if (data.Length != chart.Series.Count) {
                 throw new ArgumentException("Array length err");
             }
 
-            lock (syncLock) {
-                for (int i = 0; i < data.Length; i++) {
-                    ((List<DataPoint>)chart.Series[i].ItemsSource).Add(new DataPoint(currentSample, data[i]));
+            stopWatch.Stop();
+            deltaTime += stopWatch.ElapsedMilliseconds;
+            stopWatch.Reset();
+            stopWatch.Start();
+            //stopWatch.Restart();
+
+            bool isReady = deltaTime >= RefreshDelay;
+
+            if (isReady) {
+                Console.WriteLine(deltaTime);
+                Console.WriteLine("ppp");
+                deltaTime = 0;
+            }
+
+            for (int i = 0; i < data.Length; i++) {
+                DataPoint point = new DataPoint(currentSample, data[i]);
+                wrappedSeries[i].Points.Add(point);
+
+                if (isReady) {
+                    wrappedSeries[i].DelayedPoints.Add(point);
                 }
             }
 
             Dispatcher.Invoke(() => {
-                lock (syncLock) {
-                    if (currentSample > (clearCounter + 1) * maxSamples) {
-                        clearCounter++;
+                if (currentSample > (clearCounter + 1) * MaxSamples) {
+                    clearCounter++;
 
-                        chart.Axes[0].Minimum = chart.Axes[0].AbsoluteMinimum = clearCounter * maxSamples;
-                        chart.Axes[0].Maximum = chart.Axes[0].AbsoluteMaximum = (clearCounter + 1) * maxSamples;
+                    chart.Axes[0].Minimum = chart.Axes[0].AbsoluteMinimum = clearCounter * MaxSamples;
+                    chart.Axes[0].Maximum = chart.Axes[0].AbsoluteMaximum = (clearCounter + 1) * MaxSamples;
 
-                        for (int i = 0; i < data.Length; i++) {
-                            ((List<DataPoint>)chart.Series[i].ItemsSource).Clear();
-                        }
-                    }
+                    wrappedSeries.ForEach(s => s.Clear());
+                }
 
-                    lastUpdateSample = currentSample;
+                lastUpdateSample = currentSample;
+
+                if (isReady) {
                     chart.InvalidatePlot();
                 }
             });
 
-            Tick();
-        }
-
-        public void Tick() {
-            lock (syncLock) {
-                currentSample++;
-            }
+            currentSample++;
         }
 
         public void Clear() {
-            lock (syncLock) {
-                foreach (var series in chart.Series) {
-                    ((List<DataPoint>)series.ItemsSource).Clear();
-                }
+            wrappedSeries.ForEach(s => s.Clear());
 
-                currentSample = 0;
-                lastUpdateSample = 0;
-                clearCounter = 0;
+            currentSample = 0;
+            lastUpdateSample = 0;
+            clearCounter = 0;
 
-                chart.Axes[0].Minimum = 0;
-                chart.Axes[0].Maximum = maxSamples;
-                chart.Axes[0].AbsoluteMinimum = 0;
-                chart.Axes[0].AbsoluteMaximum = maxSamples;
-                chart.ResetAllAxes();
-                chart.InvalidatePlot();
-            }
+            chart.Axes[0].Minimum = 0;
+            chart.Axes[0].Maximum = MaxSamples;
+            chart.Axes[0].AbsoluteMinimum = 0;
+            chart.Axes[0].AbsoluteMaximum = MaxSamples;
+            chart.ResetAllAxes();
+            chart.InvalidatePlot();
         }
 
         public void ResetZoom() {
-            chart.Axes[0].Minimum = chart.Axes[0].AbsoluteMinimum = clearCounter * maxSamples;
-            chart.Axes[0].Maximum = chart.Axes[0].AbsoluteMaximum = (clearCounter + 1) * maxSamples;
+            chart.Axes[0].Minimum = chart.Axes[0].AbsoluteMinimum = clearCounter * MaxSamples;
+            chart.Axes[0].Maximum = chart.Axes[0].AbsoluteMaximum = (clearCounter + 1) * MaxSamples;
             chart.ResetAllAxes();
             chart.InvalidatePlot();
         }
@@ -247,16 +236,24 @@ namespace PingPong {
             chart.InvalidatePlot();
         }
 
-        public void BlockZoomAndPan() {
-            chart.Axes[0].IsZoomEnabled = false;
-            chart.Axes[0].IsPanEnabled = false;
-            chart.InvalidatePlot();
-        }
+        public void Freeze() {
+            IsFrozen = true;
 
-        public void UnblockZoomAndPan() {
+            wrappedSeries.ForEach(s => s.Series.ItemsSource = s.Points);
+
             chart.Axes[0].IsZoomEnabled = true;
             chart.Axes[0].IsPanEnabled = true;
             chart.InvalidatePlot();
+        }
+
+        public void Unfreeze() {
+            IsFrozen = false;
+
+            wrappedSeries.ForEach(s => s.Series.ItemsSource = s.DelayedPoints);
+
+            chart.Axes[0].IsZoomEnabled = false;
+            chart.Axes[0].IsPanEnabled = false;
+            Clear(); 
         }
 
         public MemoryStream ExportImage(int width, int height) {

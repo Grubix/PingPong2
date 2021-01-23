@@ -131,7 +131,7 @@ namespace PingPong.Applications {
 
         private void ProcessRobotFrame(object sender, KUKA.FrameReceivedEventArgs args) {
             lock (syncLock) {
-                if (robotMovedToHitPosition && args.IsTargetPositionReached) {
+                if (robotMovedToHitPosition && robot.IsTargetPositionReached) {
                     // Slow down the robot
                     robotMovedToHitPosition = false;
                     robot.MoveTo(robot.HomePosition, RobotVector.Zero, 3);

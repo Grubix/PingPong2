@@ -32,7 +32,7 @@ namespace PingPong {
             InitializeControls();
             InitializeCharts();
 
-            positionChart.RefreshDelay = 100;
+            //positionChart.RefreshDelay = 100;
             Robot = new Robot();
             InitializeRobot();
         }
@@ -45,7 +45,7 @@ namespace PingPong {
             UpdateConfigControls(config);
 
             if (Robot.Config.Port == 8082) {
-                return;
+                //return;
             }
 
             RobotLimits limits = new RobotLimits(
@@ -57,7 +57,7 @@ namespace PingPong {
                 a4AxisLimit: (-360, 360),
                 a5AxisLimit: (-360, 360),
                 a6AxisLimit: (-360, 360),
-                correctionLimit: (1, 0.1)
+                correctionLimit: (5, 0.1)
             );
             RobotConfig config2 = new RobotConfig(0, limits, null);
             RobotEmulator emulator = new RobotEmulator(config2, new RobotVector(0.44, 793.19, 177.83, 0, 0, -90));
@@ -73,31 +73,32 @@ namespace PingPong {
             });
 
             Task.Run(() => {
-                Thread.Sleep(4000);
-                //emulator.Uninitialize();
-                //emulator.Shift(new RobotVector(-50, -50, -50), RobotVector.Zero, 3);
+                Random random = new Random();
+
+                while (true) {
+                    Thread.Sleep(3000);
+
+                    double x = (random.NextDouble() - 0.5) * 300;
+                    double y = (random.NextDouble() - 0.5) * 300;
+                    double z = (random.NextDouble() - 0.5) * 300;
+
+                    emulator.Shift(new RobotVector(x, y, z), RobotVector.Zero, 2);
+                }
             });
 
             emulator.FrameReceived += fr => {
-                if (isPlotFrozen) {
-                    return;
-                }
-                if (positionChart.IsReady) {
-                    RobotVector actualPosition = emulator.Position;
-                    RobotVector targetPosition = emulator.TargetPosition;
-                    RobotVector theoreticalPosition = emulator.TheoreticalPosition;
+                RobotVector actualPosition = emulator.Position;
+                RobotVector targetPosition = emulator.TargetPosition;
+                RobotVector theoreticalPosition = emulator.TheoreticalPosition;
 
-                    positionChart.Update(new double[] {
-                        actualPosition.X, targetPosition.X, theoreticalPosition.X,
-                        actualPosition.Y, targetPosition.Y, theoreticalPosition.Y,
-                        actualPosition.Z, targetPosition.Z, theoreticalPosition.Z,
-                        actualPosition.A, targetPosition.A, theoreticalPosition.A,
-                        actualPosition.B, targetPosition.B, theoreticalPosition.B,
-                        actualPosition.C, targetPosition.C, theoreticalPosition.C,
-                    });
-                } else {
-                    positionChart.Tick();
-                }
+                positionChart.Update(new double[] {
+                    actualPosition.X, targetPosition.X, theoreticalPosition.X,
+                    actualPosition.Y, targetPosition.Y, theoreticalPosition.Y,
+                    actualPosition.Z, targetPosition.Z, theoreticalPosition.Z,
+                    actualPosition.A, targetPosition.A, theoreticalPosition.A,
+                    actualPosition.B, targetPosition.B, theoreticalPosition.B,
+                    actualPosition.C, targetPosition.C, theoreticalPosition.C,
+                });
             };
         }
 
@@ -129,7 +130,7 @@ namespace PingPong {
         }
 
         private void InitializeCharts() {
-            positionChart.YAxisTitle = "Position";
+            positionChart.Title = "Position";
             positionChart.AddSeries("Actual position X [mm]", "X", true);
             positionChart.AddSeries("Target position X [mm]", "X_T", false);
             positionChart.AddSeries("Theoretical position X [mm]", "X_TH", false, true);
@@ -149,7 +150,7 @@ namespace PingPong {
             positionChart.AddSeries("Target position C [deg]", "C_T", false);
             positionChart.AddSeries("Theoretical position C [deg]", "C_TH", false);
 
-            velocityChart.YAxisTitle = "Velocity (theoretical)";
+            velocityChart.Title = "Velocity (theoretical)";
             velocityChart.AddSeries("Velocity X [mm/s]", "V_X", true);
             velocityChart.AddSeries("Velocity Y [mm/s]", "V_Y", true);
             velocityChart.AddSeries("Velocity Z [mm/s]", "V_Z", true);
@@ -157,7 +158,7 @@ namespace PingPong {
             velocityChart.AddSeries("Velocity B [deg/s]", "V_B", false);
             velocityChart.AddSeries("Velocity C [deg/s]", "V_C", false);
 
-            accelerationChart.YAxisTitle = "Acceleration (theoretical)";
+            accelerationChart.Title = "Acceleration (theoretical)";
             accelerationChart.AddSeries("Acceleration X [mm/s²]", "A_X", true);
             accelerationChart.AddSeries("Acceleration Y [mm/s²]", "A_Y", true);
             accelerationChart.AddSeries("Acceleration Z [mm/s²]", "A_Z", true);
@@ -196,50 +197,37 @@ namespace PingPong {
             };
 
             Robot.FrameReceived += (s, e) => {
-                if (isPlotFrozen) {
-                    return;
-                }
+                RobotVector actualPosition = e.ActualPosition;
+                RobotVector targetPosition = Robot.TargetPosition;
+                RobotVector theoreticalPosition = Robot.TheoreticalPosition;
 
-                if (positionChart.IsReady) {
-                    positionChart.Update(new double[] {
-                        e.ActualPosition.X, e.TargetPosition.X, e.GenPosition.X,
-                        e.ActualPosition.Y, e.TargetPosition.Y, e.GenPosition.Y,
-                        e.ActualPosition.Z, e.TargetPosition.Z, e.GenPosition.Z,
-                        e.ActualPosition.A, e.TargetPosition.A, e.GenPosition.A,
-                        e.ActualPosition.B, e.TargetPosition.B, e.GenPosition.B,
-                        e.ActualPosition.C, e.TargetPosition.C, e.GenPosition.C,
-                    });
+                positionChart.Update(new double[] {
+                    actualPosition.X, targetPosition.X, theoreticalPosition.X,
+                    actualPosition.Y, targetPosition.Y, theoreticalPosition.Y,
+                    actualPosition.Z, targetPosition.Z, theoreticalPosition.Z,
+                    actualPosition.A, targetPosition.A, theoreticalPosition.A,
+                    actualPosition.B, targetPosition.B, theoreticalPosition.B,
+                    actualPosition.C, targetPosition.C, theoreticalPosition.C,
+                });
 
-                    Dispatcher.Invoke(() => {
-                        actualPositionX.Text = e.ActualPosition.X.ToString("F3");
-                        actualPositionY.Text = e.ActualPosition.Y.ToString("F3");
-                        actualPositionZ.Text = e.ActualPosition.Z.ToString("F3");
-                        actualPositionA.Text = e.ActualPosition.A.ToString("F3");
-                        actualPositionB.Text = e.ActualPosition.B.ToString("F3");
-                        actualPositionC.Text = e.ActualPosition.C.ToString("F3");
+                Dispatcher.Invoke(() => {
+                    actualPositionX.Text = actualPosition.X.ToString("F3");
+                    actualPositionY.Text = actualPosition.Y.ToString("F3");
+                    actualPositionZ.Text = actualPosition.Z.ToString("F3");
+                    actualPositionA.Text = actualPosition.A.ToString("F3");
+                    actualPositionB.Text = actualPosition.B.ToString("F3");
+                    actualPositionC.Text = actualPosition.C.ToString("F3");
 
-                        targetPositionX.Text = e.TargetPosition.X.ToString("F3");
-                        targetPositionY.Text = e.TargetPosition.Y.ToString("F3");
-                        targetPositionZ.Text = e.TargetPosition.Z.ToString("F3");
-                        targetPositionA.Text = e.TargetPosition.A.ToString("F3");
-                        targetPositionB.Text = e.TargetPosition.B.ToString("F3");
-                        targetPositionC.Text = e.TargetPosition.C.ToString("F3");
-                    });
-                } else {
-                    positionChart.Tick();
-                }
+                    targetPositionX.Text = targetPosition.X.ToString("F3");
+                    targetPositionY.Text = targetPosition.Y.ToString("F3");
+                    targetPositionZ.Text = targetPosition.Z.ToString("F3");
+                    targetPositionA.Text = targetPosition.A.ToString("F3");
+                    targetPositionB.Text = targetPosition.B.ToString("F3");
+                    targetPositionC.Text = targetPosition.C.ToString("F3");
+                });
 
-                if (velocityChart.IsReady) {
-                    velocityChart.Update(e.GenVelocity.ToArray());
-                } else {
-                    velocityChart.Tick();
-                }
-
-                if (accelerationChart.IsReady) {
-                    accelerationChart.Update(e.GenVelocity.ToArray());
-                } else {
-                    accelerationChart.Tick();
-                }
+                velocityChart.Update(Robot.Velocity.ToArray());
+                accelerationChart.Update(Robot.Acceleration.ToArray());
             };
         }
 
@@ -334,13 +322,9 @@ namespace PingPong {
 
         private void FreezeCharts(object sender, RoutedEventArgs e) {
             if (isPlotFrozen) {
-                positionChart.Clear();
-                velocityChart.Clear();
-                accelerationChart.Clear();
-
-                positionChart.BlockZoomAndPan();
-                velocityChart.BlockZoomAndPan();
-                accelerationChart.BlockZoomAndPan();
+                positionChart.Unfreeze();
+                velocityChart.Unfreeze();
+                accelerationChart.Unfreeze();
 
                 isPlotFrozen = false;
                 freezeBtn.Content = "Freeze";
@@ -348,9 +332,9 @@ namespace PingPong {
                 fitToDataBtn.IsEnabled = false;
                 screenshotBtn.IsEnabled = false;
             } else {
-                positionChart.UnblockZoomAndPan();
-                velocityChart.UnblockZoomAndPan();
-                accelerationChart.UnblockZoomAndPan();
+                positionChart.Freeze();
+                velocityChart.Freeze();
+                accelerationChart.Freeze();
 
                 isPlotFrozen = true;
                 freezeBtn.Content = "Unfreeze";
@@ -379,7 +363,7 @@ namespace PingPong {
                 return;
             }
 
-            string fileName = activeChart.YAxisTitle;
+            string fileName = activeChart.Title;
 
             if (string.IsNullOrEmpty(fileName)) {
                 fileName = "screenshot.png";

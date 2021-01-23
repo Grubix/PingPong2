@@ -21,7 +21,7 @@ namespace PingPong.KUKA {
 
         private RobotVector position;
 
-        private RobotAxisPosition axisPosition;
+        private RobotAxisVector axisPosition;
 
         private RobotConfig config;
 
@@ -114,7 +114,7 @@ namespace PingPong.KUKA {
         /// <summary>
         /// Robot actual axis position
         /// </summary>
-        public RobotAxisPosition AxisPosition {
+        public RobotAxisVector AxisPosition {
             get {
                 lock (receivedDataSyncLock) {
                     return axisPosition;
@@ -209,7 +209,7 @@ namespace PingPong.KUKA {
             rsiAdapter = new RSIAdapter();
             generator = new TrajectoryGenerator5T();
             position = RobotVector.Zero;
-            axisPosition = RobotAxisPosition.Zero;
+            axisPosition = RobotAxisVector.Zero;
         }
 
         public Robot(RobotConfig config) : this() {
@@ -281,17 +281,9 @@ namespace PingPong.KUKA {
                 axisPosition = receivedFrame.AxisPosition;
             }
 
-            var args = new FrameReceivedEventArgs {
-                ReceivedFrame = receivedFrame,
-                ActualPosition = receivedFrame.Position,
-                TargetPosition = generator.TargetPosition,
-                GenPosition = generator.Position,
-                GenVelocity = generator.Velocity,
-                GenAcceleration = generator.Acceleration,
-                IsTargetPositionReached = generator.IsTargetPositionReached
-            };
-
-            FrameReceived?.Invoke(this, args);
+            FrameReceived?.Invoke(this, new FrameReceivedEventArgs {
+                ReceivedFrame = receivedFrame
+            });
 
             return receivedFrame.IPOC;
         }
@@ -315,16 +307,10 @@ namespace PingPong.KUKA {
 
             rsiAdapter.SendData(outputFrame);
 
-            var args = new FrameSentEventArgs {
+            FrameSent?.Invoke(this, new FrameSentEventArgs {
                 FrameSent = outputFrame,
-                ActualPosition = position,
-                TargetPosition = generator.TargetPosition,
-                GenPosition = generator.Position,
-                GenVelocity = generator.Velocity,
-                GenAcceleration = generator.Acceleration
-            };
-
-            FrameSent?.Invoke(this, args);
+                Position = position
+            });
         }
 
         /// <summary>
@@ -375,7 +361,7 @@ namespace PingPong.KUKA {
             ManualResetEvent targetPositionReached = new ManualResetEvent(false);
 
             void processFrame(object sender, FrameReceivedEventArgs args) {
-                if (args.IsTargetPositionReached) {
+                if (IsTargetPositionReached) {
                     targetPositionReached.Set();
                 }
             };
@@ -426,6 +412,9 @@ namespace PingPong.KUKA {
                     string robotAdress = ToString();
                     rsiAdapter.Disconnect();
 
+                    isInitialized = false;
+                    Uninitialized?.Invoke(this, EventArgs.Empty);
+
                     if (task.IsFaulted) {
                         var args = new ErrorOccuredEventArgs {
                             RobotIp = robotAdress,
@@ -434,9 +423,6 @@ namespace PingPong.KUKA {
 
                         ErrorOccured?.Invoke(this, args);
                     }
-
-                    isInitialized = false;
-                    Uninitialized?.Invoke(this, EventArgs.Empty);
                 });
             });
         }

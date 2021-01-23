@@ -70,7 +70,7 @@ namespace PingPong.KUKA {
         /// <summary>
         /// Current axis position
         /// </summary>
-        public RobotAxisPosition AxisPosition { get; set; }
+        public RobotAxisVector AxisPosition { get; set; }
 
         public InputFrame() {
 
@@ -97,7 +97,7 @@ namespace PingPong.KUKA {
             return new RobotVector(X, Y, Z, A, B, C);
         }
 
-        private RobotAxisPosition ExtractAxisPosition(Tag tag) {
+        private RobotAxisVector ExtractAxisPosition(Tag tag) {
             double A1 = double.Parse(tag["A1"]);
             double A2 = double.Parse(tag["A2"]);
             double A3 = double.Parse(tag["A3"]);
@@ -105,7 +105,7 @@ namespace PingPong.KUKA {
             double A5 = double.Parse(tag["A5"]);
             double A6 = double.Parse(tag["A6"]);
 
-            return new RobotAxisPosition(A1, A2, A3, A4, A5, A6);
+            return new RobotAxisVector(A1, A2, A3, A4, A5, A6);
         }
 
     }

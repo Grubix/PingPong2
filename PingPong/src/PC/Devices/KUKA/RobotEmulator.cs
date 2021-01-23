@@ -117,10 +117,10 @@ namespace PingPong.KUKA {
         /// <summary>
         /// Robot actual axis position
         /// </summary>
-        public RobotAxisPosition AxisPosition {
+        public RobotAxisVector AxisPosition {
             get {
                 lock (receivedDataSyncLock) {
-                    return RobotAxisPosition.Zero;
+                    return RobotAxisVector.Zero;
                 }
             }
         }
@@ -222,7 +222,7 @@ namespace PingPong.KUKA {
                 InputFrame receivedFrame = new InputFrame {
                     IPOC = 0,
                     Position = homePosition,
-                    AxisPosition = RobotAxisPosition.Zero
+                    AxisPosition = RobotAxisVector.Zero
                 };
 
                 generator.Initialize(receivedFrame.Position);
@@ -280,7 +280,7 @@ namespace PingPong.KUKA {
             InputFrame receivedFrame = new InputFrame {
                 IPOC = IPOC + 4,
                 Position = position + currectCorrection,
-                AxisPosition = RobotAxisPosition.Zero
+                AxisPosition = RobotAxisVector.Zero
             };
 
             if (!Limits.CheckAxisPosition(receivedFrame.AxisPosition)) {

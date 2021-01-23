@@ -60,50 +60,48 @@ namespace PingPong {
 
             //positionChart.RefreshDelay = 10;
 
-            //BallFlightEmulator bfs = new BallFlightEmulator(x0: 1000, y0: 700, z0: 250, vx0: -1500, vy0: 50, vz0: 2600);
-            ////BallFlightEmulator bfs = new BallFlightEmulator(x0: 0, y0: 800, z0: 180, vx0: 150, vy0: -90, vz0: 1600);
-            //HitPrediction prediction = new HitPrediction();
-            //prediction.Reset(180);
+            BallFlightEmulator bfs = new BallFlightEmulator(x0: 1000, y0: 700, z0: 250, vx0: -1500, vy0: 50, vz0: 2600);
+            //BallFlightEmulator bfs = new BallFlightEmulator(x0: 0, y0: 800, z0: 180, vx0: 150, vy0: -90, vz0: 1600);
+            HitPrediction prediction = new HitPrediction();
+            prediction.Reset(180);
 
-            //RobotLimits limits = new RobotLimits(
-            //    lowerWorkspaceLimit: (-250, 700, 150),
-            //    upperWorkspaceLimit: (250, 950, 400),
-            //    a1AxisLimit: (-360, 360),
-            //    a2AxisLimit: (-360, 360),
-            //    a3AxisLimit: (-360, 360),
-            //    a4AxisLimit: (-360, 360),
-            //    a5AxisLimit: (-360, 360),
-            //    a6AxisLimit: (-360, 360),
-            //    correctionLimit: (6, 0.1)
-            //);
-            //RobotConfig config2 = new RobotConfig(0, limits, null);
-            //RobotEmulator emulator = new RobotEmulator(config2);
-            //emulator.Initialize();
+            RobotLimits limits = new RobotLimits(
+                lowerWorkspaceLimit: (-250, 700, 150),
+                upperWorkspaceLimit: (250, 950, 400),
+                a1AxisLimit: (-360, 360),
+                a2AxisLimit: (-360, 360),
+                a3AxisLimit: (-360, 360),
+                a4AxisLimit: (-360, 360),
+                a5AxisLimit: (-360, 360),
+                a6AxisLimit: (-360, 360),
+                correctionLimit: (6, 0.1)
+            );
+            RobotConfig config2 = new RobotConfig(0, limits, null);
+            RobotEmulator emulator = new RobotEmulator(config2, new RobotVector(0.44, 793.19, 177.83, 0, 0, -90));
+            emulator.Initialize();
 
-            //bfs.PositionChanged += (position, time) => {
-            //    prediction.AddMeasurement(position, time);
-            //    //Console.WriteLine(prediction.Position);
+            bfs.PositionChanged += (position, time) => {
+                prediction.AddMeasurement(position, time);
+                //Console.WriteLine(prediction.Position);
 
-            //    if (prediction.IsReady && prediction.TimeToHit > 0.1) {
-            //        var targetPos = new RobotVector(prediction.Position, emulator.HomePosition.ABC);
-            //        Console.WriteLine(targetPos);
-            //        if (emulator.Limits.CheckPosition(targetPos)) {
-            //            emulator.MoveTo(targetPos, RobotVector.Zero, prediction.TimeToHit);
-            //        }
-            //    }
+                if (prediction.IsReady && prediction.TimeToHit > 0.1) {
+                    var targetPos = new RobotVector(prediction.Position, emulator.HomePosition.ABC);
+                    Console.WriteLine(targetPos);
+                    if (emulator.Limits.CheckPosition(targetPos)) {
+                        emulator.MoveTo(targetPos, RobotVector.Zero, prediction.TimeToHit);
+                    }
+                }
 
-            //    if (positionChart.IsReady) {
-            //        var pos = emulator.Position;
+                var pos = emulator.Position;
 
-            //        positionChart.Update(new double[] {
-            //            position[0], position[1], position[2], prediction.Position[0], prediction.Position[1], prediction.Position[2], pos.X, pos.Y, pos.Z
-            //         });
-            //    } else {
-            //        positionChart.Tick();
-            //    }
-            //};
+                positionChart.Update(new double[] {
+                    position[0], position[1], position[2], 
+                    prediction.Position[0], prediction.Position[1], prediction.Position[2], 
+                    pos.X, pos.Y, pos.Z
+                });
+            };
 
-            //bfs.Start(5, 5, 5);
+            bfs.Start(5, 5, 5);
         }
 
         public void Initialize(Robot robot1, Robot robot2) {
@@ -123,84 +121,60 @@ namespace PingPong {
         }
 
         private void UpdateOptiTrackBasePositionChart(object sender, OptiTrack.FrameReceivedEventArgs args) {
-            if (isPlotFrozen) {
-                return;
-            }
-
-            if (positionChart.IsReady) {
-                positionChart.Update(new double[] {
+            positionChart.Update(new double[] {
                     args.BallPosition[0], args.BallPosition[1], args.BallPosition[2]
                 });
-                Dispatcher.Invoke(() => {
-                    actualPositionX.Text = args.BallPosition[0].ToString("F3");
-                    actualPositionY.Text = args.BallPosition[1].ToString("F3");
-                    actualPositionZ.Text = args.BallPosition[2].ToString("F3");
-                });
-            } else {
-                positionChart.Tick();
-            }
+            Dispatcher.Invoke(() => {
+                actualPositionX.Text = args.BallPosition[0].ToString("F3");
+                actualPositionY.Text = args.BallPosition[1].ToString("F3");
+                actualPositionZ.Text = args.BallPosition[2].ToString("F3");
+            });
         }
 
         private void UpdateRobot1BasePositionChart(object sender, OptiTrack.FrameReceivedEventArgs args) {
-            if (isPlotFrozen) {
-                return;
-            }
-
             var robot1BasePosition = robot1Transformation.Convert(args.BallPosition);
 
-            if (robot1PositionChart.IsReady) {
-                robot1PositionChart.Update(new double[] {
+            robot1PositionChart.Update(new double[] {
                     robot1BasePosition[0], robot1BasePosition[1], robot1BasePosition[2]
                 });
-                Dispatcher.Invoke(() => {
-                    robot1BaseActualPositionX.Text = robot1BasePosition[0].ToString("F3");
-                    robot1BaseActualPositionY.Text = robot1BasePosition[1].ToString("F3");
-                    robot1BaseActualPositionZ.Text = robot1BasePosition[2].ToString("F3");
-                });
-            } else {
-                robot1PositionChart.Tick();
-            }
+            Dispatcher.Invoke(() => {
+                robot1BaseActualPositionX.Text = robot1BasePosition[0].ToString("F3");
+                robot1BaseActualPositionY.Text = robot1BasePosition[1].ToString("F3");
+                robot1BaseActualPositionZ.Text = robot1BasePosition[2].ToString("F3");
+            });
         }
 
         private void UpdateRobot2BasePositionChart(object sender, OptiTrack.FrameReceivedEventArgs args) {
-            if (isPlotFrozen) {
-                return;
-            }
-
             var robot2BasePosition = robot2Transformation.Convert(args.BallPosition);
-
-            if (robot2PositionChart.IsReady) {
-                robot2PositionChart.Update(new double[] {
+            
+            robot2PositionChart.Update(new double[] {
                     robot2BasePosition[0], robot2BasePosition[1], robot2BasePosition[2]
                 });
-                Dispatcher.Invoke(() => {
-                    robot2BaseActualPositionX.Text = robot2BasePosition[0].ToString("F3");
-                    robot2BaseActualPositionY.Text = robot2BasePosition[1].ToString("F3");
-                    robot2BaseActualPositionZ.Text = robot2BasePosition[2].ToString("F3");
-                });
-            } else {
-                robot2PositionChart.Tick();
-            }
+            Dispatcher.Invoke(() => {
+                robot2BaseActualPositionX.Text = robot2BasePosition[0].ToString("F3");
+                robot2BaseActualPositionY.Text = robot2BasePosition[1].ToString("F3");
+                robot2BaseActualPositionZ.Text = robot2BasePosition[2].ToString("F3");
+            });
         }
 
         private void InitializeCharts() {
-            positionChart.YAxisTitle = "Position (optiTrack base)";
+            positionChart.Title = "Position (optiTrack base)";
             positionChart.AddSeries("Ball position X [mm]", "X", true);
             positionChart.AddSeries("Ball position Y [mm]", "Y", true);
             positionChart.AddSeries("Ball position Z [mm]", "Z", true);
-            //positionChart.AddSeries("Ball pred. position X [mm]", "Xp", false);
-            //positionChart.AddSeries("Ball pred. position Y [mm]", "Yp", false);
-            //positionChart.AddSeries("Ball pred. position Z [mm]", "Zp", false);
-            //positionChart.AddSeries("Robot position X [mm]", "X_R", true);
-            //positionChart.AddSeries("Robot position Y [mm]", "Y_R", true);
-            //positionChart.AddSeries("Robot position Z [mm]", "Z_R", true);
+            positionChart.AddSeries("Ball pred. position X [mm]", "Xp", false);
+            positionChart.AddSeries("Ball pred. position Y [mm]", "Yp", false);
+            positionChart.AddSeries("Ball pred. position Z [mm]", "Zp", false);
+            positionChart.AddSeries("Robot position X [mm]", "X_R", true);
+            positionChart.AddSeries("Robot position Y [mm]", "Y_R", true);
+            positionChart.AddSeries("Robot position Z [mm]", "Z_R", true);
 
-            robot1PositionChart.YAxisTitle = "Position (robot1 base)";
+            robot1PositionChart.Title = "Position (robot1 base)";
             robot1PositionChart.AddSeries("Robot 1 base ball position X [mm]", "X", true);
             robot1PositionChart.AddSeries("Robot 1 base ball position Y [mm]", "Y", true);
             robot1PositionChart.AddSeries("Robot 1 base ball position Z [mm]", "Z", true);
 
-            robot2PositionChart.YAxisTitle = "Position (robot2 base)";
+            robot2PositionChart.Title = "Position (robot2 base)";
             robot2PositionChart.AddSeries("Robot 2 base ball position X [mm]", "X", true);
             robot2PositionChart.AddSeries("Robot 2 base ball position Y [mm]", "Y", true);
             robot2PositionChart.AddSeries("Robot 2 base ball position Z [mm]", "Z", true);
@@ -239,13 +213,9 @@ namespace PingPong {
 
         private void FreezeCharts(object sender, RoutedEventArgs e) {
             if (isPlotFrozen) {
-                positionChart.Clear();
-                robot1PositionChart.Clear();
-                robot2PositionChart.Clear();
-
-                positionChart.BlockZoomAndPan();
-                robot1PositionChart.BlockZoomAndPan();
-                robot2PositionChart.BlockZoomAndPan();
+                positionChart.Unfreeze();
+                robot1PositionChart.Unfreeze();
+                robot2PositionChart.Unfreeze();
 
                 isPlotFrozen = false;
                 freezeBtn.Content = "Freeze";
@@ -253,9 +223,9 @@ namespace PingPong {
                 fitToDataBtn.IsEnabled = false;
                 screenshotBtn.IsEnabled = false;
             } else {
-                positionChart.UnblockZoomAndPan();
-                robot1PositionChart.UnblockZoomAndPan();
-                robot2PositionChart.UnblockZoomAndPan();
+                positionChart.Freeze();
+                robot1PositionChart.Freeze();
+                robot2PositionChart.Freeze();
 
                 isPlotFrozen = true;
                 freezeBtn.Content = "Unfreeze";
@@ -284,7 +254,7 @@ namespace PingPong {
                 return;
             }
 
-            string fileName = activeChart.YAxisTitle;
+            string fileName = activeChart.Title;
 
             if (string.IsNullOrEmpty(fileName)) {
                 fileName = "screenshot.png";

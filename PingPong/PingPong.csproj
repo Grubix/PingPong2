@@ -138,7 +138,7 @@
     <Compile Include="Src\PC\Devices\KUKA\Events\FrameSentEventArgs.cs" />
     <Compile Include="Src\PC\Devices\KUKA\Robot.cs" />
     <Compile Include="Src\PC\Devices\KUKA\RobotEmulator.cs" />
-    <Compile Include="Src\PC\Devices\KUKA\RobotAxisPosition.cs" />
+    <Compile Include="Src\PC\Devices\KUKA\RobotAxisVector.cs" />
     <Compile Include="Src\PC\Devices\KUKA\RobotConfig.cs" />
     <Compile Include="Src\PC\Devices\KUKA\RobotLimits.cs" />
     <Compile Include="Src\PC\Devices\KUKA\RobotVector.cs" />

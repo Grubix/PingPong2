@@ -1,7 +1,7 @@
 ﻿namespace PingPong.KUKA {
-    public class RobotAxisPosition {
+    public class RobotAxisVector {
 
-        public static readonly RobotAxisPosition Zero = new RobotAxisPosition();
+        public static readonly RobotAxisVector Zero = new RobotAxisVector();
 
         public double A1 { get; }
 
@@ -15,10 +15,10 @@
 
         public double A6 { get; }
 
-        public RobotAxisPosition() {
+        public RobotAxisVector() {
         }
 
-        public RobotAxisPosition(double A1, double A2, double A3, double A4, double A5, double A6) {
+        public RobotAxisVector(double A1, double A2, double A3, double A4, double A5, double A6) {
             this.A1 = A1;
             this.A2 = A2;
             this.A3 = A3;

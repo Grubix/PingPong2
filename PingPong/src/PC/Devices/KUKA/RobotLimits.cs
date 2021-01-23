@@ -54,7 +54,7 @@ namespace PingPong.KUKA {
             return checkX && checkY && checkZ;
         }
 
-        public bool CheckAxisPosition(RobotAxisPosition axisPosition) {
+        public bool CheckAxisPosition(RobotAxisVector axisPosition) {
             bool checkA1 = axisPosition.A1 >= A1AxisLimit.Min && axisPosition.A1 <= A1AxisLimit.Max;
             bool checkA2 = axisPosition.A2 >= A2AxisLimit.Min && axisPosition.A2 <= A2AxisLimit.Max;
             bool checkA3 = axisPosition.A3 >= A3AxisLimit.Min && axisPosition.A3 <= A3AxisLimit.Max;

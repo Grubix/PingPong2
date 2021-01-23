@@ -43,39 +43,31 @@ namespace PingPong {
             });
 
             robot1PingApp.DataReady += (s, args) => {
-                if (isPlotFrozen) {
-                    return;
-                }
+                robot1PingChart.Update(new double[] {
+                    args.PredictedTimeToHit,
+                    args.BallSetpointX,
+                    args.BallSetpointY,
+                    args.BallSetpointZ,
 
-                if (robot1PingChart.IsReady) {
-                    robot1PingChart.Update(new double[] {
-                        args.PredictedTimeToHit,
-                        args.BallSetpointX,
-                        args.BallSetpointY,
-                        args.BallSetpointZ,
+                    args.ActualBallPosition[0],
+                    args.PredictedBallPosition[0],
+                    args.PredictedBallVelocity[0],
 
-                        args.ActualBallPosition[0],
-                        args.PredictedBallPosition[0],
-                        args.PredictedBallVelocity[0],
+                    args.ActualBallPosition[1],
+                    args.PredictedBallPosition[1],
+                    args.PredictedBallVelocity[1],
 
-                        args.ActualBallPosition[1],
-                        args.PredictedBallPosition[1],
-                        args.PredictedBallVelocity[1],
+                    args.ActualBallPosition[2],
+                    args.PredictedBallPosition[2],
+                    args.PredictedBallVelocity[2],
 
-                        args.ActualBallPosition[2],
-                        args.PredictedBallPosition[2],
-                        args.PredictedBallVelocity[2],
-
-                        args.ActualRobotPosition.X,
-                        args.ActualRobotPosition.Y,
-                        args.ActualRobotPosition.Z,
-                        args.ActualRobotPosition.A,
-                        args.ActualRobotPosition.B,
-                        args.ActualRobotPosition.C,
-                    });
-                } else {
-                    robot1PingChart.Tick();
-                }
+                    args.ActualRobotPosition.X,
+                    args.ActualRobotPosition.Y,
+                    args.ActualRobotPosition.Z,
+                    args.ActualRobotPosition.A,
+                    args.ActualRobotPosition.B,
+                    args.ActualRobotPosition.C
+                });
             };
 
             // AUTOMATYCZNA INICJALIZACJA OPTITRACKA, ROBOTA I PINGA
@@ -102,7 +94,7 @@ namespace PingPong {
 
         private void InitializeCharts() {
             //robot1PingChart.RefreshDelay = 60;
-            robot1PingChart.YAxisTitle = "Ping app (robot 1)";
+            robot1PingChart.Title = "Ping app (robot 1)";
 
             robot1PingChart.AddSeries("Pred. time to hit [ms]", "T_Hpr", false);
             robot1PingChart.AddSeries("Ball target position X [mm]", "X_Bsp", false);
@@ -151,13 +143,9 @@ namespace PingPong {
 
         private void FreezeCharts(object sender, RoutedEventArgs e) {
             if (isPlotFrozen) {
-                robot1PingChart.Clear();
-                robot2PingChart.Clear();
-                pingPongChart.Clear();
-
-                robot1PingChart.BlockZoomAndPan();
-                robot2PingChart.BlockZoomAndPan();
-                pingPongChart.BlockZoomAndPan();
+                robot1PingChart.Unfreeze();
+                robot2PingChart.Unfreeze();
+                pingPongChart.Unfreeze();
 
                 isPlotFrozen = false;
                 freezeBtn.Content = "Freeze";
@@ -165,9 +153,9 @@ namespace PingPong {
                 fitToDataBtn.IsEnabled = false;
                 screenshotBtn.IsEnabled = false;
             } else {
-                robot1PingChart.UnblockZoomAndPan();
-                robot2PingChart.UnblockZoomAndPan();
-                pingPongChart.UnblockZoomAndPan();
+                robot1PingChart.Freeze();
+                robot2PingChart.Freeze();
+                pingPongChart.Freeze();
 
                 isPlotFrozen = true;
                 freezeBtn.Content = "Unfreeze";
@@ -196,7 +184,7 @@ namespace PingPong {
                 return;
             }
 
-            string fileName = activeChart.YAxisTitle;
+            string fileName = activeChart.Title;
 
             if (string.IsNullOrEmpty(fileName)) {
                 fileName = "screenshot.png";

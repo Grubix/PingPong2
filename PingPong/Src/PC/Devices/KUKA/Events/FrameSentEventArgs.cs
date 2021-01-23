@@ -5,15 +5,19 @@ namespace PingPong.KUKA {
 
         public OutputFrame FrameSent { get; set; }
 
-        public RobotVector ActualPosition { get; set; }
+        public RobotVector Position { get; set; }
 
-        public RobotVector TargetPosition { get; set; }
+        public RobotVector Correction {
+            get {
+                return FrameSent.Correction;
+            }
+        }
 
-        public RobotVector GenPosition { get; set; }
-
-        public RobotVector GenVelocity { get; set; }
-
-        public RobotVector GenAcceleration { get; set; }
+        public long IPOC {
+            get {
+                return FrameSent.IPOC;
+            }
+        }
 
     }
 }
