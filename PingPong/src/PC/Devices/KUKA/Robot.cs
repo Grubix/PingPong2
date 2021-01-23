@@ -15,7 +15,7 @@ namespace PingPong.KUKA {
 
         private readonly RSIAdapter rsiAdapter;
 
-        private readonly TrajectoryGenerator5T generator;
+        private readonly TrajectoryGenerator generator;
 
         private CancellationTokenSource cts;
 
@@ -207,9 +207,10 @@ namespace PingPong.KUKA {
 
         public Robot() {
             rsiAdapter = new RSIAdapter();
-            generator = new TrajectoryGenerator5T();
+            generator = new TrajectoryGenerator();
             position = RobotVector.Zero;
             axisPosition = RobotAxisVector.Zero;
+            HomePosition = RobotVector.Zero;
         }
 
         public Robot(RobotConfig config) : this() {
@@ -220,8 +221,6 @@ namespace PingPong.KUKA {
             cts = new CancellationTokenSource();
             IsCancellationRequested = false;
             InputFrame receivedFrame = null;
-
-            throw new ArgumentException("abc");
 
             // Connect with the robot
             try {
@@ -245,6 +244,8 @@ namespace PingPong.KUKA {
                 Correction = RobotVector.Zero,
                 IPOC = receivedFrame.IPOC
             };
+
+            rsiAdapter.SendData(response);
 
             isInitialized = true;
             Initialized?.Invoke(this, EventArgs.Empty);
@@ -412,9 +413,6 @@ namespace PingPong.KUKA {
                     string robotAdress = ToString();
                     rsiAdapter.Disconnect();
 
-                    isInitialized = false;
-                    Uninitialized?.Invoke(this, EventArgs.Empty);
-
                     if (task.IsFaulted) {
                         var args = new ErrorOccuredEventArgs {
                             RobotIp = robotAdress,
@@ -423,6 +421,9 @@ namespace PingPong.KUKA {
 
                         ErrorOccured?.Invoke(this, args);
                     }
+
+                    isInitialized = false;
+                    Uninitialized?.Invoke(this, EventArgs.Empty);
                 });
             });
         }
@@ -443,7 +444,7 @@ namespace PingPong.KUKA {
             if (Ip != null) {
                 return $"{Ip}:{Port}";
             } else {
-                return $"0.0.0.0:000";
+                return $"0.0.0.0:0000";
             }
         }
 

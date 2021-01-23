@@ -50,7 +50,7 @@ namespace PingPong {
 
         private int clearCounter = 0;
 
-        public int RefreshDelay { get; set; } = 220;
+        public int RefreshDelay { get; set; } = 180;
 
         public int MaxSamples { get; set; } = 5000;
 
@@ -167,15 +167,11 @@ namespace PingPong {
 
             stopWatch.Stop();
             deltaTime += stopWatch.ElapsedMilliseconds;
-            stopWatch.Reset();
-            stopWatch.Start();
-            //stopWatch.Restart();
+            stopWatch.Restart();
 
             bool isReady = deltaTime >= RefreshDelay;
 
             if (isReady) {
-                Console.WriteLine(deltaTime);
-                Console.WriteLine("ppp");
                 deltaTime = 0;
             }
 
@@ -256,13 +252,26 @@ namespace PingPong {
             Clear(); 
         }
 
-        public MemoryStream ExportImage(int width, int height) {
+        public MemoryStream ExportPng(int width, int height) {
             MemoryStream imageStream = new MemoryStream();
 
             var pngExporter = new PngExporter {
                 Width = width,
                 Height = height,
                 Background = OxyColors.White
+            };
+
+            pngExporter.Export(chart.ActualModel, imageStream);
+
+            return imageStream;
+        }
+
+        public MemoryStream ExportSvg(int width, int height) {
+            MemoryStream imageStream = new MemoryStream();
+
+            var pngExporter = new OxyPlot.SvgExporter {
+                Width = width,
+                Height = height
             };
 
             pngExporter.Export(chart.ActualModel, imageStream);

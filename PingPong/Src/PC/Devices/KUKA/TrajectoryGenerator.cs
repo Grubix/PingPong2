@@ -1,7 +1,7 @@
 ﻿using System;
 
 namespace PingPong.KUKA {
-    class TrajectoryGenerator5T {
+    class TrajectoryGenerator {
 
         private class Polynominal {
 
@@ -28,6 +28,7 @@ namespace PingPong.KUKA {
                 k0 = xn = X = currentX;
             }
 
+            //TODO: wywalic x0 ?
             public void UpdateCoefficients(double x0, double x1, double v1, double T, double elapsedTime) {
                 double T1 = T;
                 double T2 = T1 * T1;
@@ -155,7 +156,7 @@ namespace PingPong.KUKA {
             }
         }
 
-        public TrajectoryGenerator5T() {
+        public TrajectoryGenerator() {
         }
 
         public void Initialize(RobotVector actualRobotPosition) {
@@ -176,13 +177,15 @@ namespace PingPong.KUKA {
         }
 
         public void SetTargetPosition(RobotVector currentPosition, RobotVector targetPosition, RobotVector targetVelocity, double targetDuration) {
+            targetDuration -= 0.032;
+            
             if (targetDuration <= 0.0) {
                 throw new ArgumentException($"Duration value must be greater than 0, get: {targetDuration}");
             }
 
             bool targetPositionChanged = !targetPosition.Compare(this.targetPosition, 1, 0.1);
             bool targetVelocityChanged = !targetVelocity.Compare(this.targetVelocity, 1, 0.1);
-            bool targetDurationChanged = targetDuration != this.targetDuration;
+            bool targetDurationChanged = Math.Abs(targetDuration - this.targetDuration) >= 0.001;
 
             if (targetDurationChanged || targetPositionChanged || targetVelocityChanged) {
                 double tmpElapsedTime = elapsedTime;
@@ -191,7 +194,7 @@ namespace PingPong.KUKA {
                     targetPositionReached = false;
                     this.targetPosition = targetPosition;
                     this.targetVelocity = targetVelocity;
-                    this.targetDuration = targetDuration - 0.032; //TODO: czy to napewno powinno byc tutaj ???
+                    this.targetDuration = targetDuration;
                     elapsedTime = 0.0;
                 }
 

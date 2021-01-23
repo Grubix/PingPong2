@@ -32,7 +32,6 @@ namespace PingPong {
             InitializeControls();
             InitializeCharts();
 
-            //positionChart.RefreshDelay = 100;
             Robot = new Robot();
             InitializeRobot();
         }
@@ -43,63 +42,6 @@ namespace PingPong {
 
             Robot.Config = config;
             UpdateConfigControls(config);
-
-            if (Robot.Config.Port == 8082) {
-                //return;
-            }
-
-            RobotLimits limits = new RobotLimits(
-                lowerWorkspaceLimit: (-800, 200, -800),
-                upperWorkspaceLimit: (800, 1200, 800),
-                a1AxisLimit: (-360, 360),
-                a2AxisLimit: (-360, 360),
-                a3AxisLimit: (-360, 360),
-                a4AxisLimit: (-360, 360),
-                a5AxisLimit: (-360, 360),
-                a6AxisLimit: (-360, 360),
-                correctionLimit: (5, 0.1)
-            );
-            RobotConfig config2 = new RobotConfig(0, limits, null);
-            RobotEmulator emulator = new RobotEmulator(config2, new RobotVector(0.44, 793.19, 177.83, 0, 0, -90));
-            emulator.Initialize();
-
-            emulator.ErrorOccured += (addr, ex) => {
-                MainWindow.ShowErrorDialog($"An exception was raised on the robot ({addr}) thread.", ex);
-            };
-
-            Task.Run(() => {
-                Thread.Sleep(3000);
-                emulator.Shift(new RobotVector(180, 0, 0), RobotVector.Zero, 0.6);
-            });
-
-            Task.Run(() => {
-                Random random = new Random();
-
-                while (true) {
-                    Thread.Sleep(3000);
-
-                    double x = (random.NextDouble() - 0.5) * 300;
-                    double y = (random.NextDouble() - 0.5) * 300;
-                    double z = (random.NextDouble() - 0.5) * 300;
-
-                    emulator.Shift(new RobotVector(x, y, z), RobotVector.Zero, 2);
-                }
-            });
-
-            emulator.FrameReceived += fr => {
-                RobotVector actualPosition = emulator.Position;
-                RobotVector targetPosition = emulator.TargetPosition;
-                RobotVector theoreticalPosition = emulator.TheoreticalPosition;
-
-                positionChart.Update(new double[] {
-                    actualPosition.X, targetPosition.X, theoreticalPosition.X,
-                    actualPosition.Y, targetPosition.Y, theoreticalPosition.Y,
-                    actualPosition.Z, targetPosition.Z, theoreticalPosition.Z,
-                    actualPosition.A, targetPosition.A, theoreticalPosition.A,
-                    actualPosition.B, targetPosition.B, theoreticalPosition.B,
-                    actualPosition.C, targetPosition.C, theoreticalPosition.C,
-                });
-            };
         }
 
         private void InitializeControls() {
@@ -127,18 +69,74 @@ namespace PingPong {
                     TakeChartScreenshot(null, null);
                 }
             };
+
+            RobotLimits limits = new RobotLimits(
+                lowerWorkspaceLimit: (-800, 200, -800),
+                upperWorkspaceLimit: (800, 1200, 800),
+                a1AxisLimit: (-360, 360),
+                a2AxisLimit: (-360, 360),
+                a3AxisLimit: (-360, 360),
+                a4AxisLimit: (-360, 360),
+                a5AxisLimit: (-360, 360),
+                a6AxisLimit: (-360, 360),
+                correctionLimit: (5, 0.1)
+            );
+            RobotConfig config2 = new RobotConfig(0, limits, null);
+            RobotEmulator emulator = new RobotEmulator(config2, new RobotVector(0.44, 793.19, 177.83, 0, 0, -90));
+
+            emulator.ErrorOccured += (s, e) => {
+                MainWindow.ShowErrorDialog($"An exception was raised on the robot ({e.RobotIp}) thread.", e.Exception);
+            };
+
+            Task.Run(() => {
+                Random random = new Random();
+                Thread.Sleep(5000);
+                emulator.Initialize();
+
+                Thread.Sleep(1000);
+                emulator.Shift(new RobotVector(180, 0, 0), RobotVector.Zero, 0.6);
+
+                while (true) {
+                    Thread.Sleep(3000);
+
+                    double x = (random.NextDouble() - 0.5) * 300;
+                    double y = (random.NextDouble() - 0.5) * 300 + 500;
+                    double z = (random.NextDouble() - 0.5) * 300;
+
+                    RobotVector pos = new RobotVector(x, y, z, emulator.HomePosition.ABC);
+
+                    if (emulator.Limits.CheckPosition(pos)) {
+                        emulator.MoveTo(pos, RobotVector.Zero, 2);
+                    }
+                }
+            });
+
+            emulator.FrameReceived += (s, e) => {
+                RobotVector actualPosition = emulator.Position;
+                RobotVector targetPosition = emulator.TargetPosition;
+                RobotVector theoreticalPosition = emulator.TheoreticalPosition;
+
+                positionChart.Update(new double[] {
+                    actualPosition.X, targetPosition.X, theoreticalPosition.X,
+                    actualPosition.Y, targetPosition.Y, theoreticalPosition.Y,
+                    actualPosition.Z, targetPosition.Z, theoreticalPosition.Z,
+                    actualPosition.A, targetPosition.A, theoreticalPosition.A,
+                    actualPosition.B, targetPosition.B, theoreticalPosition.B,
+                    actualPosition.C, targetPosition.C, theoreticalPosition.C,
+                });
+            };
         }
 
         private void InitializeCharts() {
             positionChart.Title = "Position";
             positionChart.AddSeries("Actual position X [mm]", "X", true);
-            positionChart.AddSeries("Target position X [mm]", "X_T", false);
+            positionChart.AddSeries("Target position X [mm]", "X_T", true);
             positionChart.AddSeries("Theoretical position X [mm]", "X_TH", false, true);
             positionChart.AddSeries("Actual position Y [mm]", "Y", true);
-            positionChart.AddSeries("Target position Y [mm]", "Y_T", false);
+            positionChart.AddSeries("Target position Y [mm]", "Y_T", true);
             positionChart.AddSeries("Theoretical position Y [mm]", "Y_TH", false, true);
             positionChart.AddSeries("Actual position Z [mm]", "Z", true);
-            positionChart.AddSeries("Target position Z [mm]", "Z_T", false);
+            positionChart.AddSeries("Target position Z [mm]", "Z_T", true);
             positionChart.AddSeries("Theoretical position Z [mm]", "Z_TH", false, true);
             positionChart.AddSeries("Actual position A [deg]", "A", false);
             positionChart.AddSeries("Target position A [mm]", "A_T", false);
@@ -384,7 +382,7 @@ namespace PingPong {
             if (saveFileDialog.ShowDialog() == true && saveFileDialog.FileName != "") {
                 int imageWidth = 800;
 
-                using (MemoryStream imageStream = activeChart.ExportImage(imageWidth, (int)(imageWidth * 9.0 / 16.0))) {
+                using (MemoryStream imageStream = activeChart.ExportPng(imageWidth, (int)(imageWidth * 9.0 / 16.0))) {
                     File.WriteAllBytes(saveFileDialog.FileName, imageStream.ToArray());
                 }
             }

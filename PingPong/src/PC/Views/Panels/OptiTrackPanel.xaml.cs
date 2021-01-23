@@ -5,6 +5,8 @@ using PingPong.Maths;
 using PingPong.OptiTrack;
 using System;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -58,50 +60,15 @@ namespace PingPong {
                 }
             };
 
-            //positionChart.RefreshDelay = 10;
+            //Task.Run(() => {
+            //    for (int i = 0; i < 2000; i++) {
+            //        double x = Math.Sin(i / 500.0) * Math.Cos(i / 200.0);
 
-            BallFlightEmulator bfs = new BallFlightEmulator(x0: 1000, y0: 700, z0: 250, vx0: -1500, vy0: 50, vz0: 2600);
-            //BallFlightEmulator bfs = new BallFlightEmulator(x0: 0, y0: 800, z0: 180, vx0: 150, vy0: -90, vz0: 1600);
-            HitPrediction prediction = new HitPrediction();
-            prediction.Reset(180);
+            //        positionChart.Update(new double[] { x, x });
 
-            RobotLimits limits = new RobotLimits(
-                lowerWorkspaceLimit: (-250, 700, 150),
-                upperWorkspaceLimit: (250, 950, 400),
-                a1AxisLimit: (-360, 360),
-                a2AxisLimit: (-360, 360),
-                a3AxisLimit: (-360, 360),
-                a4AxisLimit: (-360, 360),
-                a5AxisLimit: (-360, 360),
-                a6AxisLimit: (-360, 360),
-                correctionLimit: (6, 0.1)
-            );
-            RobotConfig config2 = new RobotConfig(0, limits, null);
-            RobotEmulator emulator = new RobotEmulator(config2, new RobotVector(0.44, 793.19, 177.83, 0, 0, -90));
-            emulator.Initialize();
-
-            bfs.PositionChanged += (position, time) => {
-                prediction.AddMeasurement(position, time);
-                //Console.WriteLine(prediction.Position);
-
-                if (prediction.IsReady && prediction.TimeToHit > 0.1) {
-                    var targetPos = new RobotVector(prediction.Position, emulator.HomePosition.ABC);
-                    Console.WriteLine(targetPos);
-                    if (emulator.Limits.CheckPosition(targetPos)) {
-                        emulator.MoveTo(targetPos, RobotVector.Zero, prediction.TimeToHit);
-                    }
-                }
-
-                var pos = emulator.Position;
-
-                positionChart.Update(new double[] {
-                    position[0], position[1], position[2], 
-                    prediction.Position[0], prediction.Position[1], prediction.Position[2], 
-                    pos.X, pos.Y, pos.Z
-                });
-            };
-
-            bfs.Start(5, 5, 5);
+            //        Thread.Sleep(4);
+            //    }
+            //});
         }
 
         public void Initialize(Robot robot1, Robot robot2) {
@@ -122,8 +89,8 @@ namespace PingPong {
 
         private void UpdateOptiTrackBasePositionChart(object sender, OptiTrack.FrameReceivedEventArgs args) {
             positionChart.Update(new double[] {
-                    args.BallPosition[0], args.BallPosition[1], args.BallPosition[2]
-                });
+                args.BallPosition[0], args.BallPosition[1], args.BallPosition[2]
+            });
             Dispatcher.Invoke(() => {
                 actualPositionX.Text = args.BallPosition[0].ToString("F3");
                 actualPositionY.Text = args.BallPosition[1].ToString("F3");
@@ -135,8 +102,8 @@ namespace PingPong {
             var robot1BasePosition = robot1Transformation.Convert(args.BallPosition);
 
             robot1PositionChart.Update(new double[] {
-                    robot1BasePosition[0], robot1BasePosition[1], robot1BasePosition[2]
-                });
+                robot1BasePosition[0], robot1BasePosition[1], robot1BasePosition[2]
+            });
             Dispatcher.Invoke(() => {
                 robot1BaseActualPositionX.Text = robot1BasePosition[0].ToString("F3");
                 robot1BaseActualPositionY.Text = robot1BasePosition[1].ToString("F3");
@@ -148,8 +115,8 @@ namespace PingPong {
             var robot2BasePosition = robot2Transformation.Convert(args.BallPosition);
             
             robot2PositionChart.Update(new double[] {
-                    robot2BasePosition[0], robot2BasePosition[1], robot2BasePosition[2]
-                });
+                robot2BasePosition[0], robot2BasePosition[1], robot2BasePosition[2]
+            });
             Dispatcher.Invoke(() => {
                 robot2BaseActualPositionX.Text = robot2BasePosition[0].ToString("F3");
                 robot2BaseActualPositionY.Text = robot2BasePosition[1].ToString("F3");
@@ -158,16 +125,10 @@ namespace PingPong {
         }
 
         private void InitializeCharts() {
-            positionChart.Title = "Position (optiTrack base)";
+            positionChart.Title = "Position(OptiTrack base)";
             positionChart.AddSeries("Ball position X [mm]", "X", true);
             positionChart.AddSeries("Ball position Y [mm]", "Y", true);
             positionChart.AddSeries("Ball position Z [mm]", "Z", true);
-            positionChart.AddSeries("Ball pred. position X [mm]", "Xp", false);
-            positionChart.AddSeries("Ball pred. position Y [mm]", "Yp", false);
-            positionChart.AddSeries("Ball pred. position Z [mm]", "Zp", false);
-            positionChart.AddSeries("Robot position X [mm]", "X_R", true);
-            positionChart.AddSeries("Robot position Y [mm]", "Y_R", true);
-            positionChart.AddSeries("Robot position Z [mm]", "Z_R", true);
 
             robot1PositionChart.Title = "Position (robot1 base)";
             robot1PositionChart.AddSeries("Robot 1 base ball position X [mm]", "X", true);
@@ -275,7 +236,7 @@ namespace PingPong {
             if (saveFileDialog.ShowDialog() == true && saveFileDialog.FileName != "") {
                 int imageWidth = 800;
 
-                using (MemoryStream imageStream = activeChart.ExportImage(imageWidth, (int)(imageWidth * 9.0 / 16.0))) {
+                using (MemoryStream imageStream = activeChart.ExportPng(imageWidth, (int)(imageWidth * 9.0 / 16.0))) {
                     File.WriteAllBytes(saveFileDialog.FileName, imageStream.ToArray());
                 }
             }

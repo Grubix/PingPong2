@@ -12,6 +12,9 @@ namespace PingPong {
         public MainWindow() {
             InitializeComponent();
 
+            // Set timer resolution to 1 [ms]
+            WinApi.TimeBeginPeriod(1);
+
             mainWindow = this;
             // Force change number separator to dot
             CultureInfo culuteInfo = new CultureInfo("en-US");
@@ -71,9 +74,13 @@ namespace PingPong {
                 errorMessage += $"\nOriginal error: \"{exception.Message}\"";
             }
 
-            mainWindow.Dispatcher.Invoke(() => {
-                MessageBox.Show(mainWindow, errorMessage, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            });
+            if (mainWindow != null) {
+                mainWindow.Dispatcher.Invoke(() => {
+                    MessageBox.Show(mainWindow, errorMessage, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                });
+            } else {
+                MessageBox.Show(errorMessage, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
     }

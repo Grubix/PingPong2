@@ -1,12 +1,12 @@
 ﻿using PingPong.Maths;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace PingPong.KUKA {
-    class RobotEmulator : IDevice {
+
+    public class RobotEmulator : IDevice {
 
         private readonly object receivedDataSyncLock = new object();
 
@@ -14,35 +14,33 @@ namespace PingPong.KUKA {
 
         private readonly object cancellationSyncLock = new object();
 
-        private readonly TrajectoryGenerator5T generator;
+        private readonly TrajectoryGenerator generator;
 
-        private readonly List<RobotVector> correctionBufor;
-
-        private bool isInitialized = false;
-
-        private bool forceMoveMode = false;
-
-        private long IPOC; // timestamp
-
-        private RobotVector position;
+        private readonly List<RobotVector> correctionBuffor;
 
         private RobotVector correction;
 
+        private RobotVector position;
+
+        private RobotAxisVector axisPosition;
+
         private RobotConfig config;
 
-        Task communicationTask;
+        private bool isInitialized = false; // lock ??
 
-        bool cancellationPending = true;
+        private bool isForceMoveModeEnabled = false;
 
-        private bool CancellationPending {
+        private bool isCancellationRequested = false;
+
+        private bool IsCancellationRequested {
             get {
                 lock (cancellationSyncLock) {
-                    return cancellationPending;
+                    return isCancellationRequested;
                 }
             }
             set {
                 lock (cancellationSyncLock) {
-                    cancellationPending = value;
+                    isCancellationRequested = value;
                 }
             }
         }
@@ -68,7 +66,7 @@ namespace PingPong.KUKA {
         /// </summary>
         public string Ip {
             get {
-                return "x.x.x.x";
+                return "0.0.0.0";
             }
         }
 
@@ -120,7 +118,7 @@ namespace PingPong.KUKA {
         public RobotAxisVector AxisPosition {
             get {
                 lock (receivedDataSyncLock) {
-                    return RobotAxisVector.Zero;
+                    return axisPosition;
                 }
             }
         }
@@ -186,101 +184,97 @@ namespace PingPong.KUKA {
         /// <summary>
         /// Occurs when the robot is initialized (connection has been established)
         /// </summary>
-        public event Action Initialized;
+        public event EventHandler Initialized;
 
         /// <summary>
         /// TODO
         /// </summary>
-        public event Action Uninitialized;
+        public event EventHandler Uninitialized;
 
         /// <summary>
-        /// Occurs when <see cref="InputFrame"/> frame is received
+        /// Occurs when frame is received
         /// </summary>
-        public event Action<InputFrame> FrameReceived;
+        public event EventHandler<FrameReceivedEventArgs> FrameReceived;
 
         /// <summary>
-        /// Occurs when <see cref="OutputFrame"/> frame is sent
+        /// Occurs when frame is sent
         /// </summary>
-        public event Action<OutputFrame> FrameSent;
+        public event EventHandler<FrameSentEventArgs> FrameSent;
 
         /// <summary>
-        /// Occurs when error occured on robot thread, while receiving or sending data
+        /// Occurs when exception was thrown on robot thread, while receiving or sending data
         /// </summary>
-        public event Action<string, Exception> ErrorOccured;
+        public event EventHandler<ErrorOccuredEventArgs> ErrorOccured;
 
-        public RobotEmulator(RobotConfig config, RobotVector homePosition) {
-            correctionBufor = new List<RobotVector>();
-            generator = new TrajectoryGenerator5T();
-            Config = config;
-
+        public RobotEmulator(RobotVector homePosition) {
+            HomePosition = homePosition;
+            generator = new TrajectoryGenerator();
             position = RobotVector.Zero;
+            axisPosition = RobotAxisVector.Zero;
+            correctionBuffor = new List<RobotVector>();
             correction = RobotVector.Zero;
+        }
 
-            communicationTask = new Task(() => {
-                CancellationPending = false;
+        public RobotEmulator(RobotConfig config, RobotVector homePosition) : this(homePosition) {
+            Config = config;
+        }
 
-                InputFrame receivedFrame = new InputFrame {
-                    IPOC = 0,
-                    Position = homePosition,
-                    AxisPosition = RobotAxisVector.Zero
-                };
+        private void Connect() {
+            IsCancellationRequested = false;
+            InputFrame receivedFrame = new InputFrame {
+                Position = HomePosition,
+                AxisPosition = RobotAxisVector.Zero,
+                IPOC = 0
+            };
 
-                generator.Initialize(receivedFrame.Position);
+            generator.Initialize(receivedFrame.Position);
 
-                lock (receivedDataSyncLock) {
-                    IPOC = receivedFrame.IPOC;
-                    position = receivedFrame.Position;
-                    HomePosition = receivedFrame.Position;
-                }
+            lock (receivedDataSyncLock) {
+                position = receivedFrame.Position;
+                HomePosition = receivedFrame.Position;
+            }
 
-                // Send first response
-                OutputFrame response = new OutputFrame() {
-                    Correction = new RobotVector(),
-                    IPOC = IPOC
-                };
+            isInitialized = true;
+            Initialized?.Invoke(this, EventArgs.Empty);
 
-                isInitialized = true;
-                Initialized?.Invoke();
-
-                // Start loop for receiving and sending data
-                while (!CancellationPending) {
-                    ReceiveDataAsync();
-                    SendData();
+            // Start loop for receiving and sending data
+            while (!IsCancellationRequested) {
+                try {
+                    long IPOC = ReceiveDataAsync();
+                    SendData(IPOC);
                     Thread.Sleep(4);
+                } catch (Exception e) {
+                    var args = new ErrorOccuredEventArgs {
+                        RobotIp = ToString(),
+                        Exception = e
+                    };
+
+                    ErrorOccured?.Invoke(this, args);
                 }
-            });
+            }
 
-            communicationTask.ContinueWith(t => {
-                string robotAdress = ToString();
-
-                // rsi uninitialize()
-
-                if (t.IsFaulted) {
-                    ErrorOccured?.Invoke(robotAdress, t.Exception.GetBaseException());
-                }
-
-                isInitialized = false;
-                Uninitialized?.Invoke();
-            });
+            isInitialized = false;
+            Uninitialized?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
         /// Receives data (IPOC, cartesian and axis position) from the robot asynchronously, 
         /// raises <see cref="Robot.FrameRecived">FrameReceived</see> event
         /// </summary>
-        private void ReceiveDataAsync() {
-            RobotVector currectCorrection = RobotVector.Zero;
+        /// <returns>current IPOC timestamp</returns>
+        private long ReceiveDataAsync() {
+            correctionBuffor.Add(correction);
+            RobotVector currentCorrection = RobotVector.Zero;
 
-            correctionBufor.Add(correction);
-            if (correctionBufor.Count > 8) {
-                currectCorrection = correctionBufor[0];
-                correctionBufor.RemoveAt(0);
+            if (correctionBuffor.Count == 8) {
+                currentCorrection = correctionBuffor[0];
+                correctionBuffor.RemoveAt(0);
             }
 
             InputFrame receivedFrame = new InputFrame {
-                IPOC = IPOC + 4,
-                Position = position + currectCorrection,
-                AxisPosition = RobotAxisVector.Zero
+                Position = position + currentCorrection,
+                AxisPosition = RobotAxisVector.Zero,
+                IPOC = 0
             };
 
             if (!Limits.CheckAxisPosition(receivedFrame.AxisPosition)) {
@@ -296,17 +290,21 @@ namespace PingPong.KUKA {
             }
 
             lock (receivedDataSyncLock) {
-                IPOC = receivedFrame.IPOC;
                 position = receivedFrame.Position;
+                axisPosition = receivedFrame.AxisPosition;
             }
 
-            FrameReceived?.Invoke(receivedFrame);
+            FrameReceived?.Invoke(this, new FrameReceivedEventArgs {
+                ReceivedFrame = receivedFrame
+            });
+
+            return receivedFrame.IPOC;
         }
 
         /// <summary>
         /// Sends data (IPOC, correction) to the robot, raises <see cref="Robot.FrameSent">FrameSent</see> event
         /// </summary>
-        private void SendData() {
+        private void SendData(long IPOC) {
             correction = generator.GetNextCorrection();
 
             if (!Limits.CheckRelativeCorrection(correction)) {
@@ -320,7 +318,10 @@ namespace PingPong.KUKA {
                 IPOC = IPOC
             };
 
-            FrameSent?.Invoke(outputFrame);
+            FrameSent?.Invoke(this, new FrameSentEventArgs {
+                FrameSent = outputFrame,
+                Position = position
+            });
         }
 
         /// <summary>
@@ -346,7 +347,7 @@ namespace PingPong.KUKA {
             }
 
             lock (forceMoveSyncLock) {
-                if (forceMoveMode) {
+                if (isForceMoveModeEnabled) {
                     return;
                 }
             }
@@ -365,13 +366,13 @@ namespace PingPong.KUKA {
             MoveTo(targetPosition, targetVelocity, targetDuration);
 
             lock (forceMoveSyncLock) {
-                forceMoveMode = true;
+                isForceMoveModeEnabled = true;
             }
 
             ManualResetEvent targetPositionReached = new ManualResetEvent(false);
 
-            void processFrame(InputFrame frameReceived) {
-                if (generator.IsTargetPositionReached) {
+            void processFrame(object sender, FrameReceivedEventArgs args) {
+                if (IsTargetPositionReached) {
                     targetPositionReached.Set();
                 }
             };
@@ -381,7 +382,7 @@ namespace PingPong.KUKA {
             FrameReceived -= processFrame;
 
             lock (forceMoveSyncLock) {
-                forceMoveMode = false;
+                isForceMoveModeEnabled = false;
             }
         }
 
@@ -407,18 +408,21 @@ namespace PingPong.KUKA {
         }
 
         public void Initialize() {
-            if (!isInitialized && !communicationTask.IsCompleted) {
-                if (config == null) {
-                    throw new InvalidOperationException("Robot configuration is not set.");
-                }
-
-                communicationTask.Start();
+            if (isInitialized) {
+                return;
             }
+
+            if (config == null) {
+                throw new InvalidOperationException("Robot configuration is not set.");
+            }
+
+            Task.Run(() => {
+                Connect();
+            });
         }
 
         public void Uninitialize() {
-            CancellationPending = true;
-            //worker.CancelAsync();
+            IsCancellationRequested = true;
         }
 
         public bool IsInitialized() {
@@ -426,7 +430,11 @@ namespace PingPong.KUKA {
         }
 
         public override string ToString() {
-            return "x.x.x.x:yyyy";
+            if (Ip != null) {
+                return $"{Ip}:{Port}";
+            } else {
+                return $"0.0.0.0:0000";
+            }
         }
 
     }

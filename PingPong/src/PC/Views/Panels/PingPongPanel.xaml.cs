@@ -205,7 +205,7 @@ namespace PingPong {
             if (saveFileDialog.ShowDialog() == true && saveFileDialog.FileName != "") {
                 int imageWidth = 800;
 
-                using (MemoryStream imageStream = activeChart.ExportImage(imageWidth, (int)(imageWidth * 9.0 / 16.0))) {
+                using (MemoryStream imageStream = activeChart.ExportPng(imageWidth, (int)(imageWidth * 9.0 / 16.0))) {
                     File.WriteAllBytes(saveFileDialog.FileName, imageStream.ToArray());
                 }
             }

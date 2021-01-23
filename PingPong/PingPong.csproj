@@ -145,7 +145,7 @@
     <Compile Include="Src\PC\Devices\KUKA\RSI\InputFrame.cs" />
     <Compile Include="Src\PC\Devices\KUKA\RSI\OutputFrame.cs" />
     <Compile Include="Src\PC\Devices\KUKA\RSI\RSIAdapter.cs" />
-    <Compile Include="Src\PC\Devices\KUKA\TrajectoryGenerator5T.cs" />
+    <Compile Include="Src\PC\Devices\KUKA\TrajectoryGenerator.cs" />
     <Compile Include="Src\PC\Devices\OptiTrack\BallFlightEmulator.cs" />
     <Compile Include="Src\PC\Devices\OptiTrack\Events\FrameReceivedEventArgs.cs" />
     <Compile Include="Src\PC\Devices\OptiTrack\InputFrame.cs" />
@@ -173,6 +173,7 @@
     <Compile Include="Src\PC\Views\Panels\RobotPanel.xaml.cs">
       <DependentUpon>RobotPanel.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Src\PC\Views\WinApi.cs" />
     <Page Include="Src\PC\Views\Panels\CalibrationWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
