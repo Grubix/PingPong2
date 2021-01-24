@@ -7,6 +7,12 @@ namespace PingPong.KUKA {
 
         public RobotVector Position { get; set; }
 
+        public RobotVector TargetPosition { get; set; }
+
+        public RobotVector TargetVelocity { get; set; }
+
+        public double TargetDuration { get; set; }
+
         public RobotVector Correction {
             get {
                 return FrameSent.Correction;

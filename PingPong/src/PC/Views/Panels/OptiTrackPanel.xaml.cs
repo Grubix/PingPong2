@@ -59,16 +59,6 @@ namespace PingPong {
                     TakeChartScreenshot(null, null);
                 }
             };
-
-            //Task.Run(() => {
-            //    for (int i = 0; i < 2000; i++) {
-            //        double x = Math.Sin(i / 500.0) * Math.Cos(i / 200.0);
-
-            //        positionChart.Update(new double[] { x, x });
-
-            //        Thread.Sleep(4);
-            //    }
-            //});
         }
 
         public void Initialize(Robot robot1, Robot robot2) {
@@ -88,9 +78,7 @@ namespace PingPong {
         }
 
         private void UpdateOptiTrackBasePositionChart(object sender, OptiTrack.FrameReceivedEventArgs args) {
-            positionChart.Update(new double[] {
-                args.BallPosition[0], args.BallPosition[1], args.BallPosition[2]
-            });
+            positionChart.Update(args.BallPosition.ToArray());
             Dispatcher.Invoke(() => {
                 actualPositionX.Text = args.BallPosition[0].ToString("F3");
                 actualPositionY.Text = args.BallPosition[1].ToString("F3");
@@ -224,7 +212,7 @@ namespace PingPong {
             }
 
             var saveFileDialog = new Microsoft.Win32.SaveFileDialog {
-                InitialDirectory = Path.Combine(Directory.GetCurrentDirectory(), "screenshots"),
+                InitialDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Screenshots"),
                 CheckPathExists = true,
                 FilterIndex = 2,
                 Title = "Save chart screenshot",

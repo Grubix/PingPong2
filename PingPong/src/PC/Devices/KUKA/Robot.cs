@@ -310,7 +310,10 @@ namespace PingPong.KUKA {
 
             FrameSent?.Invoke(this, new FrameSentEventArgs {
                 FrameSent = outputFrame,
-                Position = position
+                Position = position,
+                TargetPosition = generator.TargetPosition,
+                TargetVelocity = generator.TargetVelocity,
+                TargetDuration = generator.TargetDuration
             });
         }
 

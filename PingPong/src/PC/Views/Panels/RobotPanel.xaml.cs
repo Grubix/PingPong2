@@ -69,65 +69,6 @@ namespace PingPong {
                     TakeChartScreenshot(null, null);
                 }
             };
-
-            RobotLimits limits = new RobotLimits(
-                lowerWorkspaceLimit: (-800, 200, -800),
-                upperWorkspaceLimit: (800, 1200, 800),
-                a1AxisLimit: (-360, 360),
-                a2AxisLimit: (-360, 360),
-                a3AxisLimit: (-360, 360),
-                a4AxisLimit: (-360, 360),
-                a5AxisLimit: (-360, 360),
-                a6AxisLimit: (-360, 360),
-                correctionLimit: (5, 0.1)
-            );
-            RobotConfig config2 = new RobotConfig(0, limits, null);
-            RobotEmulator emulator = new RobotEmulator(config2, new RobotVector(0.44, 793.19, 177.83, 0, 0, -90));
-
-            emulator.ErrorOccured += (s, e) => {
-                MainWindow.ShowErrorDialog($"An exception was raised on the robot ({e.RobotIp}) thread.", e.Exception);
-            };
-
-            Task.Run(() => {
-                Random random = new Random();
-                Thread.Sleep(5000);
-                emulator.Initialize();
-
-                Thread.Sleep(1000);
-                emulator.Shift(new RobotVector(180, 0, 0), RobotVector.Zero, 0.6);
-
-                while (true) {
-                    Thread.Sleep(3000);
-
-                    double x = (random.NextDouble() - 0.5) * 300;
-                    double y = (random.NextDouble() - 0.5) * 300 + 500;
-                    double z = (random.NextDouble() - 0.5) * 300;
-
-                    RobotVector pos = new RobotVector(x, y, z, emulator.HomePosition.ABC);
-
-                    if (emulator.Limits.CheckPosition(pos)) {
-                        emulator.MoveTo(pos, RobotVector.Zero, 2);
-                    }
-                }
-            });
-
-            emulator.FrameReceived += (s, e) => {
-                RobotVector actualPosition = emulator.Position;
-                RobotVector targetPosition = emulator.TargetPosition;
-                RobotVector theoreticalPosition = emulator.TheoreticalPosition;
-
-                positionChart.Update(new double[] {
-                    actualPosition.X, targetPosition.X, theoreticalPosition.X,
-                    actualPosition.Y, targetPosition.Y, theoreticalPosition.Y,
-                    actualPosition.Z, targetPosition.Z, theoreticalPosition.Z,
-                    actualPosition.A, targetPosition.A, theoreticalPosition.A,
-                    actualPosition.B, targetPosition.B, theoreticalPosition.B,
-                    actualPosition.C, targetPosition.C, theoreticalPosition.C,
-                });
-
-                velocityChart.Update(emulator.Velocity.ToArray());
-                accelerationChart.Update(emulator.Acceleration.ToArray());
-            };
         }
 
         private void InitializeCharts() {

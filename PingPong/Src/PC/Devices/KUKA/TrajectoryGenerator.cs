@@ -115,6 +115,22 @@ namespace PingPong.KUKA {
             }
         }
 
+        public RobotVector TargetVelocity {
+            get {
+                lock (syncLock) {
+                    return targetVelocity;
+                }
+            }
+        }
+
+        public double TargetDuration {
+            get {
+                lock (syncLock) {
+                    return targetDuration;
+                }
+            }
+        }
+
         public bool IsTargetPositionReached {
             get {
                 lock (syncLock) {
@@ -164,7 +180,7 @@ namespace PingPong.KUKA {
                 targetPositionReached = true;
                 targetPosition = actualRobotPosition;
                 targetVelocity = RobotVector.Zero;
-                targetDuration = 0.0;
+                targetDuration = -1.0;
                 elapsedTime = 0.0;
 
                 polyX.Initialize(actualRobotPosition.X);
