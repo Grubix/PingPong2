@@ -122,92 +122,92 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <ApplicationDefinition Include="Src\PC\Views\App.xaml">
+    <ApplicationDefinition Include="src\PC\Views\App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Src\PC\Applications\HitPrediction.cs" />
-    <Compile Include="Src\PC\Applications\IApplication.cs" />
-    <Compile Include="Src\PC\Applications\PingApp.cs" />
-    <Compile Include="Src\PC\Applications\Events\PingDataReadyEventArgs.cs" />
-    <Compile Include="Src\PC\Applications\PingPongApp.cs" />
-    <Compile Include="Src\PC\Applications\Events\PingPongDataReadyEventArgs.cs" />
-    <Compile Include="Src\PC\Devices\IDevice.cs" />
-    <Compile Include="Src\PC\Devices\KUKA\Events\ErrorOccuredEventArgs.cs" />
-    <Compile Include="Src\PC\Devices\KUKA\Events\FrameReceivedEventArgs.cs" />
-    <Compile Include="Src\PC\Devices\KUKA\Events\FrameSentEventArgs.cs" />
-    <Compile Include="Src\PC\Devices\KUKA\Robot.cs" />
-    <Compile Include="Src\PC\Devices\KUKA\RobotEmulator.cs" />
-    <Compile Include="Src\PC\Devices\KUKA\RobotAxisVector.cs" />
-    <Compile Include="Src\PC\Devices\KUKA\RobotConfig.cs" />
-    <Compile Include="Src\PC\Devices\KUKA\RobotLimits.cs" />
-    <Compile Include="Src\PC\Devices\KUKA\RobotVector.cs" />
-    <Compile Include="Src\PC\Devices\KUKA\RSI\InputFrame.cs" />
-    <Compile Include="Src\PC\Devices\KUKA\RSI\OutputFrame.cs" />
-    <Compile Include="Src\PC\Devices\KUKA\RSI\RSIAdapter.cs" />
-    <Compile Include="Src\PC\Devices\KUKA\TrajectoryGenerator.cs" />
-    <Compile Include="Src\PC\Devices\OptiTrack\BallFlightEmulator.cs" />
-    <Compile Include="Src\PC\Devices\OptiTrack\Events\FrameReceivedEventArgs.cs" />
-    <Compile Include="Src\PC\Devices\OptiTrack\InputFrame.cs" />
-    <Compile Include="Src\PC\Devices\OptiTrack\OptiTrackSystem.cs" />
-    <Compile Include="Src\PC\Maths\KalmanFilter.cs" />
-    <Compile Include="Src\PC\Maths\KalmanModel.cs" />
-    <Compile Include="Src\PC\Maths\PIDRegulator.cs" />
-    <Compile Include="Src\PC\Maths\PIRegulator.cs" />
-    <Compile Include="Src\PC\Maths\Polyfit.cs" />
-    <Compile Include="Src\PC\Maths\Transformation.cs" />
-    <Compile Include="Src\PC\Views\Panels\CalibrationWindow.xaml.cs">
+    <Compile Include="src\PC\Applications\HitPrediction.cs" />
+    <Compile Include="src\PC\Applications\IApplication.cs" />
+    <Compile Include="src\PC\Applications\PingApp.cs" />
+    <Compile Include="src\PC\Applications\Events\PingDataReadyEventArgs.cs" />
+    <Compile Include="src\PC\Applications\PingPongApp.cs" />
+    <Compile Include="src\PC\Applications\Events\PingPongDataReadyEventArgs.cs" />
+    <Compile Include="src\PC\Devices\IDevice.cs" />
+    <Compile Include="src\PC\Devices\KUKA\Events\ErrorOccuredEventArgs.cs" />
+    <Compile Include="src\PC\Devices\KUKA\Events\FrameReceivedEventArgs.cs" />
+    <Compile Include="src\PC\Devices\KUKA\Events\FrameSentEventArgs.cs" />
+    <Compile Include="src\PC\Devices\KUKA\Robot.cs" />
+    <Compile Include="src\PC\Devices\KUKA\RobotEmulator.cs" />
+    <Compile Include="src\PC\Devices\KUKA\RobotAxisVector.cs" />
+    <Compile Include="src\PC\Devices\KUKA\RobotConfig.cs" />
+    <Compile Include="src\PC\Devices\KUKA\RobotLimits.cs" />
+    <Compile Include="src\PC\Devices\KUKA\RobotVector.cs" />
+    <Compile Include="src\PC\Devices\KUKA\RSI\InputFrame.cs" />
+    <Compile Include="src\PC\Devices\KUKA\RSI\OutputFrame.cs" />
+    <Compile Include="src\PC\Devices\KUKA\RSI\RSIAdapter.cs" />
+    <Compile Include="src\PC\Devices\KUKA\TrajectoryGenerator.cs" />
+    <Compile Include="src\PC\Devices\OptiTrack\BallFlightEmulator.cs" />
+    <Compile Include="src\PC\Devices\OptiTrack\Events\FrameReceivedEventArgs.cs" />
+    <Compile Include="src\PC\Devices\OptiTrack\InputFrame.cs" />
+    <Compile Include="src\PC\Devices\OptiTrack\OptiTrackSystem.cs" />
+    <Compile Include="src\PC\Maths\KalmanFilter.cs" />
+    <Compile Include="src\PC\Maths\KalmanModel.cs" />
+    <Compile Include="src\PC\Maths\PIDRegulator.cs" />
+    <Compile Include="src\PC\Maths\PIRegulator.cs" />
+    <Compile Include="src\PC\Maths\Polyfit.cs" />
+    <Compile Include="src\PC\Maths\Transformation.cs" />
+    <Compile Include="src\PC\Views\Panels\CalibrationWindow.xaml.cs">
       <DependentUpon>CalibrationWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Src\PC\Views\Controls\LiveChart.xaml.cs">
+    <Compile Include="src\PC\Views\Controls\LiveChart.xaml.cs">
       <DependentUpon>LiveChart.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Src\PC\Views\Panels\ManualModeWindow.xaml.cs">
+    <Compile Include="src\PC\Views\Panels\ManualModeWindow.xaml.cs">
       <DependentUpon>ManualModeWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Src\PC\Views\Panels\OptiTrackPanel.xaml.cs">
+    <Compile Include="src\PC\Views\Panels\OptiTrackPanel.xaml.cs">
       <DependentUpon>OptiTrackPanel.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Src\PC\Views\Panels\PingPongPanel.xaml.cs">
+    <Compile Include="src\PC\Views\Panels\PingPongPanel.xaml.cs">
       <DependentUpon>PingPongPanel.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Src\PC\Views\Panels\RobotPanel.xaml.cs">
+    <Compile Include="src\PC\Views\Panels\RobotPanel.xaml.cs">
       <DependentUpon>RobotPanel.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Src\PC\Views\WinApi.cs" />
-    <Page Include="Src\PC\Views\Panels\CalibrationWindow.xaml">
+    <Compile Include="src\PC\Views\WinApi.cs" />
+    <Page Include="src\PC\Views\Panels\CalibrationWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Src\PC\Views\Controls\LiveChart.xaml">
+    <Page Include="src\PC\Views\Controls\LiveChart.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Src\PC\Views\MainWindow.xaml">
+    <Page Include="src\PC\Views\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Compile Include="Src\PC\Views\App.xaml.cs">
+    <Compile Include="src\PC\Views\App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Src\PC\Views\MainWindow.xaml.cs">
+    <Compile Include="src\PC\Views\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Src\PC\Views\Panels\ManualModeWindow.xaml">
+    <Page Include="src\PC\Views\Panels\ManualModeWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Src\PC\Views\Panels\OptiTrackPanel.xaml">
+    <Page Include="src\PC\Views\Panels\OptiTrackPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Src\PC\Views\Panels\PingPongPanel.xaml">
+    <Page Include="src\PC\Views\Panels\PingPongPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Src\PC\Views\Panels\RobotPanel.xaml">
+    <Page Include="src\PC\Views\Panels\RobotPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -245,18 +245,18 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <None Include="Src\KUKA\Robot1\robot1.config.json" />
-    <None Include="Src\KUKA\Robot1\RSI_Ethernet.rsix" />
-    <None Include="Src\KUKA\Robot1\RSI_Ethernet.src" />
-    <None Include="Src\KUKA\Robot2\robot2.config.json" />
-    <None Include="Src\KUKA\Robot2\RSI_Ethernet.rsix" />
-    <None Include="Src\KUKA\Robot2\RSI_Ethernet.src" />
+    <None Include="src\KUKA\Robot1\robot1.config.json" />
+    <None Include="src\KUKA\Robot1\RSI_Ethernet.rsix" />
+    <None Include="src\KUKA\Robot1\RSI_Ethernet.src" />
+    <None Include="src\KUKA\Robot2\robot2.config.json" />
+    <None Include="src\KUKA\Robot2\RSI_Ethernet.rsix" />
+    <None Include="src\KUKA\Robot2\RSI_Ethernet.src" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Src\OptiTrack\" />
+    <Folder Include="src\OptiTrack\" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
@@ -276,10 +276,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Src\KUKA\Robot1\RSI_EthernetConfig.xml" />
+    <Resource Include="src\KUKA\Robot1\RSI_EthernetConfig.xml" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Src\KUKA\Robot2\RSI_EthernetConfig.xml" />
+    <Resource Include="src\KUKA\Robot2\RSI_EthernetConfig.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

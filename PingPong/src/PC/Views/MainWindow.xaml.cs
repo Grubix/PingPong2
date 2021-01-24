@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PingPong.KUKA;
+using System;
 using System.Globalization;
 using System.IO;
 using System.Threading;
@@ -44,7 +45,22 @@ namespace PingPong {
                 }
 
                 optiTrackPanel.Initialize(robot1Panel.Robot, robot2Panel.Robot);
-                pingPongPanel.Initialize(robot1Panel.Robot, robot2Panel.Robot, optiTrackPanel.OptiTrack );
+                pingPongPanel.Initialize(robot1Panel.Robot, robot2Panel.Robot, optiTrackPanel.OptiTrack);
+
+                //TODO: ODBICIE LUSTRZANE
+                //Robot robot1 = robot1Panel.Robot;
+                //Robot robot2 = robot2Panel.Robot;
+
+                //robot1.FrameSent += (sender, args) => {
+                //    RobotVector targetPosition = new RobotVector(
+                //        args.TargetPosition.Y,
+                //        args.TargetPosition.X,
+                //        args.TargetPosition.Z,
+                //        robot2.HomePosition.ABC
+                //    );
+
+                //    robot2.MoveTo(args.TargetPosition, args.TargetVelocity, args.TargetDuration);
+                //};
             };
 
             // Shrink window if it is too wide or too high
