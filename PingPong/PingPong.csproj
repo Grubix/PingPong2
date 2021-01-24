@@ -196,7 +196,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="ClassDiagram1.cd" />
     <None Include="Docs\eggert_comparison_mva97.pdf" />
     <None Include="Docs\LN9_TrajectoryGeneration.pdf" />
     <None Include="Docs\Meissner feat. Pazda.pdf" />
@@ -244,10 +243,10 @@
     <Resource Include="Source\KUKA\Robot2\RSI_EthernetConfig.xml" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Source\PC\Views\App.xaml">
+    <ApplicationDefinition Include="Source\PC\Views\App.xaml">
       <SubType>Designer</SubType>
       <Generator>XamlIntelliSenseFileGenerator</Generator>
-    </Page>
+    </ApplicationDefinition>
   </ItemGroup>
   <ItemGroup>
     <Page Include="Source\PC\Views\Controls\LiveChart.xaml">
