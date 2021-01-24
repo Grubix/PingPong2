@@ -90,7 +90,7 @@ namespace PingPong.Applications {
             kalmanY.Compute(position[1]);
             kalmanZ.Compute(position[2]);
 
-            if (SamplesCount < 10) { //TODO: DO TESTOWANIA - KIEDY MA WYSTARTOWAC
+            if (SamplesCount < 25) { //TODO: DO TESTOWANIA - KIEDY MA WYSTARTOWAC
                 IsReady = false;
                 SamplesCount++;
                 return;
@@ -104,11 +104,11 @@ namespace PingPong.Applications {
             double velocityY = 0;
             double velocityZ = 0;
 
-            if (SamplesCount < 50) { //TODO: DO TESTOWANIA - KIEDY MA DZIALAC POLYFIT
+            if (SamplesCount < 60) { //TODO: DO TESTOWANIA - KIEDY MA DZIALAC POLYFIT
                 double z = kalmanZ.CorrectedState[0];
                 double v = kalmanZ.CorrectedState[1];
                 double a = -9.81 * 1000.0 / 2.0;
-                double delta = v * v - 4.0 * a * (z - TargetHitHeight);
+                double delta = v * v - 4.0 * a * (z - TargetHitHeight + 20);
 
                 if (delta < 0.0) {
                     TimeToHit = -1.0;
@@ -129,7 +129,7 @@ namespace PingPong.Applications {
                 double z0 = zCoeffs[0];
                 double v0 = zCoeffs[1];
                 double a0 = zCoeffs[2];
-                double delta = v0 * v0 - 4.0 * a0 * (z0 - TargetHitHeight);
+                double delta = v0 * v0 - 4.0 * a0 * (z0 - TargetHitHeight + 20);
 
                 if (delta < 0.0) {
                     TimeToHit = -1.0;
@@ -175,7 +175,7 @@ namespace PingPong.Applications {
 
             IsReady = false;
             SamplesCount = 0;
-            TimeToHit = -1.0;
+            TimeToHit = -20.0;
         }
 
         private void ShiftPolyfitSamples() {
