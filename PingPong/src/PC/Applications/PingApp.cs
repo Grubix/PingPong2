@@ -261,7 +261,7 @@ namespace PingPong.Applications {
                 koniec_odbicia = true;
             }
 
-            PingAppData data = new PingAppData {
+            PingDataReadyEventArgs data = new PingDataReadyEventArgs {
                 PredictedBallPosition = predBallPosition,
                 PredictedBallVelocity = predBallVelocity,
                 ActualBallPosition = robotBaseBallPosition,
@@ -272,7 +272,7 @@ namespace PingPong.Applications {
                 BallSetpointZ = destBallPosition[2]
             };
 
-            DataReady?.Invoke(data);
+            DataReady?.Invoke(this, data);
 
 
         }
