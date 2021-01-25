@@ -5,7 +5,6 @@ using PingPong.OptiTrack;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 
 namespace PingPong.Applications {
     class PingApp : IApplication<PingDataReadyEventArgs> {

@@ -179,15 +179,15 @@ namespace PingPong {
                 deltaTime = 0;
             }
 
-            for (int i = 0; i < data.Length; i++) {
-                DataPoint point = new DataPoint(currentSample, data[i]);
-                
-                if (currentSample % 2 == 0) {
-                    wrappedSeries[i].Points.Add(point);
-                }
+            if (currentSample % 2 == 0) {
+                for (int i = 0; i < data.Length; i++) {
+                    DataPoint point = new DataPoint(currentSample, data[i]);
 
-                if (isReady) {
-                    wrappedSeries[i].DelayedPoints.Add(point);
+                    wrappedSeries[i].Points.Add(point);
+
+                    if (isReady) {
+                        wrappedSeries[i].DelayedPoints.Add(point);
+                    }
                 }
             }
 

@@ -140,6 +140,7 @@
     <Compile Include="Source\PC\Applications\HitPrediction.cs" />
     <Compile Include="Source\PC\Applications\IApplication.cs" />
     <Compile Include="Source\PC\Applications\PingApp.cs" />
+    <Compile Include="Source\PC\Applications\PingApp2.cs" />
     <Compile Include="Source\PC\Applications\PingPongApp.cs" />
     <Compile Include="Source\PC\Devices\IDevice.cs" />
     <Compile Include="Source\PC\Devices\KUKA\Events\ErrorOccuredEventArgs.cs" />
