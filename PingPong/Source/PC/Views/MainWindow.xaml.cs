@@ -1,4 +1,5 @@
 ﻿using PingPong.KUKA;
+using PingPong.OptiTrack;
 using System;
 using System.Globalization;
 using System.IO;
@@ -8,15 +9,15 @@ using System.Windows;
 namespace PingPong {
     public partial class MainWindow : Window {
 
-        private static MainWindow mainWindow;
+        private static MainWindow mainWindowHanlde;
 
         public MainWindow() {
             InitializeComponent();
+            mainWindowHanlde = this;
 
             // Set timer resolution to 1ms (15.6ms is default)
             WinApi.TimeBeginPeriod(1);
 
-            mainWindow = this;
             // Force change number separator to dot
             CultureInfo culuteInfo = new CultureInfo("en-US");
             culuteInfo.NumberFormat.NumberDecimalSeparator = ".";
@@ -27,25 +28,46 @@ namespace PingPong {
             Loaded += (s, e) => {
                 robot1Panel.MainWindowHandle = this;
                 robot1Panel.OptiTrack = optiTrackPanel.OptiTrack;
-                robot1Panel.Robot.ErrorOccured += (sender, args) => {
-                    ShowErrorDialog($"An exception was raised on the robot ({args.RobotIp}) thread.", args.Exception);
-                };
-
                 robot2Panel.MainWindowHandle = this;
                 robot2Panel.OptiTrack = optiTrackPanel.OptiTrack;
-                robot2Panel.Robot.ErrorOccured += (sender, args) => {
-                    ShowErrorDialog($"An exception was raised on the robot ({args.RobotIp}) thread.", args.Exception);
-                };
 
                 try {
-                    robot1Panel.LoadConfig("Config/robot1.config.json");
-                    robot2Panel.LoadConfig("Config/robot2.config.json");
+                    robot1Panel.LoadConfig($"{App.ConfigDir}/robot1.config.json");
+                    robot2Panel.LoadConfig($"{App.ConfigDir}/robot2.config.json");
                 } catch (Exception) {
                     // Ingore exception - config files may not exist in Config folder
                 }
 
-                optiTrackPanel.Initialize(robot1Panel.Robot, robot2Panel.Robot);
-                pingPongPanel.Initialize(robot1Panel.Robot, robot2Panel.Robot, optiTrackPanel.OptiTrack);
+                Robot robot1 = robot1Panel.Robot;
+                Robot robot2 = robot2Panel.Robot;
+                OptiTrackSystem optiTrack = optiTrackPanel.OptiTrack;
+
+                optiTrackPanel.Initialize(robot1, robot2);
+                pingPongPanel.Initialize(robot1, robot2, optiTrack);
+
+                robot1.ErrorOccured += (sender, args) => {
+                    robot2.Uninitialize();
+                    optiTrack.Uninitialize();
+
+                    robot1Panel.ForceFreezeCharts();
+                    robot2Panel.ForceFreezeCharts();
+                    optiTrackPanel.ForceFreezeCharts();
+                    pingPongPanel.ForceFreezeCharts();
+
+                    ShowErrorDialog($"An exception was raised on the robot ({args.RobotIp}) thread.", args.Exception);
+                };
+
+                robot2.ErrorOccured += (sender, args) => {
+                    robot1.Uninitialize();
+                    optiTrack.Uninitialize();
+
+                    robot1Panel.ForceFreezeCharts();
+                    robot2Panel.ForceFreezeCharts();
+                    optiTrackPanel.ForceFreezeCharts();
+                    pingPongPanel.ForceFreezeCharts();
+
+                    ShowErrorDialog($"An exception was raised on the robot ({args.RobotIp}) thread.", args.Exception);
+                };
 
                 //TODO: ODBICIE LUSTRZANE
                 //Robot robot1 = robot1Panel.Robot;
@@ -79,10 +101,10 @@ namespace PingPong {
             }
 
             // Robots configuration files directory
-            Directory.CreateDirectory("Config");
+            Directory.CreateDirectory(App.ConfigDir);
 
             // Chart screenshots directory
-            Directory.CreateDirectory("Screenshots");
+            Directory.CreateDirectory(App.ScreenshotsDir);
         }
 
         public static void ShowErrorDialog(string errorMessage, Exception exception = null) {
@@ -90,9 +112,9 @@ namespace PingPong {
                 errorMessage += $"\nOriginal error: \"{exception.Message}\"";
             }
 
-            if (mainWindow != null) {
-                mainWindow.Dispatcher.Invoke(() => {
-                    MessageBox.Show(mainWindow, errorMessage, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            if (mainWindowHanlde != null) {
+                mainWindowHanlde.Dispatcher.Invoke(() => {
+                    MessageBox.Show(mainWindowHanlde, errorMessage, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 });
             } else {
                 MessageBox.Show(errorMessage, "Error", MessageBoxButton.OK, MessageBoxImage.Error);

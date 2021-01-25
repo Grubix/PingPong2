@@ -167,6 +167,22 @@ namespace PingPong {
             }
         }
 
+        public void ForceFreezeCharts() {
+            isPlotFrozen = true;
+
+            robot1PingChart.Freeze();
+            robot2PingChart.Freeze();
+            pingPongChart.Freeze();
+
+            isPlotFrozen = true;
+            freezeBtn.Content = "Unfreeze";
+            resetZoomBtn.IsEnabled = true;
+            fitToDataBtn.IsEnabled = true;
+            screenshotBtn.IsEnabled = true;
+
+            FitChartsToData(null, null);
+        }
+
         private void FitChartsToData(object sender, RoutedEventArgs e) {
             robot1PingChart.FitToData();
             robot2PingChart.FitToData();
@@ -193,7 +209,7 @@ namespace PingPong {
             }
 
             var saveFileDialog = new Microsoft.Win32.SaveFileDialog {
-                InitialDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Screenshots"),
+                InitialDirectory = Path.Combine(Directory.GetCurrentDirectory(), App.ScreenshotsDir),
                 CheckPathExists = true,
                 FilterIndex = 2,
                 Title = "Save chart screenshot",

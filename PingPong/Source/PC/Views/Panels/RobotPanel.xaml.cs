@@ -288,6 +288,22 @@ namespace PingPong {
             }
         }
 
+        public void ForceFreezeCharts() {
+            isPlotFrozen = true;
+
+            positionChart.Unfreeze();
+            velocityChart.Unfreeze();
+            accelerationChart.Unfreeze();
+
+            isPlotFrozen = true;
+            freezeBtn.Content = "Unfreeze";
+            resetZoomBtn.IsEnabled = true;
+            fitToDataBtn.IsEnabled = true;
+            screenshotBtn.IsEnabled = true;
+
+            FitChartsToData(null, null);
+        }
+
         private void FitChartsToData(object sender, RoutedEventArgs e) {
             positionChart.FitToData();
             velocityChart.FitToData();
@@ -314,7 +330,7 @@ namespace PingPong {
             }
 
             var saveFileDialog = new Microsoft.Win32.SaveFileDialog {
-                InitialDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Screenshots"),
+                InitialDirectory = Path.Combine(Directory.GetCurrentDirectory(), App.ScreenshotsDir),
                 CheckPathExists = true,
                 FilterIndex = 2,
                 Title = "Save chart screenshot",
@@ -334,7 +350,7 @@ namespace PingPong {
 
         private void LoadConfig(object sender, RoutedEventArgs e) {
             var openFileDialog = new Microsoft.Win32.OpenFileDialog {
-                InitialDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Config"),
+                InitialDirectory = Path.Combine(Directory.GetCurrentDirectory(), App.ConfigDir),
                 Title = "Select configuration file",
                 CheckFileExists = true,
                 CheckPathExists = true,
@@ -371,7 +387,7 @@ namespace PingPong {
             RobotConfig config = CreateConfigurationFromFields();
 
             var saveFileDialog = new Microsoft.Win32.SaveFileDialog {
-                InitialDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Config"),
+                InitialDirectory = Path.Combine(Directory.GetCurrentDirectory(), App.ConfigDir),
                 CheckPathExists = true,
                 FilterIndex = 2,
                 Title = "Save configuration file",
@@ -398,19 +414,30 @@ namespace PingPong {
 
             a1LowerLimit.Text = config.Limits.A1AxisLimit.Min.ToString();
             a1UpperLimit.Text = config.Limits.A1AxisLimit.Max.ToString();
+
             a2LowerLimit.Text = config.Limits.A2AxisLimit.Min.ToString();
             a2UpperLimit.Text = config.Limits.A2AxisLimit.Max.ToString();
+
             a3LowerLimit.Text = config.Limits.A3AxisLimit.Min.ToString();
             a3UpperLimit.Text = config.Limits.A3AxisLimit.Max.ToString();
+
             a4LowerLimit.Text = config.Limits.A4AxisLimit.Min.ToString();
             a4UpperLimit.Text = config.Limits.A4AxisLimit.Max.ToString();
+
             a5LowerLimit.Text = config.Limits.A5AxisLimit.Min.ToString();
             a5UpperLimit.Text = config.Limits.A5AxisLimit.Max.ToString();
+
             a6LowerLimit.Text = config.Limits.A6AxisLimit.Min.ToString();
             a6UpperLimit.Text = config.Limits.A6AxisLimit.Max.ToString();
 
             correctionLimitXYZ.Text = config.Limits.CorrectionLimit.XYZ.ToString();
             correctionLimitABC.Text = config.Limits.CorrectionLimit.ABC.ToString();
+
+            velocityLimitXYZ.Text = config.Limits.VelocityLimit.XYZ.ToString();
+            velocityLimitABC.Text = config.Limits.VelocityLimit.ABC.ToString();
+
+            accelerationLimitXYZ.Text = config.Limits.AccelerationLimit.XYZ.ToString();
+            accelerationLimitABC.Text = config.Limits.AccelerationLimit.ABC.ToString();
 
             t00.Text = config.Transformation[0, 0].ToString("F3");
             t01.Text = config.Transformation[0, 1].ToString("F3");
@@ -445,7 +472,9 @@ namespace PingPong {
                 (double.Parse(a4LowerLimit.Text), double.Parse(a4UpperLimit.Text)),
                 (double.Parse(a5LowerLimit.Text), double.Parse(a5UpperLimit.Text)),
                 (double.Parse(a6LowerLimit.Text), double.Parse(a6UpperLimit.Text)),
-                (double.Parse(correctionLimitXYZ.Text), double.Parse(correctionLimitABC.Text))
+                (double.Parse(correctionLimitXYZ.Text), double.Parse(correctionLimitABC.Text)),
+                (double.Parse(velocityLimitXYZ.Text), double.Parse(velocityLimitABC.Text)),
+                (double.Parse(accelerationLimitXYZ.Text), double.Parse(accelerationLimitABC.Text))
             );
 
             var rotation = Matrix<double>.Build.DenseOfArray(new double[,] {

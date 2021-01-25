@@ -49,14 +49,15 @@ namespace PingPong.KUKA {
             var limitsNode = getNode(data, "limits");
             var lowerWpPointNode = getNode(limitsNode, "lowerWorkspacePoint") as JArray;
             var upperWpPointNode = getNode(limitsNode, "upperWorkspacePoint") as JArray;
+            var correctionLimitNode = getNode(limitsNode, "maxCorrection") as JArray;
+            var velocityLimitNode = getNode(limitsNode, "maxVelocity") as JArray;
+            var accelerationLimitNode = getNode(limitsNode, "maxAcceleration") as JArray;
             var a1LimitNode = getNode(limitsNode, "A1") as JArray;
             var a2LimitNode = getNode(limitsNode, "A2") as JArray;
             var a3LimitNode = getNode(limitsNode, "A3") as JArray;
             var a4LimitNode = getNode(limitsNode, "A4") as JArray;
             var a5LimitNode = getNode(limitsNode, "A5") as JArray;
             var a6LimitNode = getNode(limitsNode, "A6") as JArray;
-            var maxCorrectionXYZNode = getNode(limitsNode, "maxCorrectionXYZ");
-            var maxCorrectionABCNode = getNode(limitsNode, "maxCorrectionABC");
 
             Limits = new RobotLimits(
                 ((double)lowerWpPointNode[0], (double)lowerWpPointNode[1], (double)lowerWpPointNode[2]),
@@ -67,7 +68,9 @@ namespace PingPong.KUKA {
                 ((double)a4LimitNode[0], (double)a4LimitNode[1]),
                 ((double)a5LimitNode[0], (double)a5LimitNode[1]),
                 ((double)a6LimitNode[0], (double)a6LimitNode[1]),
-                ((double)maxCorrectionXYZNode, (double)maxCorrectionABCNode)
+                ((double)correctionLimitNode[0], (double)correctionLimitNode[1]),
+                ((double)velocityLimitNode[0], (double)velocityLimitNode[1]),
+                ((double)accelerationLimitNode[0], (double)accelerationLimitNode[1])
             );
 
             var transformationNode = getNode(data, "transformation") as JArray;
@@ -91,6 +94,9 @@ namespace PingPong.KUKA {
         public string ToJsonString() {
             (double wx0, double wy0, double wz0) = Limits.LowerWorkspacePoint;
             (double wx1, double wy1, double wz1) = Limits.UpperWorkspacePoint;
+            (double corXYZ, double corABC) = Limits.CorrectionLimit;
+            (double velXYZ, double velABC) = Limits.VelocityLimit;
+            (double accXYZ, double accABC) = Limits.AccelerationLimit;
 
             string jsonString =
             $@"{{
@@ -98,8 +104,9 @@ namespace PingPong.KUKA {
                 ""limits"": {{
                     ""lowerWorkspacePoint"": [{wx0}, {wy0}, {wz0}],
                     ""upperWorkspacePoint"": [{wx1}, {wy1}, {wz1}],
-                    ""maxCorrectionXYZ"": {Limits.CorrectionLimit.XYZ},
-                    ""maxCorrectionABC"": {Limits.CorrectionLimit.ABC},
+                    ""maxCorrection"": [{corXYZ}, {corABC}],
+                    ""maxVelocity"": [{velXYZ}, {velABC}],
+                    ""maxAcceleration"": [{accXYZ}, {accABC}],
                     ""A1"": [{Limits.A1AxisLimit.Min}, {Limits.A1AxisLimit.Max}],
                     ""A2"": [{Limits.A2AxisLimit.Min}, {Limits.A2AxisLimit.Max}],
                     ""A3"": [{Limits.A3AxisLimit.Min}, {Limits.A3AxisLimit.Max}],

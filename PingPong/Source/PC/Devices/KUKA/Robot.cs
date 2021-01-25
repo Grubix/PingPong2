@@ -293,12 +293,30 @@ namespace PingPong.KUKA {
         /// Sends data (IPOC, correction) to the robot, raises <see cref="Robot.FrameSent">FrameSent</see> event
         /// </summary>
         private void SendData(long IPOC) {
-            RobotVector correction = generator.GetNextCorrection();
+            RobotVector targetPosition = generator.TargetPosition;
+            RobotVector targetVelocity = generator.TargetVelocity;
+            double targetDuration = generator.TargetDuration;
 
-            if (!Limits.CheckRelativeCorrection(correction)) {
+            RobotVector correction = generator.GetNextCorrection();
+            RobotVector velocity = generator.Velocity;
+            RobotVector acceleration = generator.Acceleration;
+
+            if (!Limits.CheckCorrection(correction)) {
                 Uninitialize();
                 throw new InvalidOperationException("Correction limit has been exceeded:" +
                     $"{Environment.NewLine}{correction}");
+            }
+
+            if (!Limits.CheckVelocity(velocity)) {
+                Uninitialize();
+                throw new InvalidOperationException("Velocity limit has been exceeded:" +
+                    $"{Environment.NewLine}{velocity}");
+            }
+
+            if (!Limits.CheckAcceleration(acceleration)) {
+                Uninitialize();
+                throw new InvalidOperationException("Acceleration limit has been exceeded:" +
+                    $"{Environment.NewLine}{acceleration}");
             }
 
             OutputFrame outputFrame = new OutputFrame() {
@@ -311,9 +329,9 @@ namespace PingPong.KUKA {
             FrameSent?.Invoke(this, new FrameSentEventArgs {
                 FrameSent = outputFrame,
                 Position = position,
-                TargetPosition = generator.TargetPosition,
-                TargetVelocity = generator.TargetVelocity,
-                TargetDuration = generator.TargetDuration
+                TargetPosition = targetPosition,
+                TargetVelocity = targetVelocity,
+                TargetDuration = targetDuration
             });
         }
 
@@ -334,7 +352,7 @@ namespace PingPong.KUKA {
             }
 
             if (!Limits.CheckVelocity(targetVelocity)) {
-                throw new ArgumentException("target velocity exceeding max value " +
+                throw new ArgumentException("Target velocity exceeding max value " +
                     $"({Limits.VelocityLimit.XYZ} [mm/s], {Limits.VelocityLimit.ABC} [deg/s]):" +
                     $"{Environment.NewLine}{targetVelocity}");
             }

@@ -1,12 +1,8 @@
-﻿using MathNet.Numerics.LinearAlgebra;
-using PingPong.Applications;
-using PingPong.KUKA;
+﻿using PingPong.KUKA;
 using PingPong.Maths;
 using PingPong.OptiTrack;
 using System;
 using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -38,6 +34,13 @@ namespace PingPong {
                 hostName.Text = OptiTrack.ServerDescription.HostComputerName;
                 hostAdress.Text = OptiTrack.ServerDescription.HostComputerAddress.ToString(); //TODO:
                 natnetVersion.Text = OptiTrack.ServerDescription.NatNetVersion.ToString(); //TODO:
+
+                connectBtn.IsEnabled = false;
+                disconnectBtn.IsEnabled = true;
+            };
+            OptiTrack.Uninitialized += (s, e) => {
+                connectBtn.IsEnabled = true;
+                disconnectBtn.IsEnabled = false;
             };
 
             connectBtn.Click += Connect;
@@ -142,8 +145,6 @@ namespace PingPong {
 
             try {
                 OptiTrack.Initialize();
-                connectBtn.IsEnabled = false;
-                disconnectBtn.IsEnabled = true;
             } catch (InvalidOperationException ex) {
                 MainWindow.ShowErrorDialog("OptiTrack system initialization failed.", ex);
             }
@@ -155,9 +156,6 @@ namespace PingPong {
             OptiTrack.FrameReceived -= UpdateOptiTrackBasePositionChart;
             OptiTrack.FrameReceived -= UpdateRobot1BasePositionChart;
             OptiTrack.FrameReceived -= UpdateRobot2BasePositionChart;
-
-            connectBtn.IsEnabled = true;
-            disconnectBtn.IsEnabled = false;
         }
 
         private void FreezeCharts(object sender, RoutedEventArgs e) {
@@ -186,6 +184,22 @@ namespace PingPong {
             }
         }
 
+        public void ForceFreezeCharts() {
+            isPlotFrozen = true;
+
+            positionChart.Freeze();
+            robot1PositionChart.Freeze();
+            robot2PositionChart.Freeze();
+
+            isPlotFrozen = true;
+            freezeBtn.Content = "Unfreeze";
+            resetZoomBtn.IsEnabled = true;
+            fitToDataBtn.IsEnabled = true;
+            screenshotBtn.IsEnabled = true;
+
+            FitChartsToData(null, null);
+        }
+
         private void FitChartsToData(object sender, RoutedEventArgs e) {
             positionChart.FitToData();
             robot1PositionChart.FitToData();
@@ -212,7 +226,7 @@ namespace PingPong {
             }
 
             var saveFileDialog = new Microsoft.Win32.SaveFileDialog {
-                InitialDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Screenshots"),
+                InitialDirectory = Path.Combine(Directory.GetCurrentDirectory(), App.ScreenshotsDir),
                 CheckPathExists = true,
                 FilterIndex = 2,
                 Title = "Save chart screenshot",

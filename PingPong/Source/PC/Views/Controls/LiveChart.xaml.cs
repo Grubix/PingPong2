@@ -38,9 +38,9 @@ namespace PingPong {
 
         }
 
-        private readonly Stopwatch stopWatch = new Stopwatch();
+        private readonly Stopwatch stopWatch;
 
-        private readonly List<SeriesWrapper> wrappedSeries  = new List<SeriesWrapper>();
+        private readonly List<SeriesWrapper> wrappedSeries;
 
         private long deltaTime = 0;
 
@@ -67,100 +67,15 @@ namespace PingPong {
 
         public LiveChart() {
             InitializeComponent();
+
+            stopWatch = new Stopwatch();
+            wrappedSeries = new List<SeriesWrapper>();
+
             chart.Axes[0].Minimum = 0;
             chart.Axes[0].Maximum = MaxSamples;
             chart.Axes[0].AbsoluteMinimum = 0;
             chart.Axes[0].AbsoluteMaximum = MaxSamples;
             chart.Axes[0].MinimumRange = 10;
-
-            //chart.Axes[0].Title = "Ball position X [mm]";
-
-            //Series series1 = new LineSeries {
-            //    Title = "Beta = 1.5"
-            //};
-
-            //var points1 = new List<DataPoint>();
-            //series1.ItemsSource = points1;
-
-            //Series series2 = new LineSeries {
-            //    Title = "Beta = 1.5"
-            //};
-
-            //var points2 = new List<DataPoint>();
-            //series2.ItemsSource = points2;
-
-            //Series series3 = new LineSeries {
-            //    Title = "Beta = 0.5"
-            //};
-
-            //var points3 = new List<DataPoint>();
-            //series3.ItemsSource = points3;
-
-            //Series series4 = new LineSeries {
-            //    Title = "Beta = 0.01"
-            //};
-
-            //var points4 = new List<DataPoint>();
-            //series4.ItemsSource = points4;
-
-            //Series series5 = new LineSeries {
-            //    Title = "z = z0 + vz0 * t - g / 2 * t^2"
-            //};
-
-            //var points5 = new List<DataPoint>();
-            //series5.ItemsSource = points5;
-
-            //chart.Series.Add(series1);
-            ////chart.Series.Add(series2);
-            //chart.Series.Add(series3);
-            //chart.Series.Add(series4);
-            //chart.Series.Add(series5);
-
-            //double beta1 = 1.5;
-            //double beta2 = 1.5;
-            //double beta3 = 0.5;
-            //double beta4 = 0.01;
-
-            //double x0 = 0;
-            //double vx0 = 3;
-
-            //double z0 = 0;
-            //double vz0 = 6;
-
-            //double g = 9.81;
-
-            //for (double t = 0; t < 2; t += 0.004) {
-            //    double x = x0 + vx0 * t;
-            //    double x1 = x0 + vx0 / beta1 * (1 - Math.Exp(-beta1 * t));
-            //    double x2 = x0 + vx0 / beta2 * (1 - Math.Exp(-beta2 * t));
-            //    double x3 = x0 + vx0 / beta3 * (1 - Math.Exp(-beta3 * t));
-            //    double x4 = x0 + vx0 / beta4 * (1 - Math.Exp(-beta4 * t));
-
-            //    double z = z0 + vz0 * t - g / 2 * t * t;
-            //    double z1 = z0 + (beta1 * vz0 + g) / (beta1 * beta1) * (1 - Math.Exp(-beta1 * t)) - g / beta1 * t;
-            //    double z2 = z0 + (beta2 * vz0 + g) / (beta2 * beta2) * (1 - Math.Exp(-beta2 * t)) - g / beta2 * t;
-            //    double z3 = z0 + (beta3 * vz0 + g) / (beta3 * beta3) * (1 - Math.Exp(-beta3 * t)) - g / beta3 * t;
-            //    double z4 = z0 + (beta4 * vz0 + g) / (beta4 * beta4) * (1 - Math.Exp(-beta4 * t)) - g / beta4 * t;
-
-            //    if (z1 >= 0) {
-            //        points1.Add(new DataPoint(x1 * 1000, z1 * 1000));
-            //    }
-            //    if (z2 >= 0) {
-            //        points2.Add(new DataPoint(x2 * 1000, z2 * 1000));
-            //    }
-            //    if (z3 >= 0) {
-            //        points3.Add(new DataPoint(x3 * 1000, z3 * 1000));
-            //    }
-            //    if (z4 >= 0) {
-            //        points4.Add(new DataPoint(x4 * 1000, z4 * 1000));
-            //    }
-
-            //    if (z >= 0) {
-            //        points5.Add(new DataPoint(x * 1000, z * 1000));
-            //    }
-            //}
-
-            //chart.InvalidatePlot();
         }
 
         public void AddSeries(string title, string text, bool visible, bool addSeparator = false) {
@@ -251,7 +166,7 @@ namespace PingPong {
             }
 
             if (data.Length != chart.Series.Count) {
-                throw new ArgumentException("Array length err");
+                throw new ArgumentException("Data array length error");
             }
 
             stopWatch.Stop();
@@ -266,7 +181,10 @@ namespace PingPong {
 
             for (int i = 0; i < data.Length; i++) {
                 DataPoint point = new DataPoint(currentSample, data[i]);
-                wrappedSeries[i].Points.Add(point);
+                
+                if (currentSample % 2 == 0) {
+                    wrappedSeries[i].Points.Add(point);
+                }
 
                 if (isReady) {
                     wrappedSeries[i].DelayedPoints.Add(point);
@@ -348,19 +266,6 @@ namespace PingPong {
                 Width = width,
                 Height = height,
                 Background = OxyColors.White
-            };
-
-            pngExporter.Export(chart.ActualModel, imageStream);
-
-            return imageStream;
-        }
-
-        public MemoryStream ExportSvg(int width, int height) {
-            MemoryStream imageStream = new MemoryStream();
-
-            var pngExporter = new OxyPlot.SvgExporter {
-                Width = width,
-                Height = height
             };
 
             pngExporter.Export(chart.ActualModel, imageStream);

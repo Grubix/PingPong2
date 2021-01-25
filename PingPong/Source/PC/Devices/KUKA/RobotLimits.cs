@@ -23,6 +23,8 @@ namespace PingPong.KUKA {
 
         public (double XYZ, double ABC) VelocityLimit { get; }
 
+        public (double XYZ, double ABC) AccelerationLimit { get; }
+
         public RobotLimits(
             (double X, double Y, double Z) lowerWorkspaceLimit, 
             (double X, double Y, double Z) upperWorkspaceLimit, 
@@ -32,7 +34,9 @@ namespace PingPong.KUKA {
             (double Min, double Max) a4AxisLimit, 
             (double Min, double Max) a5AxisLimit, 
             (double Min, double Max) a6AxisLimit, 
-            (double XYZ, double ABC) correctionLimit
+            (double XYZ, double ABC) correctionLimit,
+            (double XYZ, double ABC) velocityLimit,
+            (double XYZ, double ABC) accelerationLimit
         ) {
             LowerWorkspacePoint = lowerWorkspaceLimit;
             UpperWorkspacePoint = upperWorkspaceLimit;
@@ -43,7 +47,8 @@ namespace PingPong.KUKA {
             A5AxisLimit = a5AxisLimit;
             A6AxisLimit = a6AxisLimit;
             CorrectionLimit = correctionLimit;
-            VelocityLimit = (CorrectionLimit.XYZ / 0.004, CorrectionLimit.ABC / 0.004);
+            VelocityLimit = velocityLimit;
+            AccelerationLimit = accelerationLimit;
         }
 
         public bool CheckPosition(RobotVector position) {
@@ -65,6 +70,17 @@ namespace PingPong.KUKA {
             return checkA1 && checkA2 && checkA3 && checkA4 && checkA5 && checkA6;
         }
 
+        public bool CheckCorrection(RobotVector correction) {
+            bool checkX = Math.Abs(correction.X) <= CorrectionLimit.XYZ;
+            bool checkY = Math.Abs(correction.Y) <= CorrectionLimit.XYZ;
+            bool checkZ = Math.Abs(correction.Z) <= CorrectionLimit.XYZ;
+            bool checkA = Math.Abs(correction.A) <= CorrectionLimit.ABC;
+            bool checkB = Math.Abs(correction.B) <= CorrectionLimit.ABC;
+            bool checkC = Math.Abs(correction.C) <= CorrectionLimit.ABC;
+
+            return checkX && checkY && checkZ && checkA && checkB && checkC;
+        }
+
         public bool CheckVelocity(RobotVector velocity) {
             bool checkX = Math.Abs(velocity.X) <= VelocityLimit.XYZ;
             bool checkY = Math.Abs(velocity.Y) <= VelocityLimit.XYZ;
@@ -76,19 +92,15 @@ namespace PingPong.KUKA {
             return checkX && checkY && checkZ && checkA && checkB && checkC;
         }
 
-        public bool CheckRelativeCorrection(RobotVector correction) {
-            bool checkX = Math.Abs(correction.X) <= CorrectionLimit.XYZ;
-            bool checkY = Math.Abs(correction.Y) <= CorrectionLimit.XYZ;
-            bool checkZ = Math.Abs(correction.Z) <= CorrectionLimit.XYZ;
-            bool checkA = Math.Abs(correction.A) <= CorrectionLimit.ABC;
-            bool checkB = Math.Abs(correction.B) <= CorrectionLimit.ABC;
-            bool checkC = Math.Abs(correction.C) <= CorrectionLimit.ABC;
+        public bool CheckAcceleration(RobotVector acceleration) {
+            bool checkX = Math.Abs(acceleration.X) <= AccelerationLimit.XYZ;
+            bool checkY = Math.Abs(acceleration.Y) <= AccelerationLimit.XYZ;
+            bool checkZ = Math.Abs(acceleration.Z) <= AccelerationLimit.XYZ;
+            bool checkA = Math.Abs(acceleration.A) <= AccelerationLimit.ABC;
+            bool checkB = Math.Abs(acceleration.B) <= AccelerationLimit.ABC;
+            bool checkC = Math.Abs(acceleration.C) <= AccelerationLimit.ABC;
 
             return checkX && checkY && checkZ && checkA && checkB && checkC;
-        }
-
-        public bool CheckAbsoluteCorrection(RobotVector correction, RobotVector homePosition) {
-            return CheckPosition(homePosition + correction);
         }
 
     }

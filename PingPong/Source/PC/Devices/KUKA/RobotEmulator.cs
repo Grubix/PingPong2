@@ -307,7 +307,7 @@ namespace PingPong.KUKA {
         private void SendData(long IPOC) {
             correction = generator.GetNextCorrection();
 
-            if (!Limits.CheckRelativeCorrection(correction)) {
+            if (!Limits.CheckCorrection(correction)) {
                 Uninitialize();
                 throw new InvalidOperationException("Correction limit has been exceeded:" +
                     $"{Environment.NewLine}{correction}");

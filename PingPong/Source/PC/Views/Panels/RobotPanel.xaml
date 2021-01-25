@@ -55,7 +55,7 @@
                                     </Expander>
                                     <Separator Margin="10,2,0,2"/>
                                     <Separator Margin="10,0,0,2"/>
-                                    <Expander Padding="10,0,0,0" Margin="0,0,0,0" IsExpanded="True">
+                                    <Expander Padding="10,0,0,0" Margin="0,0,0,0">
                                         <Expander.Header>
                                             <TextBlock Text="Target position" FontWeight="SemiBold" />
                                         </Expander.Header>
@@ -181,6 +181,48 @@
                                             <TextBox Grid.Column="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" Text="0.0" x:Name="correctionLimitXYZ" VerticalAlignment="Center"/>
                                             <Label Content="Max ABC [deg]" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right"/>
                                             <TextBox Grid.Column="1" Grid.Row="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="0.0"  x:Name="correctionLimitABC" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Expander>
+                                    <Separator Margin="10,2,0,2"/>
+                                    <Separator Margin="10,0,0,2"/>
+                                    <Expander Padding="10,0,0,0" IsExpanded="False">
+                                        <Expander.Header>
+                                            <TextBlock Text="Velocity limits" FontWeight="SemiBold" />
+                                        </Expander.Header>
+                                        <Grid Margin="0,2,0,0">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition/>
+                                                <RowDefinition/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="auto"/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Content="Max XYZ [mm/s]" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right"/>
+                                            <TextBox Grid.Column="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" Text="0.0" x:Name="velocityLimitXYZ" VerticalAlignment="Center"/>
+                                            <Label Content="Max ABC [deg/s]" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right"/>
+                                            <TextBox Grid.Column="1" Grid.Row="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="0.0"  x:Name="velocityLimitABC" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Expander>
+                                    <Separator Margin="10,2,0,2"/>
+                                    <Separator Margin="10,0,0,2"/>
+                                    <Expander Padding="10,0,0,0" IsExpanded="False">
+                                        <Expander.Header>
+                                            <TextBlock Text="Acceleration limits" FontWeight="SemiBold" />
+                                        </Expander.Header>
+                                        <Grid Margin="0,2,0,0">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition/>
+                                                <RowDefinition/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="auto"/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Content="Max XYZ [mm/s²]" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right"/>
+                                            <TextBox Grid.Column="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" Text="0.0" x:Name="accelerationLimitXYZ" VerticalAlignment="Center"/>
+                                            <Label Content="Max ABC [deg/s²]" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right"/>
+                                            <TextBox Grid.Column="1" Grid.Row="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0" VerticalContentAlignment="Center" Text="0.0"  x:Name="accelerationLimitABC" VerticalAlignment="Center"/>
                                         </Grid>
                                     </Expander>
                                     <Separator Margin="10,2,0,2"/>
