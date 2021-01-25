@@ -27,7 +27,7 @@ namespace PingPong.Applications {
                 });
 
                 Q = Matrix<double>.Build.DenseOfArray(new double[,] {
-                    { 0.15, 0, 0 },
+                    { 0.5, 0, 0 },
                     { 0, 1000, 0 },
                     { 0, 0, 1000 }
                 });
@@ -104,11 +104,11 @@ namespace PingPong.Applications {
             double velocityY = 0;
             double velocityZ = 0;
 
-            if (SamplesCount < 60) { //TODO: DO TESTOWANIA - KIEDY MA DZIALAC POLYFIT
+            if (SamplesCount < 40) { //TODO: DO TESTOWANIA - KIEDY MA DZIALAC POLYFIT
                 double z = kalmanZ.CorrectedState[0];
                 double v = kalmanZ.CorrectedState[1];
                 double a = -9.81 * 1000.0 / 2.0;
-                double delta = v * v - 4.0 * a * (z - TargetHitHeight + 20);
+                double delta = v * v - 4.0 * a * (z - TargetHitHeight);
 
                 if (delta < 0.0) {
                     TimeToHit = -1.0;
@@ -129,7 +129,7 @@ namespace PingPong.Applications {
                 double z0 = zCoeffs[0];
                 double v0 = zCoeffs[1];
                 double a0 = zCoeffs[2];
-                double delta = v0 * v0 - 4.0 * a0 * (z0 - TargetHitHeight + 20);
+                double delta = v0 * v0 - 4.0 * a0 * (z0 - TargetHitHeight);
 
                 if (delta < 0.0) {
                     TimeToHit = -1.0;

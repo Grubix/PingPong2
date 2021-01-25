@@ -46,6 +46,8 @@ namespace PingPong.Applications {
 
         private PIRegulator regC;
 
+        private Vector<double> prevBallPos;
+
         public PingApp(Robot robot, OptiTrackSystem optiTrack, Func<Vector<double>, bool> checkFunction) {
             this.robot = robot;
             this.optiTrack = optiTrack;
@@ -60,8 +62,8 @@ namespace PingPong.Applications {
             destBallPosition = Vector<double>.Build.DenseOfArray(
                 new double[] { 0.44, 793.19, 177.82 }
             );
-            regB = new PIRegulator(0.0075, 0.001, 0.004, 0.0);
-            regC = new PIRegulator(0.0075, 0.001, 0.004, 793.19);
+            regB = new PIRegulator(0.005, 0.001, 0.004, 0.0);
+            regC = new PIRegulator(0.005, 0.001, 0.004, 793.19);
         }
 
         ~PingApp() {
@@ -96,6 +98,7 @@ namespace PingPong.Applications {
                     }
 
                     ballPosition = robot.OptiTrackTransformation.Convert(args.BallPosition);
+                    this.prevBallPos = ballPosition;
 
                     bool ballVisible =
                         ballPosition[0] != translation[0] &&
@@ -147,7 +150,7 @@ namespace PingPong.Applications {
                     regC.Shift();
 
                     robotMovedToHitPosition = false;
-                    robot.MoveTo(robot.HomePosition, RobotVector.Zero, 3);
+                    robot.MoveTo(new RobotVector(0.44, 793.19, 177.83, 0.0, 0.0, -90.0), RobotVector.Zero, 5);
                     //Stop(); // comment if 194 is commented
 
                     //robot.FrameReceived -= ProcessRobotFrame;
@@ -155,6 +158,7 @@ namespace PingPong.Applications {
                     Console.WriteLine("END: " + elapsedTime);
                     elapsedTime = 0;
                     koniec_odbicia = true;
+                    Console.WriteLine("***** ***");
                 }
             }
         }
@@ -179,6 +183,13 @@ namespace PingPong.Applications {
                     elapsedTime += args.ReceivedFrame.DeltaTime;
                 }
 
+                if (robotBaseBallPosition[0] == prevBallPos[0] && robotBaseBallPosition[1] == prevBallPos[1] & robotBaseBallPosition[2] == prevBallPos[2]) {
+                    prevBallPos = robotBaseBallPosition;
+                    return;
+                }
+
+                prevBallPos = robotBaseBallPosition;
+
                 prediction.AddMeasurement(robotBaseBallPosition, elapsedTime);
 
                 predBallPosition = prediction.Position;
@@ -199,13 +210,14 @@ namespace PingPong.Applications {
                         });*/
 
                 var racketNormalVector = upVector.Normalize(1.0) - predBallVelocity.Normalize(1.0);
+                Console.WriteLine("Up: " + upVector.Normalize(1.0) + " -ballvel: "  + predBallVelocity.Normalize(1.0) + " = " + racketNormalVector);
 
                 double angleB = Math.Atan2(racketNormalVector[0], racketNormalVector[2]) * 180.0 / Math.PI;
                 double angleC = -90.0 - Math.Atan2(racketNormalVector[1], racketNormalVector[2]) * 180.0 / Math.PI;
                 //angleB += regB.ComputeU(predBallPosition[0], elapsedTime + predTimeToHit);
                 //angleC -= regC.ComputeU(predBallPosition[1], elapsedTime + predTimeToHit);
-                Console.WriteLine("regB: " + regB.ComputeU(predBallPosition[0], elapsedTime + predTimeToHit));
-                Console.WriteLine("regC: " + regC.ComputeU(predBallPosition[1], elapsedTime + predTimeToHit));
+                //Console.WriteLine("regB: " + angleB + " + " + regB.ComputeU(predBallPosition[0], 0.004));
+                //Console.WriteLine("regC: " + angleC + " + " + regC.ComputeU(predBallPosition[1], 0.004));
                 angleB = Math.Min(Math.Max(angleB, -20.0), 20.0);
                 angleC = Math.Min(Math.Max(angleC, -110.0), -70.0);
 
@@ -218,11 +230,11 @@ namespace PingPong.Applications {
                 
                 var normalProjection = Projection(racketNormalVector);
                 double speed = (Norm(normalProjection * upVector) - Norm(normalProjection * predBallVelocity) * CoR) / (1.0 + CoR);
-                Console.WriteLine("Speed: " + speed);
+                //Console.WriteLine("Speed: " + speed);
 
                 double dampCoeff = 1;
 
-                if (predTimeToHit >= 0.4) {
+                if (predTimeToHit >= 0.4 && robot.Limits.CheckPosition(new RobotVector(predBallPosition[0], predBallPosition[1], predBallPosition[2], 0, angleB, angleC))) {
                     dampCoeff = Math.Exp(-(predTimeToHit - 0.4) / 0.15);
                 }
 
@@ -238,17 +250,14 @@ namespace PingPong.Applications {
                 if (robot.Limits.CheckPosition(robotTargetPostion)) {
                     lock (syncLock) {
                         robotMovedToHitPosition = true;
-                        if (!koniec_odbicia || 1 == 1) {
+                        if (!koniec_odbicia || 1==1) {
                             racketNormalVector = racketNormalVector.Normalize(1.0);
-                            /*if (speed < 70) {
-                                speed = Math.Max(speed, 0.0);
-                            } else {
-                                speed = 70.0;
-                            }*/
-                            robotTargetVelocity = new RobotVector(racketNormalVector[0] * 0, racketNormalVector[1] * 0, 200);
-                            robot.MoveTo(robotTargetPostion, robotTargetVelocity, predTimeToHit);
+                            robotTargetVelocity = new RobotVector(racketNormalVector[0] * 0, racketNormalVector[1] * 0, 180);
+                            if (robot.IsInitialized()) {
+                                robot.MoveTo(robotTargetPostion, robotTargetVelocity, predTimeToHit);
+                            }
                         } else {
-                            robot.MoveTo(robotTargetPostion, new RobotVector(0, 0, 0), predTimeToHit);
+                            //robot.MoveTo(robotTargetPostion, new RobotVector(0, 0, 0), predTimeToHit);
                         }
                         /*Console.WriteLine("vr: " + robotTargetPostion);
                         Console.WriteLine("vp: " + upVector);
