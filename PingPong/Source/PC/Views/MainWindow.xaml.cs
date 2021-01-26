@@ -32,10 +32,15 @@ namespace PingPong {
                 robot2Panel.OptiTrack = optiTrackPanel.OptiTrack;
 
                 try {
-                    robot1Panel.LoadConfig($"{App.ConfigDir}/robot1.config.json");
-                    robot2Panel.LoadConfig($"{App.ConfigDir}/robot2.config.json");
+                    robot1Panel.LoadConfig(Path.Combine(App.ConfigDir, "robot1.config.json"));
                 } catch (Exception) {
-                    // Ingore exception - config files may not exist in Config folder
+
+                }
+
+                try {
+                    robot2Panel.LoadConfig(Path.Combine(App.ConfigDir, "robot2.config.json"));
+                } catch (Exception) {
+
                 }
 
                 Robot robot1 = robot1Panel.Robot;

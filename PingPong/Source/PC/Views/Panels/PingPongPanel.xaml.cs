@@ -168,19 +168,21 @@ namespace PingPong {
         }
 
         public void ForceFreezeCharts() {
-            isPlotFrozen = true;
+            Dispatcher.Invoke(() => {
+                isPlotFrozen = true;
 
-            robot1PingChart.Freeze();
-            robot2PingChart.Freeze();
-            pingPongChart.Freeze();
+                robot1PingChart.Freeze();
+                robot2PingChart.Freeze();
+                pingPongChart.Freeze();
 
-            isPlotFrozen = true;
-            freezeBtn.Content = "Unfreeze";
-            resetZoomBtn.IsEnabled = true;
-            fitToDataBtn.IsEnabled = true;
-            screenshotBtn.IsEnabled = true;
+                isPlotFrozen = true;
+                freezeBtn.Content = "Unfreeze";
+                resetZoomBtn.IsEnabled = true;
+                fitToDataBtn.IsEnabled = true;
+                screenshotBtn.IsEnabled = true;
 
-            FitChartsToData(null, null);
+                FitChartsToData(null, null);
+            });
         }
 
         private void FitChartsToData(object sender, RoutedEventArgs e) {
