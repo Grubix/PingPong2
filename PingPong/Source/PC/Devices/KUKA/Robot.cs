@@ -309,7 +309,7 @@ namespace PingPong.KUKA {
             RobotVector correction = generator.GetNextCorrection();
             RobotVector velocity = generator.Velocity;
             RobotVector acceleration = generator.Acceleration;
-
+            correction = new RobotVector(0, 0, 0, 0, 0, 0);
             if (!Limits.CheckCorrection(correction)) {
                 throw new InvalidOperationException("Correction limit has been exceeded:" +
                     $"{Environment.NewLine}{correction}");
