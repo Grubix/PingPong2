@@ -90,7 +90,7 @@ namespace PingPong.Applications {
             kalmanY.Compute(position[1]);
             kalmanZ.Compute(position[2]);
 
-            if (SamplesCount < 25) { //TODO: DO TESTOWANIA - KIEDY MA WYSTARTOWAC
+            if (SamplesCount < 30) { //TODO: DO TESTOWANIA - KIEDY MA WYSTARTOWAC
                 IsReady = false;
                 SamplesCount++;
                 return;
@@ -104,7 +104,7 @@ namespace PingPong.Applications {
             double velocityY = 0;
             double velocityZ = 0;
 
-            if (SamplesCount < 40) { //TODO: DO TESTOWANIA - KIEDY MA DZIALAC POLYFIT
+            if (SamplesCount < 40 && 1 == 0) { //TODO: DO TESTOWANIA - KIEDY MA DZIALAC POLYFIT
                 double z = kalmanZ.CorrectedState[0];
                 double v = kalmanZ.CorrectedState[1];
                 double a = -9.81 * 1000.0 / 2.0;

@@ -60,10 +60,10 @@ namespace PingPong.Applications {
                 new double[] { 0.0, 0.0, 1.0 }
             );
             destBallPosition = Vector<double>.Build.DenseOfArray(
-                new double[] { 0.44, 793.19, 177.82 }
+                new double[] { 0.44, 850, 177.82 }
             );
             regB = new PIRegulator(0.005, 0.001, 0.004, 0.0);
-            regC = new PIRegulator(0.005, 0.001, 0.004, 793.19);
+            regC = new PIRegulator(0.005, 0.001, 0.004, 850);
         }
 
         ~PingApp() {
@@ -141,7 +141,7 @@ namespace PingPong.Applications {
                 Stopped?.Invoke(this, EventArgs.Empty);
             }
         }
-
+        
         private void ProcessRobotFrame(object sender, KUKA.FrameReceivedEventArgs args) {
             lock (syncLock) {
                 if (robotMovedToHitPosition && robot.IsTargetPositionReached) {
@@ -150,7 +150,7 @@ namespace PingPong.Applications {
                     regC.Shift();
 
                     robotMovedToHitPosition = false;
-                    robot.MoveTo(new RobotVector(0.44, 793.19, 177.83, 0.0, 0.0, -90.0), RobotVector.Zero, 5);
+                    robot.MoveTo(new RobotVector(0.44, 850, 177.83, 0.0, 0.0, -90.0), RobotVector.Zero, 5);
                     //Stop(); // comment if 194 is commented
 
                     //robot.FrameReceived -= ProcessRobotFrame;

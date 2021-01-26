@@ -294,7 +294,6 @@ namespace PingPong.KUKA {
         /// </summary>
         private void SendData(long IPOC) {
             RobotVector correction = generator.GetNextCorrection();
-            correction = new RobotVector(0, 0, 0, 0, 0, 0);
 
             if (!Limits.CheckRelativeCorrection(correction)) {
                 Uninitialize();
