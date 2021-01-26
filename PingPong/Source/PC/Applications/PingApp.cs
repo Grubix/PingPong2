@@ -248,7 +248,7 @@ namespace PingPong.Applications {
                 if (robot.Limits.CheckPosition(robotTargetPostion)) {
                     lock (syncLock) {
                         robotMovedToHitPosition = true;
-                        if (!koniec_odbicia) {
+                        if (!koniec_odbicia || 1==1) {
                             racketNormalVector = racketNormalVector.Normalize(1.0);
                             robotTargetVelocity = new RobotVector(racketNormalVector[0] * 0, racketNormalVector[1] * 0, 200);
                             if (robot.IsInitialized()) {

@@ -75,28 +75,6 @@ namespace PingPong {
                     ShowErrorDialog($"An exception was raised on the robot ({args.RobotIp}) thread.", args.Exception);
                 };
 
-                // TEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEESTT
-                robot1.Initialized += (s1, e1) => {
-                    Task.Run(() => {
-                        Thread.Sleep(5000);
-
-                        RobotMovement movement1 = new RobotMovement(
-                            robot1.HomePosition + new RobotVector(100, 0, 0),
-                            new RobotVector(50, 0, 0),
-                            2
-                        );
-
-                        RobotMovement movement2 = new RobotMovement(
-                            robot1.HomePosition,
-                            RobotVector.Zero,
-                            3
-                        );
-
-                        robot1.MoveTo(new RobotMovement[] { movement1, movement2 });
-                    });
-                };
-                // TEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEESTT
-
                 //TODO: ODBICIE LUSTRZANE
                 //Robot robot1 = robot1Panel.Robot;
                 //Robot robot2 = robot2Panel.Robot;
