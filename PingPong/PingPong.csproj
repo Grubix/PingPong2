@@ -151,6 +151,7 @@
     <Compile Include="Source\PC\Devices\KUKA\RobotConfig.cs" />
     <Compile Include="Source\PC\Devices\KUKA\RobotEmulator.cs" />
     <Compile Include="Source\PC\Devices\KUKA\RobotLimits.cs" />
+    <Compile Include="Source\PC\Devices\KUKA\RobotMovement.cs" />
     <Compile Include="Source\PC\Devices\KUKA\RobotVector.cs" />
     <Compile Include="Source\PC\Devices\KUKA\RSI\InputFrame.cs" />
     <Compile Include="Source\PC\Devices\KUKA\RSI\OutputFrame.cs" />
