@@ -302,19 +302,16 @@ namespace PingPong.KUKA {
             RobotVector acceleration = generator.Acceleration;
 
             if (!Limits.CheckCorrection(correction)) {
-                Uninitialize();
                 throw new InvalidOperationException("Correction limit has been exceeded:" +
                     $"{Environment.NewLine}{correction}");
             }
 
             if (!Limits.CheckVelocity(velocity)) {
-                Uninitialize();
                 throw new InvalidOperationException("Velocity limit has been exceeded:" +
                     $"{Environment.NewLine}{velocity}");
             }
 
             if (!Limits.CheckAcceleration(acceleration)) {
-                Uninitialize();
                 throw new InvalidOperationException("Acceleration limit has been exceeded:" +
                     $"{Environment.NewLine}{acceleration}");
             }
@@ -335,13 +332,16 @@ namespace PingPong.KUKA {
             });
         }
 
-        /// <summary>
-        /// Moves robot to specified position (sets target position).
-        /// </summary>
-        /// <param name="targetPosition">target position</param>
-        /// <param name="targetVelocity">target velocity (velocity after targetDuration)</param>
-        /// <param name="targetDuration">desired movement duration in seconds</param>
-        public void MoveTo(RobotVector targetPosition, RobotVector targetVelocity, double targetDuration) {
+        public void MoveTo(RobotMovement movement) {
+            lock (forceMoveSyncLock) {
+                if (isForceMoveModeEnabled) {
+                    return;
+                }
+            }
+
+            RobotVector targetPosition = movement.TargetPosition;
+            RobotVector targetVelocity = movement.TargetVelocity;
+
             if (!isInitialized) {
                 throw new InvalidOperationException("Robot is not initialized");
             }
@@ -352,18 +352,49 @@ namespace PingPong.KUKA {
             }
 
             if (!Limits.CheckVelocity(targetVelocity)) {
-                throw new ArgumentException("Target velocity exceeding max value " +
-                    $"({Limits.VelocityLimit.XYZ} [mm/s], {Limits.VelocityLimit.ABC} [deg/s]):" +
+                throw new ArgumentException("Target velocity exceeding max value:" +
                     $"{Environment.NewLine}{targetVelocity}");
             }
 
+            generator.SetMovement(movement);
+        }
+
+        public void MoveTo(RobotMovement[] movementsStack) {
             lock (forceMoveSyncLock) {
                 if (isForceMoveModeEnabled) {
                     return;
                 }
             }
 
-            generator.SetTargetPosition(position, targetPosition, targetVelocity, targetDuration);
+            if (!isInitialized) {
+                throw new InvalidOperationException("Robot is not initialized");
+            }
+
+            for (int i = 0; i < movementsStack.Length; i++) {
+                RobotMovement movement = movementsStack[i];
+
+                if (!Limits.CheckPosition(movement.TargetPosition)) {
+                    throw new ArgumentException("Target position is outside the available workspace:" +
+                        $"{Environment.NewLine}{movement.TargetPosition}");
+                }
+
+                if (!Limits.CheckVelocity(movement.TargetVelocity)) {
+                    throw new ArgumentException("Target velocity exceeding max value:" +
+                        $"{Environment.NewLine}{movement.TargetVelocity}");
+                }
+            }
+
+            generator.SetMovementsStack(movementsStack);
+        }
+
+        /// <summary>
+        /// Moves robot to specified position (sets target position).
+        /// </summary>
+        /// <param name="targetPosition">target position</param>
+        /// <param name="targetVelocity">target velocity (velocity after targetDuration)</param>
+        /// <param name="targetDuration">desired movement duration in seconds</param>
+        public void MoveTo(RobotVector targetPosition, RobotVector targetVelocity, double targetDuration) {
+            MoveTo(new RobotMovement(targetPosition, targetVelocity, targetDuration));
         }
 
         /// <summary>

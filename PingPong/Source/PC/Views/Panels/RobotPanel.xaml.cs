@@ -69,15 +69,72 @@ namespace PingPong {
                     TakeChartScreenshot(null, null);
                 }
             };
+
+            //RobotLimits limits = new RobotLimits(
+            //    lowerWorkspaceLimit: (-800, 200, -800),
+            //    upperWorkspaceLimit: (800, 1200, 800),
+            //    a1AxisLimit: (-360, 360),
+            //    a2AxisLimit: (-360, 360),
+            //    a3AxisLimit: (-360, 360),
+            //    a4AxisLimit: (-360, 360),
+            //    a5AxisLimit: (-360, 360),
+            //    a6AxisLimit: (-360, 360),
+            //    correctionLimit: (10, 10),
+            //    velocityLimit: (1000, 1000),
+            //    accelerationLimit: (80000, 80000)
+            //);
+            //RobotConfig config2 = new RobotConfig(0, limits, null);
+            //RobotEmulator emulator = new RobotEmulator(config2, new RobotVector(0.44, 793.19, 177.83, 0.0, 0.0, -90.0));
+
+            //Task.Run(() => {
+            //    Thread.Sleep(5000);
+            //    emulator.Initialize();
+            //    Thread.Sleep(1000);
+
+            //    RobotMovement movement1 = new RobotMovement(new RobotVector(-150, 800, 180), new RobotVector(0, 0, 200), 0.623);
+            //    RobotMovement movement2 = new RobotMovement(emulator.HomePosition, RobotVector.Zero, 1.05);
+            //    RobotMovement movement3 = new RobotMovement(new RobotVector(-150, 800, 180), new RobotVector(0, 0, 50), 2.44421);
+            //    RobotMovement movement4 = new RobotMovement(emulator.HomePosition, RobotVector.Zero, 2.211);
+
+            //    emulator.MoveTo(new RobotMovement[] {
+            //        movement1, movement2, movement3, movement4
+            //    });
+            //    //emulator.ForceMoveTo(new RobotVector(-150, 800, 180), new RobotVector(0, 0, 200), 0.6);
+            //    //emulator.ForceMoveTo(emulator.HomePosition, RobotVector.Zero, 1);
+            //});
+
+            //emulator.FrameReceived += (s, e) => {
+
+            //    RobotVector actualPosition = emulator.Position;
+            //    RobotVector targetPosition = emulator.TargetPosition;
+            //    RobotVector theoreticalPosition = emulator.TheoreticalPosition;
+
+            //    positionChart.Update(new double[] {
+            //        actualPosition.X, targetPosition.X, theoreticalPosition.X,
+            //        actualPosition.Y, targetPosition.Y, theoreticalPosition.Y,
+            //        actualPosition.Z, targetPosition.Z, theoreticalPosition.Z,
+            //        actualPosition.A, targetPosition.A, theoreticalPosition.A,
+            //        actualPosition.B, targetPosition.B, theoreticalPosition.B,
+            //        actualPosition.C, targetPosition.C, theoreticalPosition.C,
+            //    });
+
+            //    velocityChart.Update(emulator.Velocity.ToArray());
+
+            //    accelerationChart.Update(emulator.Acceleration.ToArray());
+            //};
+
+            //emulator.ErrorOccured += (s, e) => {
+            //    MainWindow.ShowErrorDialog($"An exception was raised on the robot ({e.RobotIp}) thread.", e.Exception);
+            //};
         }
 
         private void InitializeCharts() {
             positionChart.Title = "Position";
-            positionChart.AddSeries("Actual position X [mm]", "X", true);
-            positionChart.AddSeries("Target position X [mm]", "X_T", true);
+            positionChart.AddSeries("Actual position X [mm]", "X", false);
+            positionChart.AddSeries("Target position X [mm]", "X_T", false);
             positionChart.AddSeries("Theoretical position X [mm]", "X_TH", false, true);
-            positionChart.AddSeries("Actual position Y [mm]", "Y", true);
-            positionChart.AddSeries("Target position Y [mm]", "Y_T", true);
+            positionChart.AddSeries("Actual position Y [mm]", "Y", false);
+            positionChart.AddSeries("Target position Y [mm]", "Y_T", false);
             positionChart.AddSeries("Theoretical position Y [mm]", "Y_TH", false, true);
             positionChart.AddSeries("Actual position Z [mm]", "Z", true);
             positionChart.AddSeries("Target position Z [mm]", "Z_T", true);

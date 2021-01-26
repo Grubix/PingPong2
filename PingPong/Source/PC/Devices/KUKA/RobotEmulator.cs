@@ -331,6 +331,19 @@ namespace PingPong.KUKA {
         /// <param name="targetVelocity">target velocity (velocity after targetDuration)</param>
         /// <param name="targetDuration">desired movement duration in seconds</param>
         public void MoveTo(RobotVector targetPosition, RobotVector targetVelocity, double targetDuration) {
+            MoveTo(new RobotMovement(targetPosition, targetVelocity, targetDuration));
+        }
+
+        public void MoveTo(RobotMovement movement) {
+            lock (forceMoveSyncLock) {
+                if (isForceMoveModeEnabled) {
+                    return;
+                }
+            }
+
+            RobotVector targetPosition = movement.TargetPosition;
+            RobotVector targetVelocity = movement.TargetVelocity;
+
             if (!isInitialized) {
                 throw new InvalidOperationException("Robot is not initialized");
             }
@@ -341,18 +354,39 @@ namespace PingPong.KUKA {
             }
 
             if (!Limits.CheckVelocity(targetVelocity)) {
-                throw new ArgumentException("target velocity exceeding max value " +
-                    $"({Limits.VelocityLimit.XYZ} [mm/s], {Limits.VelocityLimit.ABC} [deg/s]):" +
+                throw new ArgumentException("Target velocity exceeding max value:" +
                     $"{Environment.NewLine}{targetVelocity}");
             }
 
+            generator.SetMovement(movement);
+        }
+
+        public void MoveTo(RobotMovement[] movements) {
             lock (forceMoveSyncLock) {
                 if (isForceMoveModeEnabled) {
                     return;
                 }
             }
 
-            generator.SetTargetPosition(position, targetPosition, targetVelocity, targetDuration);
+            if (!isInitialized) {
+                throw new InvalidOperationException("Robot is not initialized");
+            }
+
+            for (int i = 0; i < movements.Length; i++) {
+                RobotMovement movement = movements[i];
+
+                if (!Limits.CheckPosition(movement.TargetPosition)) {
+                    throw new ArgumentException("Target position is outside the available workspace:" +
+                        $"{Environment.NewLine}{movement.TargetPosition}");
+                }
+
+                if (!Limits.CheckVelocity(movement.TargetVelocity)) {
+                    throw new ArgumentException("Target velocity exceeding max value:" +
+                        $"{Environment.NewLine}{movement.TargetVelocity}");
+                }
+            }
+
+            generator.SetMovementsStack(movements);
         }
 
         /// <summary>
@@ -384,16 +418,6 @@ namespace PingPong.KUKA {
             lock (forceMoveSyncLock) {
                 isForceMoveModeEnabled = false;
             }
-        }
-
-        /// <summary>
-        /// Shifts robot by the specified delta position
-        /// </summary>
-        /// <param name="deltaPosition">desired position change</param>
-        /// <param name="targetVelocity">target velocity (velocity after targetDuration)</param>
-        /// <param name="targetDuration">desired movement duration in seconds</param>
-        public void Shift(RobotVector deltaPosition, RobotVector targetVelocity, double targetDuration) {
-            MoveTo(Position + deltaPosition, targetVelocity, targetDuration);
         }
 
         /// <summary>
