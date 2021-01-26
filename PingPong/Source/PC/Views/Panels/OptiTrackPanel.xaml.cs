@@ -30,13 +30,15 @@ namespace PingPong {
 
             OptiTrack = new OptiTrackSystem();
             OptiTrack.Initialized += (s, e) => {
-                hostApp.Text = OptiTrack.ServerDescription.HostApp;
-                hostName.Text = OptiTrack.ServerDescription.HostComputerName;
-                hostAdress.Text = OptiTrack.ServerDescription.HostComputerAddress.ToString(); //TODO:
-                natnetVersion.Text = OptiTrack.ServerDescription.NatNetVersion.ToString(); //TODO:
+                Dispatcher.Invoke(() => {
+                    hostApp.Text = OptiTrack.ServerDescription.HostApp;
+                    hostName.Text = OptiTrack.ServerDescription.HostComputerName;
+                    hostAdress.Text = OptiTrack.ServerDescription.HostComputerAddress.ToString(); //TODO:
+                    natnetVersion.Text = OptiTrack.ServerDescription.NatNetVersion.ToString(); //TODO:
 
-                connectBtn.IsEnabled = false;
-                disconnectBtn.IsEnabled = true;
+                    connectBtn.IsEnabled = false;
+                    disconnectBtn.IsEnabled = true;
+                });
             };
             OptiTrack.Uninitialized += (s, e) => {
                 Dispatcher.Invoke(() => {
@@ -187,19 +189,21 @@ namespace PingPong {
         }
 
         public void ForceFreezeCharts() {
-            isPlotFrozen = true;
+            Dispatcher.Invoke(() => {
+                isPlotFrozen = true;
 
-            positionChart.Freeze();
-            robot1PositionChart.Freeze();
-            robot2PositionChart.Freeze();
+                positionChart.Freeze();
+                robot1PositionChart.Freeze();
+                robot2PositionChart.Freeze();
 
-            isPlotFrozen = true;
-            freezeBtn.Content = "Unfreeze";
-            resetZoomBtn.IsEnabled = true;
-            fitToDataBtn.IsEnabled = true;
-            screenshotBtn.IsEnabled = true;
+                isPlotFrozen = true;
+                freezeBtn.Content = "Unfreeze";
+                resetZoomBtn.IsEnabled = true;
+                fitToDataBtn.IsEnabled = true;
+                screenshotBtn.IsEnabled = true;
 
-            FitChartsToData(null, null);
+                FitChartsToData(null, null);
+            });
         }
 
         private void FitChartsToData(object sender, RoutedEventArgs e) {

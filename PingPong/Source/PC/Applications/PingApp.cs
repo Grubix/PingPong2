@@ -61,8 +61,8 @@ namespace PingPong.Applications {
             destBallPosition = Vector<double>.Build.DenseOfArray(
                 new double[] { 0.44, 850.57, 180.0 }
             );
-            regB = new PIRegulator(0.005, 0.001, 0.004, 0.44);
-            regC = new PIRegulator(0.005, 0.001, 0.004, 850.57);
+            regB = new PIRegulator(0.0, 0.001, 0.004, 0.44);
+            regC = new PIRegulator(0.001, 0.001, 0.004, 850.57);
         }
 
         ~PingApp() {
@@ -149,15 +149,14 @@ namespace PingPong.Applications {
                     regC.Shift();
 
                     robotMovedToHitPosition = false;
-                    robot.MoveTo(new RobotVector(0.44, 850.57, 170.71, 0.0, 0.0, -90.0), RobotVector.Zero, 5);
+                    robot.MoveTo(new RobotVector(0.44, 850.57, 170.71, 0.0, 0.0, -90.0), RobotVector.Zero, 1);
                     //Stop(); // comment if 194 is commented
 
                     //robot.FrameReceived -= ProcessRobotFrame;
                     prediction.Reset(prediction.TargetHitHeight);
-                    Console.WriteLine("END: " + elapsedTime);
+                    //Console.WriteLine("END: " + elapsedTime);
                     elapsedTime = 0;
                     koniec_odbicia = true;
-                    Console.WriteLine("***** ***");
                 }
             }
         }
@@ -209,14 +208,14 @@ namespace PingPong.Applications {
                         });*/
 
                 var racketNormalVector = upVector.Normalize(1.0) - predBallVelocity.Normalize(1.0);
-                Console.WriteLine("Up: " + upVector.Normalize(1.0) + " -ballvel: "  + predBallVelocity.Normalize(1.0) + " = " + racketNormalVector);
+                //Console.WriteLine("Up: " + upVector.Normalize(1.0) + " -ballvel: "  + predBallVelocity.Normalize(1.0) + " = " + racketNormalVector);
 
                 double angleB = Math.Atan2(racketNormalVector[0], racketNormalVector[2]) * 180.0 / Math.PI;
                 double angleC = -90.0 - Math.Atan2(racketNormalVector[1], racketNormalVector[2]) * 180.0 / Math.PI;
-                //angleB += regB.ComputeU(predBallPosition[0], elapsedTime + predTimeToHit);
-                //angleC -= regC.ComputeU(predBallPosition[1], elapsedTime + predTimeToHit);
-                //Console.WriteLine("regB: " + angleB + " + " + regB.ComputeU(predBallPosition[0], 0.004));
-                //Console.WriteLine("regC: " + angleC + " + " + regC.ComputeU(predBallPosition[1], 0.004));
+                angleB += regB.ComputeU(predBallPosition[0], 0.004);
+                angleC -= regC.ComputeU(predBallPosition[1], 0.004);
+                Console.WriteLine("regB: " + angleB + " + " + regB.ComputeU(predBallPosition[0], 0.004));
+                Console.WriteLine("regC: " + angleC + " - " + regC.ComputeU(predBallPosition[1], 0.004));
                 angleB = Math.Min(Math.Max(angleB, -20.0), 20.0);
                 angleC = Math.Min(Math.Max(angleC, -110.0), -70.0);
 
@@ -249,11 +248,12 @@ namespace PingPong.Applications {
                 if (robot.Limits.CheckPosition(robotTargetPostion)) {
                     lock (syncLock) {
                         robotMovedToHitPosition = true;
-                        if (!koniec_odbicia || 1==1) {
+                        if (!koniec_odbicia) {
                             racketNormalVector = racketNormalVector.Normalize(1.0);
-                            robotTargetVelocity = new RobotVector(racketNormalVector[0] * 0, racketNormalVector[1] * 0, 180);
+                            robotTargetVelocity = new RobotVector(racketNormalVector[0] * 0, racketNormalVector[1] * 0, 200);
                             if (robot.IsInitialized()) {
-                                robot.MoveTo(robotTargetPostion, robotTargetVelocity, 2);
+                                Console.WriteLine("wszedllllllllllllll");
+                                robot.MoveTo(robotTargetPostion, robotTargetVelocity, predTimeToHit - 0.008);
                             }
                         } else {
                             //robot.MoveTo(robotTargetPostion, new RobotVector(0, 0, 0), predTimeToHit);

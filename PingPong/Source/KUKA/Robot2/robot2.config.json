@@ -1,7 +1,7 @@
 {
     "port": 8082,
     "limits": {
-        "lowerWorkspacePoint": [-300, 700, 150],
+        "lowerWorkspacePoint": [-300, 700, 135],
         "upperWorkspacePoint": [300, 1000, 400],
         "maxCorrection": [3.5 , 0.3],
         "maxVelocity": [875.0, 75.0],

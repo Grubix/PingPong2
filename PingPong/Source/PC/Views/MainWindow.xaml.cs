@@ -32,10 +32,15 @@ namespace PingPong {
                 robot2Panel.OptiTrack = optiTrackPanel.OptiTrack;
 
                 try {
-                    robot1Panel.LoadConfig($"{App.ConfigDir}/robot1.config.json");
-                    robot2Panel.LoadConfig($"{App.ConfigDir}/robot2.config.json");
+                    robot1Panel.LoadConfig(Path.Combine(App.ConfigDir, "robot1.config.json"));
                 } catch (Exception) {
-                    // Ingore exception - config files may not exist in Config folder
+
+                }
+
+                try {
+                    robot2Panel.LoadConfig(Path.Combine(App.ConfigDir, "robot2.config.json"));
+                } catch (Exception) {
+
                 }
 
                 Robot robot1 = robot1Panel.Robot;
@@ -46,25 +51,25 @@ namespace PingPong {
                 pingPongPanel.Initialize(robot1, robot2, optiTrack);
 
                 robot1.ErrorOccured += (sender, args) => {
-                    robot2.Uninitialize();
+                    /*robot2.Uninitialize();
                     optiTrack.Uninitialize();
 
                     robot1Panel.ForceFreezeCharts();
                     robot2Panel.ForceFreezeCharts();
                     optiTrackPanel.ForceFreezeCharts();
-                    pingPongPanel.ForceFreezeCharts();
+                    pingPongPanel.ForceFreezeCharts();*/
 
                     ShowErrorDialog($"An exception was raised on the robot ({args.RobotIp}) thread.", args.Exception);
                 };
 
                 robot2.ErrorOccured += (sender, args) => {
-                    robot1.Uninitialize();
+                    /*robot1.Uninitialize();
                     optiTrack.Uninitialize();
 
                     robot1Panel.ForceFreezeCharts();
                     robot2Panel.ForceFreezeCharts();
                     optiTrackPanel.ForceFreezeCharts();
-                    pingPongPanel.ForceFreezeCharts();
+                    pingPongPanel.ForceFreezeCharts();*/
 
                     ShowErrorDialog($"An exception was raised on the robot ({args.RobotIp}) thread.", args.Exception);
                 };
