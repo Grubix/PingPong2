@@ -104,7 +104,7 @@ namespace PingPong.KUKA {
         }
 
         public bool CheckMove(RobotVector targetPosition, RobotVector targetVelocity, double targetDuration) {
-            return CheckPosition(targetPosition) && CheckVelocity(targetVelocity) && targetDuration > 0;
+            return CheckPosition(targetPosition) && CheckVelocity(targetVelocity) && targetDuration > 0.032;
         }
 
     }

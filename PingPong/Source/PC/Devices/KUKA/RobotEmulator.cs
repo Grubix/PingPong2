@@ -151,6 +151,15 @@ namespace PingPong.KUKA {
         }
 
         /// <summary>
+        /// Robot (theoretical) actual jerk
+        /// </summary>
+        public RobotVector Jerk {
+            get {
+                return generator.Jerk;
+            }
+        }
+
+        /// <summary>
         /// Robot actual target position
         /// </summary>
         public RobotVector TargetPosition {

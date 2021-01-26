@@ -44,58 +44,40 @@ namespace PingPong {
 
                 }
 
-                Robot robot1 = robot1Panel.Robot;
+                Robot robot = robot1Panel.Robot;
                 Robot robot2 = robot2Panel.Robot;
                 OptiTrackSystem optiTrack = optiTrackPanel.OptiTrack;
 
-                optiTrackPanel.Initialize(robot1, robot2);
-                pingPongPanel.Initialize(robot1, robot2, optiTrack);
+                optiTrackPanel.Initialize(robot, robot2);
+                pingPongPanel.Initialize(robot, robot2, optiTrack);
 
-                robot1.ErrorOccured += (sender, args) => {
-                    robot2.Uninitialize();
-                    optiTrack.Uninitialize();
+                robot.ErrorOccured += (sender, args) => {
+                    //TODO: czemu to zakomentowane wywala wyjatek (FatalError) ?
 
-                    robot1Panel.ForceFreezeCharts();
-                    robot2Panel.ForceFreezeCharts();
-                    optiTrackPanel.ForceFreezeCharts();
-                    pingPongPanel.ForceFreezeCharts();
+                    //robot2.Uninitialize();
+                    //optiTrack.Uninitialize();
+
+                    //robot1Panel.ForceFreezeCharts();
+                    //robot2Panel.ForceFreezeCharts();
+                    //optiTrackPanel.ForceFreezeCharts();
+                    //pingPongPanel.ForceFreezeCharts();
 
                     ShowErrorDialog($"An exception was raised on the robot ({args.RobotIp}) thread.", args.Exception);
                 };
 
                 robot2.ErrorOccured += (sender, args) => {
-                    robot1.Uninitialize();
-                    optiTrack.Uninitialize();
+                    //TODO: czemu to zakomentowane wywala wyjatek (FatalError) ?
 
-                    robot1Panel.ForceFreezeCharts();
-                    robot2Panel.ForceFreezeCharts();
-                    optiTrackPanel.ForceFreezeCharts();
-                    pingPongPanel.ForceFreezeCharts();
+                    //robot.Uninitialize();
+                    //optiTrack.Uninitialize();
+
+                    //robot1Panel.ForceFreezeCharts();
+                    //robot2Panel.ForceFreezeCharts();
+                    //optiTrackPanel.ForceFreezeCharts();
+                    //pingPongPanel.ForceFreezeCharts();
 
                     ShowErrorDialog($"An exception was raised on the robot ({args.RobotIp}) thread.", args.Exception);
                 };
-
-                // TEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEESTT
-                robot1.Initialized += (s1, e1) => {
-                    Task.Run(() => {
-                        Thread.Sleep(5000);
-
-                        RobotMovement movement1 = new RobotMovement(
-                            robot1.HomePosition + new RobotVector(100, 0, 0),
-                            new RobotVector(50, 0, 0),
-                            2
-                        );
-
-                        RobotMovement movement2 = new RobotMovement(
-                            robot1.HomePosition,
-                            RobotVector.Zero,
-                            3
-                        );
-
-                        robot1.MoveTo(new RobotMovement[] { movement1, movement2 });
-                    });
-                };
-                // TEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEESTT
 
                 //TODO: ODBICIE LUSTRZANE
                 //Robot robot1 = robot1Panel.Robot;

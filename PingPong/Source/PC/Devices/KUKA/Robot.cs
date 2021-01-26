@@ -150,6 +150,15 @@ namespace PingPong.KUKA {
         }
 
         /// <summary>
+        /// Robot (theoretical) actual jerk
+        /// </summary>
+        public RobotVector Jerk {
+            get {
+                return generator.Jerk;
+            }
+        }
+
+        /// <summary>
         /// Robot actual target position
         /// </summary>
         public RobotVector TargetPosition {
@@ -332,6 +341,10 @@ namespace PingPong.KUKA {
             });
         }
 
+        /// <summary>
+        /// Starts robot movement with specified parameters
+        /// </summary>
+        /// <param name="movement">movement parameters</param>
         public void MoveTo(RobotMovement movement) {
             lock (forceMoveSyncLock) {
                 if (isForceMoveModeEnabled) {
@@ -359,6 +372,10 @@ namespace PingPong.KUKA {
             generator.SetMovement(movement);
         }
 
+        /// <summary>
+        /// TODO:
+        /// </summary>
+        /// <param name="movementsStack"></param>
         public void MoveTo(RobotMovement[] movementsStack) {
             lock (forceMoveSyncLock) {
                 if (isForceMoveModeEnabled) {
@@ -395,6 +412,60 @@ namespace PingPong.KUKA {
         /// <param name="targetDuration">desired movement duration in seconds</param>
         public void MoveTo(RobotVector targetPosition, RobotVector targetVelocity, double targetDuration) {
             MoveTo(new RobotMovement(targetPosition, targetVelocity, targetDuration));
+        }
+
+        /// <summary>
+        /// TODO: Cos tam ze blokuje watek dopoki nie skonczy ruchu
+        /// </summary>
+        public void ForceMoveTo(RobotMovement movement) {
+            MoveTo(movement);
+
+            lock (forceMoveSyncLock) {
+                isForceMoveModeEnabled = true;
+            }
+
+            ManualResetEvent targetPositionReached = new ManualResetEvent(false);
+
+            void processFrame(object sender, FrameReceivedEventArgs args) {
+                if (IsTargetPositionReached) {
+                    targetPositionReached.Set();
+                }
+            };
+
+            FrameReceived += processFrame;
+            targetPositionReached.WaitOne();
+            FrameReceived -= processFrame;
+
+            lock (forceMoveSyncLock) {
+                isForceMoveModeEnabled = false;
+            }
+        }
+
+        /// <summary>
+        /// TODO: Cos tam ze blokuje watek dopoki nie skonczy wszystkich ruchow z tablicy
+        /// </summary>
+        public void ForceMoveTo(RobotMovement[] movementsStack) {
+            MoveTo(movementsStack);
+
+            lock (forceMoveSyncLock) {
+                isForceMoveModeEnabled = true;
+            }
+
+            ManualResetEvent targetPositionReached = new ManualResetEvent(false);
+
+            void processFrame(object sender, FrameReceivedEventArgs args) {
+                if (IsTargetPositionReached) {
+                    targetPositionReached.Set();
+                }
+            };
+
+            FrameReceived += processFrame;
+            targetPositionReached.WaitOne();
+            FrameReceived -= processFrame;
+
+            lock (forceMoveSyncLock) {
+                isForceMoveModeEnabled = false;
+            }
         }
 
         /// <summary>

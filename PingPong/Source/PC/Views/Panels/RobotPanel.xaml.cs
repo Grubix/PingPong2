@@ -91,16 +91,26 @@ namespace PingPong {
             //    emulator.Initialize();
             //    Thread.Sleep(1000);
 
-            //    RobotMovement movement1 = new RobotMovement(new RobotVector(-150, 800, 180), new RobotVector(0, 0, 200), 0.623);
-            //    RobotMovement movement2 = new RobotMovement(emulator.HomePosition, RobotVector.Zero, 1.05);
-            //    RobotMovement movement3 = new RobotMovement(new RobotVector(-150, 800, 180), new RobotVector(0, 0, 50), 2.44421);
-            //    RobotMovement movement4 = new RobotMovement(emulator.HomePosition, RobotVector.Zero, 2.211);
+            //    RobotMovement movement1 = new RobotMovement(emulator.HomePosition + new RobotVector(200, 0, 0), new RobotVector(0, 0, 0), 0.5);
+            //    RobotMovement movement2 = new RobotMovement(emulator.HomePosition, RobotVector.Zero, 1);
+
+            //    //emulator.MoveTo(new RobotMovement[] {
+            //    //    movement1, movement2
+            //    //});
+
+            //    RobotMovement movement3 = new RobotMovement(emulator.HomePosition + new RobotVector(0, 0, 0), new RobotVector(600, 0, 0), 0.6);
+            //    RobotMovement movement4 = new RobotMovement(emulator.HomePosition, RobotVector.Zero, 1);
+
+            //    Thread.Sleep(1000);
 
             //    emulator.MoveTo(new RobotMovement[] {
-            //        movement1, movement2, movement3, movement4
+            //        movement3, movement4
             //    });
-            //    //emulator.ForceMoveTo(new RobotVector(-150, 800, 180), new RobotVector(0, 0, 200), 0.6);
+
+            //    //emulator.ForceMoveTo(emulator.HomePosition + new RobotVector(200, 0, 0), new RobotVector(600, 0, 0), 0.6);
             //    //emulator.ForceMoveTo(emulator.HomePosition, RobotVector.Zero, 1);
+
+            //    //emulator.ForceMoveTo()
             //});
 
             //emulator.FrameReceived += (s, e) => {

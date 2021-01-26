@@ -18,7 +18,7 @@
 
         public double setPoint { get; }
 
-        public PIRegulator(double kp, double ki, double setPoint, double Ts = 1) {
+        public PIRegulator(double kp, double ki, double setPoint, double Ts = 0.004) {
             Kp = kp;
             Ki = ki;
             this.Ts = Ts;

@@ -8,7 +8,7 @@ namespace PingPong.KUKA {
 
             private double k0, k1, k2, k3, k4, k5; // Polynominal coefficients
 
-            private double xn, vn, an; // next value, velocity and acceleration
+            private double xn, vn, an, jn; // next value, velocity acceleration and jerk
 
             /// <summary>
             /// Current (theoretical) position
@@ -24,6 +24,11 @@ namespace PingPong.KUKA {
             /// Current (theoretical) acceleration
             /// </summary>
             public double A { get; private set; }
+
+            /// <summary>
+            /// Current (theoretical) jerk
+            /// </summary>
+            public double J { get; private set; }
 
             public void Initialize(double currentX) {
                 k0 = xn = X = currentX;
@@ -45,6 +50,7 @@ namespace PingPong.KUKA {
                 double x0 = k5 * t5 + k4 * t4 + k3 * t3 + k2 * t2 + k1 * t1 + k0;
                 vn = 5.0 * k5 * t4 + 4.0 * k4 * t3 + 3.0 * k3 * t2 + 2.0 * k2 * t1 + k1;
                 an = 20.0 * k5 * t3 + 12.0 * k4 * t2 + 6.0 * k3 * t1 + 2.0 * k2;
+                jn = 60.0 * k5 * t2 + 24.0 * k4 * t1 + 6.0 * k3;
 
                 k0 = x0;
                 k1 = vn;
@@ -68,6 +74,7 @@ namespace PingPong.KUKA {
                 xn = k5 * t5 + k4 * t4 + k3 * t3 + k2 * t2 + k1 * t1 + k0;
                 vn = 5.0 * k5 * t4 + 4.0 * k4 * t3 + 3.0 * k3 * t2 + 2.0 * k2 * t1 + k1;
                 an = 20.0 * k5 * t3 + 12.0 * k4 * t2 + 6.0 * k3 * t1 + 2.0 * k2;
+                jn = 60.0 * k5 * t2 + 24.0 * k4 * t1 + 6.0 * k3;
 
                 return xn;
             }
@@ -76,6 +83,7 @@ namespace PingPong.KUKA {
                 X = xn;
                 V = vn;
                 A = an;
+                J = jn;
             }
 
         }
@@ -165,6 +173,17 @@ namespace PingPong.KUKA {
             get {
                 lock (syncLock) {
                     return new RobotVector(polyX.A, polyY.A, polyZ.A, polyA.A, polyB.A, polyC.A);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Current (theoretical) acceleration
+        /// </summary>
+        public RobotVector Jerk {
+            get {
+                lock (syncLock) {
+                    return new RobotVector(polyX.J, polyY.J, polyZ.J, polyA.J, polyB.J, polyC.J);
                 }
             }
         }
@@ -274,6 +293,7 @@ namespace PingPong.KUKA {
                         RobotMovement nextMovement = movementsStack[0];
                         UpdateCurrentMovement(nextMovement);
                         movementsStack.RemoveAt(0);
+
                         elapsedTime = Ts;
 
                         double nx = polyX.GetValueAt(elapsedTime);

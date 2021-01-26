@@ -6,45 +6,11 @@ using System.Collections.Generic;
 namespace PingPong.Applications {
     public class HitPrediction {
 
-        private class BallModel : KalmanModel {
-            public BallModel() {
-                double ts = 0.004;
-
-                F = Matrix<double>.Build.DenseOfArray(new double[,] {
-                    { 1, ts, ts * ts / 2.0 },
-                    { 0, 1, ts },
-                    { 0, 0, 1 }
-                });
-
-                B = Matrix<double>.Build.DenseOfArray(new double[,] {
-                    { 0 },
-                    { 0 },
-                    { 0 }
-                });
-
-                H = Matrix<double>.Build.DenseOfArray(new double[,] {
-                    { 1, 0, 0 }
-                });
-
-                Q = Matrix<double>.Build.DenseOfArray(new double[,] {
-                    { 0.5, 0, 0 },
-                    { 0, 1000, 0 },
-                    { 0, 0, 1000 }
-                });
-
-                R = Matrix<double>.Build.DenseOfArray(new double[,] {
-                    { 1 }
-                });
-            }
-        }
-
         private readonly double timeErrorTolerance = 0.03;
 
         private readonly int timeCheckRange = 5;
 
         private readonly int maxPolyfitSamples = 50;
-
-        private readonly KalmanFilter kalmanX, kalmanY, kalmanZ;
 
         private readonly Polyfit polyfitX, polyfitY, polyfitZ;
 
@@ -67,11 +33,6 @@ namespace PingPong.Applications {
             polyfitY = new Polyfit(1);
             polyfitZ = new Polyfit(2);
 
-            KalmanModel ballModel = new BallModel();
-            kalmanX = new KalmanFilter(ballModel);
-            kalmanY = new KalmanFilter(ballModel);
-            kalmanZ = new KalmanFilter(ballModel);
-
             predictedTimeSamples = new List<double>();
             Position = Vector<double>.Build.Dense(3);
             Velocity = Vector<double>.Build.Dense(3);
@@ -86,11 +47,7 @@ namespace PingPong.Applications {
             polyfitY.AddPoint(elapsedTime, position[1]);
             polyfitZ.AddPoint(elapsedTime, position[2]);
 
-            kalmanX.Compute(position[0]);
-            kalmanY.Compute(position[1]);
-            kalmanZ.Compute(position[2]);
-
-            if (SamplesCount < 25) { //TODO: DO TESTOWANIA - KIEDY MA WYSTARTOWAC
+            if (SamplesCount < 30) { //TODO: DO TESTOWANIA - KIEDY MA WYSTARTOWAC
                 IsReady = false;
                 SamplesCount++;
                 return;
@@ -104,62 +61,37 @@ namespace PingPong.Applications {
             double velocityY = 0;
             double velocityZ = 0;
 
-            if (SamplesCount < 40) { //TODO: DO TESTOWANIA - KIEDY MA DZIALAC POLYFIT
-                double z = kalmanZ.CorrectedState[0];
-                double v = kalmanZ.CorrectedState[1];
-                double a = -9.81 * 1000.0 / 2.0;
-                double delta = v * v - 4.0 * a * (z - TargetHitHeight);
+            var zCoeffs = polyfitZ.CalculateCoefficients();
+            double timeOfFlight = CalculatePredictedTime(zCoeffs[0], zCoeffs[1], zCoeffs[2], TargetHitHeight);
+            
+            if (timeOfFlight > 0.0 && IsPredictedTimeStable(timeOfFlight)) {
+                TimeToHit = timeOfFlight - elapsedTime;
+                IsReady = true;
 
-                if (delta < 0.0) {
-                    TimeToHit = -1.0;
-                } else {
-                    TimeToHit = (-v - Math.Sqrt(delta)) / (2.0 * a);
+                var xCoeffs = polyfitX.CalculateCoefficients();
+                var yCoeffs = polyfitY.CalculateCoefficients();
 
-                    positionX = kalmanX.CorrectedState[1] * TimeToHit + kalmanX.CorrectedState[0];
-                    positionY = kalmanY.CorrectedState[1] * TimeToHit + kalmanY.CorrectedState[0];
-                    positionZ = TargetHitHeight;
+                positionX = xCoeffs[1] * timeOfFlight + xCoeffs[0];
+                positionY = yCoeffs[1] * timeOfFlight + yCoeffs[0];
+                positionZ = TargetHitHeight;
 
-                    velocityX = kalmanX.CorrectedState[1];
-                    velocityY = kalmanZ.CorrectedState[1];
-                    velocityZ = 2.0 * a * TimeToHit + v;
-                }
+                velocityX = xCoeffs[1];
+                velocityY = yCoeffs[1];
+                velocityZ = 2.0 * zCoeffs[2] * timeOfFlight + zCoeffs[1];
             } else {
-                var zCoeffs = polyfitZ.CalculateCoefficients();
-
-                double z0 = zCoeffs[0];
-                double v0 = zCoeffs[1];
-                double a0 = zCoeffs[2];
-                double delta = v0 * v0 - 4.0 * a0 * (z0 - TargetHitHeight);
-
-                if (delta < 0.0) {
-                    TimeToHit = -1.0;
-                } else {
-                    double timeOfFlight = (-v0 - Math.Sqrt(delta)) / (2.0 * a0);
-                    TimeToHit = timeOfFlight - elapsedTime;
-
-                    var xCoeffs = polyfitX.CalculateCoefficients();
-                    var yCoeffs = polyfitY.CalculateCoefficients();
-
-                    positionX = xCoeffs[1] * timeOfFlight + xCoeffs[0];
-                    positionY = yCoeffs[1] * timeOfFlight + yCoeffs[0];
-                    positionZ = TargetHitHeight;
-
-                    velocityX = xCoeffs[1];
-                    velocityY = yCoeffs[1];
-                    velocityZ = 2.0 * zCoeffs[2] * timeOfFlight + zCoeffs[1];
-                }
+                TimeToHit = -1;
+                IsReady = false;
             }
 
             Position = Vector<double>.Build.DenseOfArray(new double[] {
-                        positionX, positionY, positionZ
-                    });
+                positionX, positionY, positionZ
+            });
 
             Velocity = Vector<double>.Build.DenseOfArray(new double[] {
                 velocityX, velocityY, velocityZ
             });
 
             SamplesCount++;
-            IsReady = TimeToHit > 0;
         }
 
         public void Reset(double targetHitHeight) {
@@ -168,10 +100,6 @@ namespace PingPong.Applications {
             polyfitX.Values.Clear();
             polyfitY.Values.Clear();
             polyfitZ.Values.Clear();
-
-            kalmanX.Reset();
-            kalmanY.Reset();
-            kalmanZ.Reset();
 
             IsReady = false;
             SamplesCount = 0;
@@ -191,7 +119,7 @@ namespace PingPong.Applications {
 
         }
 
-        private double CalculatePredictedTime(double z0, double v0, double a0) {
+        private double CalculatePredictedTime(double z0, double v0, double a0, double z1) {
             // z(t) = a0 * t^2 + v0 * t + z0
             // z(T) = a0 * T^2 + v0 * T + z0 = TargetHitHeight
             // T = predicted time of flight
@@ -200,7 +128,7 @@ namespace PingPong.Applications {
                 return -1.0;
             }
 
-            double delta = v0 * v0 - 4.0 * a0 * (z0 - TargetHitHeight);
+            double delta = v0 * v0 - 4.0 * a0 * (z0 - z1);
 
             if (delta < 0.0) { // no real roots
                 return -1.0;
@@ -234,4 +162,3 @@ namespace PingPong.Applications {
 
     }
 }
-

@@ -1,12 +1,16 @@
 ﻿using MathNet.Numerics.LinearAlgebra;
 using PingPong.KUKA;
+using PingPong.Maths;
 using PingPong.OptiTrack;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace PingPong.Applications {
     class PingApp2 : IApplication<PingDataReadyEventArgs> {
+
+        private readonly object syncLock = new object();
 
         private readonly Robot robot;
 
@@ -16,17 +20,25 @@ namespace PingPong.Applications {
 
         private readonly Func<Vector<double>, bool> checkFunction;
 
-        private readonly object syncLock = new object();
+        private readonly Vector<double> upVector = Vector<double>.Build.DenseOfArray(new double[] { 0, 0, 1 });
+
+        private readonly int bufferSize = 5;
+
+        private readonly List<Vector<double>> samplesBuffer = new List<Vector<double>>();
+
+        private readonly PIRegulator regB;
+
+        private readonly PIRegulator regC;
 
         private bool isStarted;
 
         private double elapsedTime;
 
+        private bool weAreWaitingForBallToHit = false;
+
         private Vector<double> prevBallPosition;
 
         private Vector<double> currentBallPosition;
-
-        private bool robotMovedToHitPosition;
 
         public event EventHandler Started;
 
@@ -38,6 +50,9 @@ namespace PingPong.Applications {
             this.robot = robot;
             this.optiTrack = optiTrack;
             this.checkFunction = checkFunction;
+
+            regB = new PIRegulator(0.005, 0.001, 0.004, 0.44);
+            regC = new PIRegulator(0.005, 0.001, 0.004, 850.71);
 
             prediction = new HitPrediction();
             prediction.Reset(180);
@@ -104,7 +119,6 @@ namespace PingPong.Applications {
                 ballSpottedEvent.WaitOne();
 
                 // start application
-                robot.FrameReceived += ProcessRobotFrame;
                 optiTrack.FrameReceived += ProcessOptiTrackFrame;
                 Started?.Invoke(this, EventArgs.Empty);
             });
@@ -114,7 +128,6 @@ namespace PingPong.Applications {
             if (isStarted) {
                 isStarted = false;
 
-                robot.FrameReceived -= ProcessRobotFrame;
                 optiTrack.FrameReceived -= ProcessOptiTrackFrame;
                 robot.Uninitialize();
 
@@ -122,97 +135,113 @@ namespace PingPong.Applications {
             }
         }
 
-        // Robot thread
-        private void ProcessRobotFrame(object sender, KUKA.FrameReceivedEventArgs args) {
-            Vector<double> ballPosition;
-            Vector<double> predBallPositionOnHit;
-            Vector<double> predBallVelocityOnHit;
-            double predTimeToHit;
-            bool isPredictionReady;
-
-            lock (syncLock) {
-                ballPosition = currentBallPosition;
-                predBallPositionOnHit = prediction.Position;
-                predBallVelocityOnHit = prediction.Position;
-                predTimeToHit = prediction.TimeToHit;
-                isPredictionReady = prediction.IsReady;
-            }
-
-            if (robotMovedToHitPosition) {
-                if (robot.IsTargetPositionReached) { //czekanie az robot dojedzie do zadanego punktu, albo trzeba jakos wykryc odbicie z optitracka
-                    robotMovedToHitPosition = false;
-                    robot.MoveTo(robot.HomePosition, RobotVector.Zero, 3); //hamowanie
-
-                    lock (syncLock) { // reset predykcji
-                        elapsedTime = 0;
-                        prediction.Reset(180);
-                    }
-                }
-            } else if (isPredictionReady && predTimeToHit >= 0.25) {
-                RobotVector targetPosition = new RobotVector(
-                    predBallPositionOnHit[0],
-                    predBallPositionOnHit[1],
-                    predBallPositionOnHit[2],
-                    0,
-                    0, //TODO: B
-                    -90 //TODO: C
-                );
-
-                RobotVector targetVelocity = new RobotVector(
-                    0, //TODO: vX
-                    0, //TODO: vY
-                    0 //TODO: vZ
-                );
-
-                if (robot.Limits.CheckMove(targetPosition, targetVelocity, predTimeToHit)) {
-                    robot.MoveTo(targetPosition, targetVelocity, predTimeToHit);
-                    robotMovedToHitPosition = true;
-                }
-            }
-
-            DataReady?.Invoke(this, new PingDataReadyEventArgs {
-                PredictedBallPosition = predBallPositionOnHit,
-                PredictedBallVelocity = predBallVelocityOnHit,
-                ActualBallPosition = currentBallPosition,
-                ActualRobotPosition = args.Position,
-                PredictedTimeToHit = predTimeToHit,
-                BallSetpointX = 0, //TODO:
-                BallSetpointY = 0, //TODO:
-                BallSetpointZ = 0 //TODO:
-            });
-        }
-
-        // OptiTrack thread
         private void ProcessOptiTrackFrame(object sender, OptiTrack.FrameReceivedEventArgs args) {
-            lock (syncLock) {
-                currentBallPosition = robot.OptiTrackTransformation.Convert(args.BallPosition);
+            currentBallPosition = robot.OptiTrackTransformation.Convert(args.BallPosition);
 
-                if (currentBallPosition[2] < prediction.TargetHitHeight - 50.0) {
-                    Stop();
-                    return;
-                }
+            if (currentBallPosition[2] < prediction.TargetHitHeight - 50.0) {
+                Stop();
+                return;
+            }
 
-                bool positionChanged =
-                    currentBallPosition[0] != prevBallPosition[0] ||
-                    currentBallPosition[1] != prevBallPosition[1] ||
-                    currentBallPosition[2] != prevBallPosition[2];
+            bool positionChanged =
+                currentBallPosition[0] != prevBallPosition[0] ||
+                currentBallPosition[1] != prevBallPosition[1] ||
+                currentBallPosition[2] != prevBallPosition[2];
 
-                prevBallPosition = currentBallPosition;
+            prevBallPosition = currentBallPosition;
 
-                if (!positionChanged) {
-                    if (prediction.SamplesCount != 0) {
-                        elapsedTime += args.ReceivedFrame.DeltaTime;
-                    }
-
-                    return;
-                }
-
+            if (!positionChanged) {
                 if (prediction.SamplesCount != 0) {
                     elapsedTime += args.ReceivedFrame.DeltaTime;
                 }
 
-                prediction.AddMeasurement(currentBallPosition, elapsedTime);
+                return;
             }
+
+            if (weAreWaitingForBallToHit) {
+                if (samplesBuffer.Count == bufferSize) {
+                    samplesBuffer.Add(currentBallPosition);
+                    samplesBuffer.RemoveAt(0);
+                } else {
+                    samplesBuffer.Add(currentBallPosition);
+                    return;
+                }
+
+                for (int i = 1; i < samplesBuffer.Count; i++) {
+                    if (samplesBuffer[i][2] <= samplesBuffer[i - 1][2]) {
+                        return;
+                    }
+                }
+
+                samplesBuffer.Clear();
+                weAreWaitingForBallToHit = false;
+            }
+
+            if (prediction.SamplesCount != 0) {
+                elapsedTime += args.ReceivedFrame.DeltaTime;
+            }
+
+            prediction.AddMeasurement(currentBallPosition, elapsedTime);
+            RobotVector robotActualPosition = robot.Position;
+
+            if (prediction.IsReady) {
+                if (prediction.TimeToHit >= 0.25) {
+                    var paddleNormalVector = upVector.Normalize(1.0) - prediction.Velocity.Normalize(1.0);
+                    Console.WriteLine("Up: " + upVector.Normalize(1.0) + " -ballvel: " + prediction.Velocity.Normalize(1.0) + " = " + paddleNormalVector);
+
+                    double angleB = Math.Atan2(paddleNormalVector[0], paddleNormalVector[2]) * 180.0 / Math.PI;
+                    double angleC = -90.0 - Math.Atan2(paddleNormalVector[1], paddleNormalVector[2]) * 180.0 / Math.PI;
+
+                    angleB += regB.ComputeU(prediction.Position[0]);
+                    angleC -= regC.ComputeU(prediction.Position[1]);
+                    angleB = Math.Min(Math.Max(angleB, -20.0), 20.0);
+                    angleC = Math.Min(Math.Max(angleC, -110.0), -70.0);
+
+                    double dampCoeff = 1;
+
+                    if (prediction.TimeToHit >= 0.4) { //TODO: dopisac warunek
+                        dampCoeff = Math.Exp(-(prediction.TimeToHit - 0.4) / 0.15);
+                    }
+
+                    RobotVector robotTargetPosition = new RobotVector(
+                        robotActualPosition.X + (prediction.Position[0] - robotActualPosition.X) * dampCoeff,
+                        robotActualPosition.Y + (prediction.Position[1] - robotActualPosition.Y) * dampCoeff,
+                        prediction.Position[2],
+                        0,
+                        robotActualPosition.B + (angleB - robotActualPosition.B) * dampCoeff,
+                        robotActualPosition.C + (angleC - robotActualPosition.C) * dampCoeff
+                    );
+
+
+                    RobotVector robotTargetVelocity = new RobotVector(0, 0, 200);
+
+                    if (robot.Limits.CheckMove(robotTargetPosition, robotTargetVelocity, prediction.TimeToHit)) {
+                        RobotMovement movement1 = new RobotMovement(robotTargetPosition, robotTargetVelocity, prediction.TimeToHit);
+                        RobotMovement movement2 = new RobotMovement(robot.HomePosition, RobotVector.Zero, 1.0);
+
+                        robot.MoveTo(new RobotMovement[] { movement1, movement2 });
+                    }
+                } else {
+                    regB.Shift();
+                    regC.Shift();
+                    weAreWaitingForBallToHit = true;
+                    prediction.Reset(180);
+                    elapsedTime = 0;
+                }
+            }
+
+            PingDataReadyEventArgs data = new PingDataReadyEventArgs {
+                PredictedBallPosition = prediction.Position,
+                PredictedBallVelocity = prediction.Velocity,
+                ActualBallPosition = currentBallPosition,
+                ActualRobotPosition = robotActualPosition,
+                PredictedTimeToHit = prediction.TimeToHit,
+                BallSetpointX = 0,  //TODO:
+                BallSetpointY = 0,  //TODO:
+                BallSetpointZ = 0   //TODO:
+            };
+
+            DataReady?.Invoke(this, data);
         }
 
     }
