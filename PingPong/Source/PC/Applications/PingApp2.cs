@@ -141,7 +141,7 @@ namespace PingPong.Applications {
             if (robotMovedToHitPosition) {
                 if (robot.IsTargetPositionReached) { //czekanie az robot dojedzie do zadanego punktu, albo trzeba jakos wykryc odbicie z optitracka
                     robotMovedToHitPosition = false;
-                    robot.MoveTo(robot.HomePosition, RobotVector.Zero, 3); //hamowanie
+                    robot.MoveTo(robot.HomePosition, RobotVector.Zero, 5); //hamowanie
 
                     lock (syncLock) { // reset predykcji
                         elapsedTime = 0;

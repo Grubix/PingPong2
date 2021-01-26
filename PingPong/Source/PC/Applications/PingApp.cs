@@ -53,16 +53,16 @@ namespace PingPong.Applications {
             this.checkFunction = checkFunction;
 
             prediction = new HitPrediction();
-            prediction.Reset(183.48);
+            prediction.Reset(180);
 
             upVector = Vector<double>.Build.DenseOfArray(
                 new double[] { 0.0, 0.0, 1.0 }
             );
             destBallPosition = Vector<double>.Build.DenseOfArray(
-                new double[] { 0.44, 793.19, 177.82 }
+                new double[] { 0.44, 850.57, 180.0 }
             );
-            regB = new PIRegulator(0.005, 0.001, 0.004, 0.0);
-            regC = new PIRegulator(0.005, 0.001, 0.004, 793.19);
+            regB = new PIRegulator(0.005, 0.001, 0.004, 0.44);
+            regC = new PIRegulator(0.005, 0.001, 0.004, 850.57);
         }
 
         ~PingApp() {
@@ -149,7 +149,7 @@ namespace PingPong.Applications {
                     regC.Shift();
 
                     robotMovedToHitPosition = false;
-                    robot.MoveTo(new RobotVector(0.44, 793.19, 177.83, 0.0, 0.0, -90.0), RobotVector.Zero, 5);
+                    robot.MoveTo(new RobotVector(0.44, 850.57, 170.71, 0.0, 0.0, -90.0), RobotVector.Zero, 5);
                     //Stop(); // comment if 194 is commented
 
                     //robot.FrameReceived -= ProcessRobotFrame;
@@ -253,7 +253,7 @@ namespace PingPong.Applications {
                             racketNormalVector = racketNormalVector.Normalize(1.0);
                             robotTargetVelocity = new RobotVector(racketNormalVector[0] * 0, racketNormalVector[1] * 0, 180);
                             if (robot.IsInitialized()) {
-                                robot.MoveTo(robotTargetPostion, robotTargetVelocity, predTimeToHit);
+                                robot.MoveTo(robotTargetPostion, robotTargetVelocity, 2);
                             }
                         } else {
                             //robot.MoveTo(robotTargetPostion, new RobotVector(0, 0, 0), predTimeToHit);

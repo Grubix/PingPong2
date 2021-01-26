@@ -39,8 +39,10 @@ namespace PingPong {
                 disconnectBtn.IsEnabled = true;
             };
             OptiTrack.Uninitialized += (s, e) => {
-                connectBtn.IsEnabled = true;
-                disconnectBtn.IsEnabled = false;
+                Dispatcher.Invoke(() => {
+                    connectBtn.IsEnabled = true;
+                    disconnectBtn.IsEnabled = false;
+                });
             };
 
             connectBtn.Click += Connect;

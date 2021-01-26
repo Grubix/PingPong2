@@ -1,16 +1,16 @@
 {
-    "port": 8081,
+    "port": 8082,
     "limits": {
-        "lowerWorkspacePoint": [-250, 700, 150],
-        "upperWorkspacePoint": [250, 950, 400],
-        "maxCorrection": [2.0 , 0.1],
-        "maxVelocity": [500.0, 25.0],
+        "lowerWorkspacePoint": [-300, 700, 150],
+        "upperWorkspacePoint": [300, 1000, 400],
+        "maxCorrection": [3.5 , 0.3],
+        "maxVelocity": [875.0, 75.0],
         "maxAcceleration": [2000.0, 100.0],
-        "A1": [-360, 360],
-        "A2": [-360, 360],
+        "A1": [-150, -20],
+        "A2": [-130, 40],
         "A3": [-360, 360],
-        "A4": [-360, 360],
-        "A5": [-360, 360],
+        "A4": [-185, 185],
+        "A5": [-100, 115],
         "A6": [-360, 360]
     },
     "transformation": [
