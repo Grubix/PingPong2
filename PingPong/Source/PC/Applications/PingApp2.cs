@@ -81,7 +81,6 @@ namespace PingPong.Applications {
             Task.Run(() => {
                 ManualResetEvent ballSpottedEvent = new ManualResetEvent(false);
                 Vector<double> ballPosition = null;
-                Vector<double> prevBallPosition = null;
                 Vector<double> translation = robot.OptiTrackTransformation.Translation;
 
                 bool firstFrame = true;
@@ -150,25 +149,42 @@ namespace PingPong.Applications {
 
             prevBallPosition = currentBallPosition;
 
+            PingDataReadyEventArgs data = new PingDataReadyEventArgs {
+                PredictedBallPosition = prediction.Position,
+                PredictedBallVelocity = prediction.Velocity,
+                ActualBallPosition = currentBallPosition,
+                ActualRobotPosition = robot.Position,
+                PredictedTimeToHit = prediction.TimeToHit,
+                BallSetpointX = 0,  //TODO:
+                BallSetpointY = 0,  //TODO:
+                BallSetpointZ = 0   //TODO:
+            };
+
             if (!positionChanged) {
                 if (prediction.SamplesCount != 0) {
                     elapsedTime += args.ReceivedFrame.DeltaTime;
                 }
 
+                DataReady?.Invoke(this, data);
                 return;
             }
 
             if (weAreWaitingForBallToHit) {
+                prediction.Reset(180);
+                elapsedTime = 0;
+
                 if (samplesBuffer.Count == bufferSize) {
                     samplesBuffer.Add(currentBallPosition);
                     samplesBuffer.RemoveAt(0);
                 } else {
                     samplesBuffer.Add(currentBallPosition);
+                    DataReady?.Invoke(this, data);
                     return;
                 }
 
                 for (int i = 1; i < samplesBuffer.Count; i++) {
                     if (samplesBuffer[i][2] <= samplesBuffer[i - 1][2]) {
+                        DataReady?.Invoke(this, data);
                         return;
                     }
                 }
@@ -182,7 +198,9 @@ namespace PingPong.Applications {
             }
 
             prediction.AddMeasurement(currentBallPosition, elapsedTime);
-            RobotVector robotActualPosition = robot.Position;
+            data.PredictedBallPosition = prediction.Position;
+            data.PredictedBallVelocity = prediction.Velocity;
+            data.PredictedTimeToHit = prediction.TimeToHit;
 
             if (prediction.IsReady) {
                 if (prediction.TimeToHit >= 0.25) {
@@ -203,6 +221,7 @@ namespace PingPong.Applications {
                         dampCoeff = Math.Exp(-(prediction.TimeToHit - 0.4) / 0.15);
                     }
 
+                    RobotVector robotActualPosition = robot.Position;
                     RobotVector robotTargetPosition = new RobotVector(
                         robotActualPosition.X + (prediction.Position[0] - robotActualPosition.X) * dampCoeff,
                         robotActualPosition.Y + (prediction.Position[1] - robotActualPosition.Y) * dampCoeff,
@@ -229,17 +248,6 @@ namespace PingPong.Applications {
                     elapsedTime = 0;
                 }
             }
-
-            PingDataReadyEventArgs data = new PingDataReadyEventArgs {
-                PredictedBallPosition = prediction.Position,
-                PredictedBallVelocity = prediction.Velocity,
-                ActualBallPosition = currentBallPosition,
-                ActualRobotPosition = robotActualPosition,
-                PredictedTimeToHit = prediction.TimeToHit,
-                BallSetpointX = 0,  //TODO:
-                BallSetpointY = 0,  //TODO:
-                BallSetpointZ = 0   //TODO:
-            };
 
             DataReady?.Invoke(this, data);
         }
