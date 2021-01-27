@@ -10,8 +10,6 @@ using System.Threading.Tasks;
 namespace PingPong.Applications {
     class PingApp2 : IApplication<PingDataReadyEventArgs> {
 
-        private readonly object syncLock = new object();
-
         private readonly Robot robot;
 
         private readonly OptiTrackSystem optiTrack;
@@ -24,7 +22,7 @@ namespace PingPong.Applications {
 
         private readonly int bufferSize = 5;
 
-        private readonly List<Vector<double>> samplesBuffer = new List<Vector<double>>();
+        private readonly List<(double FrameDeltaTime, Vector<double> Position)> samplesBuffer;
 
         private readonly PIRegulator regB;
 
@@ -54,6 +52,7 @@ namespace PingPong.Applications {
             regB = new PIRegulator(0.005, 0.001, 0.004, 0.44);
             regC = new PIRegulator(0.005, 0.001, 0.004, 850.71);
 
+            samplesBuffer = new List<(double, Vector<double>)>();
             prediction = new HitPrediction();
             prediction.Reset(180);
         }
@@ -160,15 +159,22 @@ namespace PingPong.Applications {
 
             if (weAreWaitingForBallToHit) {
                 if (samplesBuffer.Count == bufferSize) {
-                    samplesBuffer.Add(currentBallPosition);
+                    samplesBuffer.Add((args.ReceivedFrame.DeltaTime, currentBallPosition));
                     samplesBuffer.RemoveAt(0);
                 } else {
-                    samplesBuffer.Add(currentBallPosition);
+                    samplesBuffer.Add((args.ReceivedFrame.DeltaTime, currentBallPosition));
                     return;
                 }
 
+                prediction.AddMeasurement(samplesBuffer[0].Position, 0);
+
                 for (int i = 1; i < samplesBuffer.Count; i++) {
-                    if (samplesBuffer[i][2] <= samplesBuffer[i - 1][2]) {
+                    elapsedTime += samplesBuffer[i].FrameDeltaTime;
+                    prediction.AddMeasurement(samplesBuffer[i].Position, elapsedTime);
+
+                    if (samplesBuffer[i].Position[2] <= samplesBuffer[i - 1].Position[2]) {
+                        prediction.Reset(180);
+                        elapsedTime = 0;
                         return;
                     }
                 }

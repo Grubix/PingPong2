@@ -1,7 +1,7 @@
 ﻿using System;
 
 namespace PingPong.Applications {
-    interface IApplication<T> {
+    interface IApplication<T> where T : EventArgs {
 
         event EventHandler Started;
 
@@ -15,7 +15,6 @@ namespace PingPong.Applications {
 
         bool IsStarted();
 
-        //TODO: start PingPonga z wlaczanego Pinga i odwrotnie??
         //void Start(IApplication application);
 
     }
