@@ -57,8 +57,8 @@ namespace PingPong {
                     //robot2.Uninitialize();
                     //optiTrack.Uninitialize();
 
-                    //robot1Panel.ForceFreezeCharts();
-                    //robot2Panel.ForceFreezeCharts();
+                    robot1Panel.ForceFreezeCharts();
+                    robot2Panel.ForceFreezeCharts();
                     //optiTrackPanel.ForceFreezeCharts();
                     //pingPongPanel.ForceFreezeCharts();
 
@@ -71,8 +71,8 @@ namespace PingPong {
                     //robot.Uninitialize();
                     //optiTrack.Uninitialize();
 
-                    //robot1Panel.ForceFreezeCharts();
-                    //robot2Panel.ForceFreezeCharts();
+                    robot1Panel.ForceFreezeCharts();
+                    robot2Panel.ForceFreezeCharts();
                     //optiTrackPanel.ForceFreezeCharts();
                     //pingPongPanel.ForceFreezeCharts();
 

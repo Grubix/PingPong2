@@ -10,7 +10,7 @@ using PingPong.OptiTrack;
 namespace PingPong {
     public partial class PingPongPanel : UserControl {
 
-        private PingApp robot1PingApp;
+        private PingApp2 robot1PingApp;
 
         private PingApp robot2PingApp;
 
@@ -38,7 +38,7 @@ namespace PingPong {
             this.robot1 = robot1;
             this.robot2 = robot2;
 
-            robot1PingApp = new PingApp(robot1, optiTrack, (position) => {
+            robot1PingApp = new PingApp2(robot1, optiTrack, (position) => {
                 return position[0] < 1000.0 && position[2] > 600.0;
             });
 

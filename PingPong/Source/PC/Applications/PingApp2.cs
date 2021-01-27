@@ -36,6 +36,8 @@ namespace PingPong.Applications {
 
         private bool weAreWaitingForBallToHit = false;
 
+        private int counter = 0;
+
         private Vector<double> prevBallPosition;
 
         private Vector<double> currentBallPosition;
@@ -51,8 +53,8 @@ namespace PingPong.Applications {
             this.optiTrack = optiTrack;
             this.checkFunction = checkFunction;
 
-            regB = new PIRegulator(0.005, 0.001, 0.004, 0.44);
-            regC = new PIRegulator(0.005, 0.001, 0.004, 850.71);
+            regB = new PIRegulator(0.002, 0.006, 0.44);
+            regC = new PIRegulator(0.002, 0.006, 900);
 
             prediction = new HitPrediction();
             prediction.Reset(180);
@@ -81,6 +83,7 @@ namespace PingPong.Applications {
             Task.Run(() => {
                 ManualResetEvent ballSpottedEvent = new ManualResetEvent(false);
                 Vector<double> ballPosition = null;
+                Vector<double> prevBallPosition = null;
                 Vector<double> translation = robot.OptiTrackTransformation.Translation;
 
                 bool firstFrame = true;
@@ -93,7 +96,7 @@ namespace PingPong.Applications {
                     }
 
                     ballPosition = robot.OptiTrackTransformation.Convert(args.BallPosition);
-                    prevBallPosition = ballPosition;
+                    this.prevBallPosition = ballPosition;
 
                     bool ballVisible =
                         ballPosition[0] != translation[0] &&
@@ -128,7 +131,7 @@ namespace PingPong.Applications {
                 isStarted = false;
 
                 optiTrack.FrameReceived -= ProcessOptiTrackFrame;
-                robot.Uninitialize();
+                //robot.Uninitialize();
 
                 Stopped?.Invoke(this, EventArgs.Empty);
             }
@@ -203,17 +206,22 @@ namespace PingPong.Applications {
             data.PredictedTimeToHit = prediction.TimeToHit;
 
             if (prediction.IsReady) {
-                if (prediction.TimeToHit >= 0.25) {
-                    var paddleNormalVector = upVector.Normalize(1.0) - prediction.Velocity.Normalize(1.0);
-                    Console.WriteLine("Up: " + upVector.Normalize(1.0) + " -ballvel: " + prediction.Velocity.Normalize(1.0) + " = " + paddleNormalVector);
+                if (prediction.TimeToHit >= 0.2) {
+                    var paddleNormalVector = upVector - Normalize(prediction.Velocity);
+                    //Console.WriteLine("ballvel: " + prediction.Velocity.Normalize(1.0) + " Normal: " + paddleNormalVector);
 
-                    double angleB = Math.Atan2(paddleNormalVector[0], paddleNormalVector[2]) * 180.0 / Math.PI;
-                    double angleC = -90.0 - Math.Atan2(paddleNormalVector[1], paddleNormalVector[2]) * 180.0 / Math.PI;
+                    double angleB = Math.Atan2(paddleNormalVector[0], paddleNormalVector[2]) * 180.0 / Math.PI - 0.89;
+                    double angleC = -90.0 - Math.Atan2(paddleNormalVector[1], paddleNormalVector[2]) * 180.0 / Math.PI - 0.5;
 
                     angleB += regB.ComputeU(prediction.Position[0]);
                     angleC -= regC.ComputeU(prediction.Position[1]);
-                    angleB = Math.Min(Math.Max(angleB, -20.0), 20.0);
-                    angleC = Math.Min(Math.Max(angleC, -110.0), -70.0);
+                    angleB = Math.Min(Math.Max(angleB, -15.0), 15.0);
+                    angleC = Math.Min(Math.Max(angleC, -100.0), -80.0);
+                    Console.WriteLine("B: " + angleB + " w tym reg: " + regB.ComputeU(prediction.Position[0]));
+                    Console.WriteLine("C: " + angleC + " w tym reg: " + regC.ComputeU(prediction.Position[1]));
+                    if (angleB == -15.0 || angleB == 15.0 || angleC == -100.0 || angleC == -80.0) {
+                        Console.WriteLine("NASYCENIE na kącie!!!!!!!!!");
+                    }
 
                     double dampCoeff = 1;
 
@@ -231,12 +239,21 @@ namespace PingPong.Applications {
                         robotActualPosition.C + (angleC - robotActualPosition.C) * dampCoeff
                     );
 
-
-                    RobotVector robotTargetVelocity = new RobotVector(0, 0, 200);
+                    RobotVector robotTargetVelocity = new RobotVector(0, 0, 450);
 
                     if (robot.Limits.CheckMove(robotTargetPosition, robotTargetVelocity, prediction.TimeToHit)) {
                         RobotMovement movement1 = new RobotMovement(robotTargetPosition, robotTargetVelocity, prediction.TimeToHit);
-                        RobotMovement movement2 = new RobotMovement(robot.HomePosition, RobotVector.Zero, 1.0);
+                        RobotMovement movement2;
+
+                        if (counter > 3) {
+                            movement2 = new RobotMovement(
+                                new RobotVector(robotActualPosition.X, robotActualPosition.Y, prediction.TargetHitHeight - 10, robot.HomePosition.ABC),
+                                RobotVector.Zero,
+                                1.0
+                            );
+                        } else {
+                            movement2 = new RobotMovement(robot.HomePosition, RobotVector.Zero, 1.0);
+                        }
 
                         robot.MoveTo(new RobotMovement[] { movement1, movement2 });
                     }
@@ -246,10 +263,21 @@ namespace PingPong.Applications {
                     weAreWaitingForBallToHit = true;
                     prediction.Reset(180);
                     elapsedTime = 0;
+                    counter++;
                 }
             }
 
             DataReady?.Invoke(this, data);
+        }
+
+        private Vector<double> Normalize(Vector<double> vec) {
+            double norm = 0.0;
+            for (int i = 0; i < vec.Count; i++) {
+                norm += vec[i] * vec[i];
+            }
+            norm = Math.Sqrt(norm);
+
+            return vec / norm;
         }
 
     }
