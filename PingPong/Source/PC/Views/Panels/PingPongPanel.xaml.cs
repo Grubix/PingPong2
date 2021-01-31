@@ -10,7 +10,7 @@ using PingPong.OptiTrack;
 namespace PingPong {
     public partial class PingPongPanel : UserControl {
 
-        private PingApp robot1PingApp;
+        private PingApp2 robot1PingApp;
 
         private PingApp robot2PingApp; //TODO:
 
