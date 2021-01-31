@@ -146,6 +146,7 @@
     <Compile Include="Source\PC\Devices\KUKA\Events\ErrorOccuredEventArgs.cs" />
     <Compile Include="Source\PC\Devices\KUKA\Events\FrameReceivedEventArgs.cs" />
     <Compile Include="Source\PC\Devices\KUKA\Events\FrameSentEventArgs.cs" />
+    <Compile Include="Source\PC\Devices\KUKA\Events\MovementChangedEventArgs.cs" />
     <Compile Include="Source\PC\Devices\KUKA\Robot.cs" />
     <Compile Include="Source\PC\Devices\KUKA\RobotAxisVector.cs" />
     <Compile Include="Source\PC\Devices\KUKA\RobotConfig.cs" />

@@ -12,9 +12,9 @@ namespace PingPong {
 
         private PingApp robot1PingApp;
 
-        private PingApp robot2PingApp;
+        private PingApp robot2PingApp; //TODO:
 
-        private PingPongApp pingPongApp;
+        private PingPongApp pingPongApp; //TODO:
 
         private Robot robot1;
 
@@ -38,35 +38,18 @@ namespace PingPong {
             this.robot1 = robot1;
             this.robot2 = robot2;
 
-            robot1PingApp = new PingApp(robot1, optiTrack, (position) => {
-                return position[0] < 1000.0 && position[2] > 600.0;
+            robot1PingApp = new PingApp(robot1, optiTrack, (ballPosition) => {
+                return ballPosition[0] < 1000.0 && ballPosition[2] > 600.0;
             });
 
             robot1PingApp.DataReady += (s, args) => {
                 robot1PingChart.Update(new double[] {
-                    args.PredictedTimeToHit,
-                    args.BallSetpointX,
-                    args.BallSetpointY,
-                    args.BallSetpointZ,
-
-                    args.ActualBallPosition[0],
-                    args.PredictedBallPosition[0],
-                    args.PredictedBallVelocity[0],
-
-                    args.ActualBallPosition[1],
-                    args.PredictedBallPosition[1],
-                    args.PredictedBallVelocity[1],
-
-                    args.ActualBallPosition[2],
-                    args.PredictedBallPosition[2],
-                    args.PredictedBallVelocity[2],
-
-                    args.ActualRobotPosition.X,
-                    args.ActualRobotPosition.Y,
-                    args.ActualRobotPosition.Z,
-                    args.ActualRobotPosition.A,
-                    args.ActualRobotPosition.B,
-                    args.ActualRobotPosition.C
+                    args.PredictedTimeToHit, args.BallSetpointX, args.BallSetpointY, args.BallSetpointZ,
+                    args.ActualBallPosition[0], args.PredictedBallPosition[0], args.PredictedBallVelocity[0],
+                    args.ActualBallPosition[1], args.PredictedBallPosition[1], args.PredictedBallVelocity[1],
+                    args.ActualBallPosition[2], args.PredictedBallPosition[2], args.PredictedBallVelocity[2],
+                    args.ActualRobotPosition.X, args.ActualRobotPosition.Y, args.ActualRobotPosition.Z,
+                    args.ActualRobotPosition.A, args.ActualRobotPosition.B, args.ActualRobotPosition.C
                 });
             };
 
@@ -83,17 +66,27 @@ namespace PingPong {
                 }
             };
 
-            //robot2PingApp = new PingApp(robot2, optiTrack, (position) => {
-            //    return position[0] < 1200.0; //TODO:
-            //});
+            //TODO: ODBICIE LUSTRZANE
+            //robot1.MovementChanged += (sender, args) => {
+            //    RobotMovement[] movementsStack = new RobotMovement[args.MovementsStack.Length];
 
-            //pingPongApp = new PingPongApp(robot1, robot2, optiTrack, (position) => {
-            //    return true; //TODO:
-            //});
+            //    for (int i = 0; i < args.MovementsStack.Length; i++) {
+            //        RobotMovement movement = args.MovementsStack[i];
+            //        RobotVector tPos = movement.TargetPosition;
+            //        RobotVector tVel = movement.TargetVelocity;
+
+            //        movementsStack[i] = new RobotMovement(
+            //            targetPosition: new RobotVector(tPos.Y, tPos.X, tPos.Z, robot2.HomePosition.ABC),
+            //            targetVelocity: new RobotVector(tVel.Y, tVel.X, tVel.Z, robot2.HomePosition.ABC),
+            //            targetDuration: movement.TargetDuration
+            //        );
+            //    }
+
+            //    robot2.MoveTo(movementsStack);
+            //};
         }
 
         private void InitializeCharts() {
-            //robot1PingChart.RefreshDelay = 60;
             robot1PingChart.Title = "Ping app (robot 1)";
 
             robot1PingChart.AddSeries("Pred. time to hit [ms]", "T_Hpr", false);

@@ -14,6 +14,8 @@ namespace PingPong.KUKA {
 
         private readonly object cancellationSyncLock = new object();
 
+        private readonly object generatorSyncLock = new object();
+
         private readonly TrajectoryGenerator generator;
 
         private readonly List<RobotVector> correctionBuffor;
@@ -45,9 +47,6 @@ namespace PingPong.KUKA {
             }
         }
 
-        /// <summary>
-        /// Robot config
-        /// </summary>
         public RobotConfig Config {
             get {
                 return config;
@@ -61,18 +60,12 @@ namespace PingPong.KUKA {
             }
         }
 
-        /// <summary>
-        /// Robot Ip adress (Robot Sensor Interface - RSI)
-        /// </summary>
         public string Ip {
             get {
                 return "0.0.0.0";
             }
         }
 
-        /// <summary>
-        /// Port number (Robot Sensor Interface - RSI)
-        /// </summary>
         public int Port {
             get {
                 if (config != null) {
@@ -83,9 +76,6 @@ namespace PingPong.KUKA {
             }
         }
 
-        /// <summary>
-        /// Robot limits
-        /// </summary>
         public RobotLimits Limits {
             get {
                 if (config != null) {
@@ -96,14 +86,8 @@ namespace PingPong.KUKA {
             }
         }
 
-        /// <summary>
-        /// Robot home position
-        /// </summary>
         public RobotVector HomePosition { get; private set; }
 
-        /// <summary>
-        /// Robot actual position
-        /// </summary>
         public RobotVector Position {
             get {
                 lock (receivedDataSyncLock) {
@@ -112,9 +96,6 @@ namespace PingPong.KUKA {
             }
         }
 
-        /// <summary>
-        /// Robot actual axis position
-        /// </summary>
         public RobotAxisVector AxisPosition {
             get {
                 lock (receivedDataSyncLock) {
@@ -123,63 +104,54 @@ namespace PingPong.KUKA {
             }
         }
 
-        /// <summary>
-        /// Robot (theoretical) actual position
-        /// </summary>
         public RobotVector TheoreticalPosition {
             get {
-                return generator.Position;
+                lock (generatorSyncLock) {
+                    return generator.Position;
+                }
             }
         }
 
-        /// <summary>
-        /// Robot (theoretical) actual velocity
-        /// </summary>
         public RobotVector Velocity {
             get {
-                return generator.Velocity;
+                lock (generatorSyncLock) {
+                    return generator.Velocity;
+                }
             }
         }
 
-        /// <summary>
-        /// Robot (theoretical) actual acceleration
-        /// </summary>
         public RobotVector Acceleration {
             get {
-                return generator.Acceleration;
+                lock (generatorSyncLock) {
+                    return generator.Acceleration;
+                }
             }
         }
 
-        /// <summary>
-        /// Robot (theoretical) actual jerk
-        /// </summary>
         public RobotVector Jerk {
             get {
-                return generator.Jerk;
+                lock (generatorSyncLock) {
+                    return generator.Jerk;
+                }
             }
         }
 
-        /// <summary>
-        /// Robot actual target position
-        /// </summary>
         public RobotVector TargetPosition {
             get {
-                return generator.TargetPosition;
+                lock (generatorSyncLock) {
+                    return generator.TargetPosition;
+                }
             }
         }
 
-        /// <summary>
-        /// Flag that indicates if robot reached target position
-        /// </summary>
         public bool IsTargetPositionReached {
             get {
-                return generator.IsTargetPositionReached;
+                lock (generatorSyncLock) {
+                    return generator.IsTargetPositionReached;
+                }
             }
         }
 
-        /// <summary>
-        /// Transformation from OptiTrack coordinate system to this robot coordinate system
-        /// </summary>
         public Transformation OptiTrackTransformation {
             get {
                 if (config != null) {
@@ -189,31 +161,17 @@ namespace PingPong.KUKA {
                 }
             }
         }
-
-        /// <summary>
-        /// Occurs when the robot is initialized (connection has been established)
-        /// </summary>
         public event EventHandler Initialized;
 
-        /// <summary>
-        /// TODO
-        /// </summary>
         public event EventHandler Uninitialized;
 
-        /// <summary>
-        /// Occurs when frame is received
-        /// </summary>
         public event EventHandler<FrameReceivedEventArgs> FrameReceived;
 
-        /// <summary>
-        /// Occurs when frame is sent
-        /// </summary>
         public event EventHandler<FrameSentEventArgs> FrameSent;
 
-        /// <summary>
-        /// Occurs when exception was thrown on robot thread, while receiving or sending data
-        /// </summary>
         public event EventHandler<ErrorOccuredEventArgs> ErrorOccured;
+
+        public event EventHandler<MovementChangedEventArgs> MovementChanged;
 
         public RobotEmulator(RobotVector homePosition) {
             HomePosition = homePosition;
@@ -247,30 +205,26 @@ namespace PingPong.KUKA {
             Initialized?.Invoke(this, EventArgs.Empty);
 
             // Start loop for receiving and sending data
-            while (!IsCancellationRequested) {
-                try {
+
+            try {
+                while(!IsCancellationRequested) {
                     long IPOC = ReceiveDataAsync();
                     SendData(IPOC);
                     Thread.Sleep(4);
-                } catch (Exception e) {
-                    var args = new ErrorOccuredEventArgs {
-                        RobotIp = ToString(),
-                        Exception = e
-                    };
-
-                    ErrorOccured?.Invoke(this, args);
                 }
+            } catch (Exception e) {
+                var args = new ErrorOccuredEventArgs {
+                    RobotIp = ToString(),
+                    Exception = e
+                };
+
+                ErrorOccured?.Invoke(this, args);
             }
 
             isInitialized = false;
             Uninitialized?.Invoke(this, EventArgs.Empty);
         }
 
-        /// <summary>
-        /// Receives data (IPOC, cartesian and axis position) from the robot asynchronously, 
-        /// raises <see cref="Robot.FrameRecived">FrameReceived</see> event
-        /// </summary>
-        /// <returns>current IPOC timestamp</returns>
         private long ReceiveDataAsync() {
             correctionBuffor.Add(correction);
             RobotVector currentCorrection = RobotVector.Zero;
@@ -310,9 +264,6 @@ namespace PingPong.KUKA {
             return receivedFrame.IPOC;
         }
 
-        /// <summary>
-        /// Sends data (IPOC, correction) to the robot, raises <see cref="Robot.FrameSent">FrameSent</see> event
-        /// </summary>
         private void SendData(long IPOC) {
             correction = generator.GetNextCorrection();
 
@@ -333,44 +284,7 @@ namespace PingPong.KUKA {
             });
         }
 
-        /// <summary>
-        /// Moves robot to specified position (sets target position).
-        /// </summary>
-        /// <param name="targetPosition">target position</param>
-        /// <param name="targetVelocity">target velocity (velocity after targetDuration)</param>
-        /// <param name="targetDuration">desired movement duration in seconds</param>
-        public void MoveTo(RobotVector targetPosition, RobotVector targetVelocity, double targetDuration) {
-            MoveTo(new RobotMovement(targetPosition, targetVelocity, targetDuration));
-        }
-
-        public void MoveTo(RobotMovement movement) {
-            lock (forceMoveSyncLock) {
-                if (isForceMoveModeEnabled) {
-                    return;
-                }
-            }
-
-            RobotVector targetPosition = movement.TargetPosition;
-            RobotVector targetVelocity = movement.TargetVelocity;
-
-            if (!isInitialized) {
-                throw new InvalidOperationException("Robot is not initialized");
-            }
-
-            if (!Limits.CheckPosition(targetPosition)) {
-                throw new ArgumentException("Target position is outside the available workspace:" +
-                    $"{Environment.NewLine}{targetPosition}");
-            }
-
-            if (!Limits.CheckVelocity(targetVelocity)) {
-                throw new ArgumentException("Target velocity exceeding max value:" +
-                    $"{Environment.NewLine}{targetVelocity}");
-            }
-
-            generator.SetMovement(movement);
-        }
-
-        public void MoveTo(RobotMovement[] movements) {
+        public void MoveTo(RobotMovement[] movementsStack) {
             lock (forceMoveSyncLock) {
                 if (isForceMoveModeEnabled) {
                     return;
@@ -381,8 +295,8 @@ namespace PingPong.KUKA {
                 throw new InvalidOperationException("Robot is not initialized");
             }
 
-            for (int i = 0; i < movements.Length; i++) {
-                RobotMovement movement = movements[i];
+            for (int i = 0; i < movementsStack.Length; i++) {
+                RobotMovement movement = movementsStack[i];
 
                 if (!Limits.CheckPosition(movement.TargetPosition)) {
                     throw new ArgumentException("Target position is outside the available workspace:" +
@@ -395,18 +309,33 @@ namespace PingPong.KUKA {
                 }
             }
 
-            generator.SetMovementsStack(movements);
+            RobotVector currentVelocity;
+            RobotVector currentAcceleration;
+
+            lock (generatorSyncLock) {
+                generator.SetMovements(movementsStack);
+                currentVelocity = generator.Velocity;
+                currentAcceleration = generator.Acceleration;
+            }
+
+            MovementChanged?.Invoke(this, new MovementChangedEventArgs {
+                Position = Position,
+                Velocity = currentVelocity,
+                Acceleration = currentAcceleration,
+                MovementsStack = movementsStack
+            });
         }
 
-        /// <summary>
-        /// Moves robot to the specified position and blocks current thread until position is reached.
-        /// Enables force move mode during the movement.
-        /// </summary>
-        /// <param name="targetPosition">target position</param>
-        /// <param name="targetVelocity">target velocity (velocity after targetDuration)</param>
-        /// <param name="targetDuration">desired movement duration in seconds</param>
-        public void ForceMoveTo(RobotVector targetPosition, RobotVector targetVelocity, double targetDuration) {
-            MoveTo(targetPosition, targetVelocity, targetDuration);
+        public void MoveTo(RobotMovement movement) {
+            MoveTo(new RobotMovement[] { movement });
+        }
+
+        public void MoveTo(RobotVector targetPosition, RobotVector targetVelocity, double targetDuration) {
+            MoveTo(new RobotMovement(targetPosition, targetVelocity, targetDuration));
+        }
+
+        public void ForceMoveTo(RobotMovement[] movementsStack) {
+            MoveTo(movementsStack);
 
             lock (forceMoveSyncLock) {
                 isForceMoveModeEnabled = true;
@@ -416,26 +345,31 @@ namespace PingPong.KUKA {
 
             void processFrame(object sender, FrameReceivedEventArgs args) {
                 if (IsTargetPositionReached) {
+                    FrameReceived -= processFrame;
                     targetPositionReached.Set();
                 }
             };
 
             FrameReceived += processFrame;
             targetPositionReached.WaitOne();
-            FrameReceived -= processFrame;
 
             lock (forceMoveSyncLock) {
                 isForceMoveModeEnabled = false;
             }
         }
 
-        /// <summary>
-        /// Shifts robot by the specified delta position and blocks current thread until new position is reached.
-        /// Enables force move mode during the movement.
-        /// </summary>
-        /// <param name="deltaPosition">desired position change</param>
-        /// <param name="targetVelocity">target velocity (velocity after targetDuration)</param>
-        /// <param name="targetDuration">desired movement duration in seconds</param>
+        public void ForceMoveTo(RobotMovement movement) {
+            ForceMoveTo(new RobotMovement[] { movement });
+        }
+
+        public void ForceMoveTo(RobotVector targetPosition, RobotVector targetVelocity, double targetDuration) {
+            ForceMoveTo(new RobotMovement(targetPosition, targetVelocity, targetDuration));
+        }
+
+        public void Shift(RobotVector deltaPosition, RobotVector targetVelocity, double targetDuration) {
+            MoveTo(Position + deltaPosition, targetVelocity, targetDuration);
+        }
+
         public void ForceShift(RobotVector deltaPosition, RobotVector targetVelocity, double targetDuration) {
             ForceMoveTo(Position + deltaPosition, targetVelocity, targetDuration);
         }

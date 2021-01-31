@@ -34,7 +34,7 @@ namespace PingPong.KUKA {
                     Value = match.Groups[3].Value.Trim();
                     attributes = ExtractAttributes(match.Groups[1].Value.Trim());
                 } else {
-                    throw new Exception($"Tag <{tag}> not found in data");
+                    throw new ArgumentException($"Tag <{tag}> not found in data");
                 }
             }
 
@@ -73,7 +73,6 @@ namespace PingPong.KUKA {
         public RobotAxisVector AxisPosition { get; set; }
 
         public InputFrame() {
-
         }
 
         public InputFrame(string data) {

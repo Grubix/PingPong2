@@ -101,9 +101,12 @@ namespace PingPong.Applications {
             polyfitY.Values.Clear();
             polyfitZ.Values.Clear();
 
+            Position = Vector<double>.Build.Dense(3);
+            Velocity = Vector<double>.Build.Dense(3);
+
             IsReady = false;
             SamplesCount = 0;
-            TimeToHit = -20.0;
+            TimeToHit = -1.0;
         }
 
         private void ShiftPolyfitSamples() {

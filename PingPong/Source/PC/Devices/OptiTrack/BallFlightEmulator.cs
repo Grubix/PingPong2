@@ -10,7 +10,7 @@ namespace PingPong.OptiTrack {
 
         private readonly double vx0, vy0, vz0;
 
-        public Action<Vector<double>, double> PositionChanged;
+        public event Action<Vector<double>, double> PositionChanged;
 
         public BallFlightEmulator(double x0, double y0, double z0, double vx0, double vy0, double vz0) {
             this.x0 = x0;

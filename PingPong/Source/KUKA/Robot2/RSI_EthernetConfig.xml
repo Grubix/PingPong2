@@ -5,13 +5,16 @@
 		<SENTYPE>PingPong</SENTYPE>
 		<ONLYSEND>FALSE</ONLYSEND>
 	</CONFIG>
+	
+	<!-- Znacznik definiujący format wysyłancyh przez robota ramek -->
 	<SEND>
 		<ELEMENTS>
 			<ELEMENT TAG="DEF_RIst" TYPE="DOUBLE" INDX="INTERNAL" />
 			<ELEMENT TAG="DEF_AIPos" TYPE="DOUBLE" INDX="INTERNAL" />
-			<ELEMENT TAG="DEF_AIPos" TYPE="DOUBLE" INDX="INTERNAL" />
 		</ELEMENTS>
 	</SEND>
+	
+	<!-- Znacznik definiujący format odbieranych przez robota ramek -->
 	<RECEIVE>
 		<ELEMENTS>
 			<ELEMENT TAG="DEF_EStr" TYPE="STRING" INDX="INTERNAL" />

@@ -4,7 +4,6 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace PingPong {
@@ -16,7 +15,7 @@ namespace PingPong {
             InitializeComponent();
             mainWindowHanlde = this;
 
-            // Set timer resolution to 1ms (15.6ms is default)
+            // Set timer resolution to 1ms (default is 15.6ms)
             WinApi.TimeBeginPeriod(1);
 
             // Force change number separator to dot
@@ -35,13 +34,11 @@ namespace PingPong {
                 try {
                     robot1Panel.LoadConfig(Path.Combine(App.ConfigDir, "robot1.config.json"));
                 } catch (Exception) {
-
                 }
 
                 try {
                     robot2Panel.LoadConfig(Path.Combine(App.ConfigDir, "robot2.config.json"));
                 } catch (Exception) {
-
                 }
 
                 Robot robot = robot1Panel.Robot;
@@ -52,47 +49,22 @@ namespace PingPong {
                 pingPongPanel.Initialize(robot, robot2, optiTrack);
 
                 robot.ErrorOccured += (sender, args) => {
-                    //TODO: czemu to zakomentowane wywala wyjatek (FatalError) ?
-
-                    //robot2.Uninitialize();
-                    //optiTrack.Uninitialize();
-
-                    //robot1Panel.ForceFreezeCharts();
-                    //robot2Panel.ForceFreezeCharts();
-                    //optiTrackPanel.ForceFreezeCharts();
-                    //pingPongPanel.ForceFreezeCharts();
+                    robot1Panel.ForceFreezeCharts();
+                    robot2Panel.ForceFreezeCharts();
+                    optiTrackPanel.ForceFreezeCharts();
+                    pingPongPanel.ForceFreezeCharts();
 
                     ShowErrorDialog($"An exception was raised on the robot ({args.RobotIp}) thread.", args.Exception);
                 };
 
                 robot2.ErrorOccured += (sender, args) => {
-                    //TODO: czemu to zakomentowane wywala wyjatek (FatalError) ?
-
-                    //robot.Uninitialize();
-                    //optiTrack.Uninitialize();
-
-                    //robot1Panel.ForceFreezeCharts();
-                    //robot2Panel.ForceFreezeCharts();
-                    //optiTrackPanel.ForceFreezeCharts();
-                    //pingPongPanel.ForceFreezeCharts();
+                    robot1Panel.ForceFreezeCharts();
+                    robot2Panel.ForceFreezeCharts();
+                    optiTrackPanel.ForceFreezeCharts();
+                    pingPongPanel.ForceFreezeCharts();
 
                     ShowErrorDialog($"An exception was raised on the robot ({args.RobotIp}) thread.", args.Exception);
                 };
-
-                //TODO: ODBICIE LUSTRZANE
-                //Robot robot1 = robot1Panel.Robot;
-                //Robot robot2 = robot2Panel.Robot;
-
-                //robot1.FrameSent += (sender, args) => {
-                //    RobotVector targetPosition = new RobotVector(
-                //        args.TargetPosition.Y,
-                //        args.TargetPosition.X,
-                //        args.TargetPosition.Z,
-                //        robot2.HomePosition.ABC
-                //    );
-
-                //    robot2.MoveTo(args.TargetPosition, args.TargetVelocity, args.TargetDuration);
-                //};
             };
 
             // Shrink window if it is too wide or too high

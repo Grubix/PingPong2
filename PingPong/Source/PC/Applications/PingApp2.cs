@@ -75,12 +75,17 @@ namespace PingPong.Applications {
                 throw new InvalidOperationException("Robot and optiTrack system must be initialized");
             }
 
+            if (robot.OptiTrackTransformation == null) {
+                throw new InvalidOperationException("OptiTrack transformation must not be null");
+            }
+
             isStarted = true;
 
             // waiting for ball to be visible
             Task.Run(() => {
                 ManualResetEvent ballSpottedEvent = new ManualResetEvent(false);
                 Vector<double> ballPosition = null;
+                Vector<double> prevBallPosition = null;
                 Vector<double> translation = robot.OptiTrackTransformation.Translation;
 
                 bool firstFrame = true;
@@ -234,7 +239,7 @@ namespace PingPong.Applications {
 
                     RobotVector robotTargetVelocity = new RobotVector(0, 0, 200);
 
-                    if (robot.Limits.CheckMove(robotTargetPosition, robotTargetVelocity, prediction.TimeToHit)) {
+                    if (robot.Limits.CheckMovement(robotTargetPosition, robotTargetVelocity, prediction.TimeToHit)) {
                         RobotMovement movement1 = new RobotMovement(robotTargetPosition, robotTargetVelocity, prediction.TimeToHit);
                         RobotMovement movement2 = new RobotMovement(robot.HomePosition, RobotVector.Zero, 1.0);
 

@@ -34,7 +34,7 @@ namespace PingPong.KUKA {
 
         public string Message { get; set; } = "Ping Pong";
 
-        public RobotVector Correction { get; set; } = new RobotVector();
+        public RobotVector Correction { get; set; } = RobotVector.Zero;
 
         public long IPOC { get; set; }
 
