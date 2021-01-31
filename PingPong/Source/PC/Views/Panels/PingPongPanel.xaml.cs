@@ -38,7 +38,7 @@ namespace PingPong {
             this.robot1 = robot1;
             this.robot2 = robot2;
 
-            robot1PingApp = new PingApp(robot1, optiTrack, (ballPosition) => {
+            robot1PingApp = new PingApp2(robot1, optiTrack, (ballPosition) => {
                 return ballPosition[0] < 1000.0 && ballPosition[2] > 600.0;
             });
 
