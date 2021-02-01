@@ -30,6 +30,14 @@ namespace PingPong.Applications {
 
         private readonly PIRegulator regC;
 
+        private readonly PIRegulator regZ;
+
+        private double prevHeightMax = 1000.0;
+
+        private double height = 1000;
+
+        private double nextHeight;
+
         private bool isStarted;
 
         private double elapsedTime;
@@ -53,11 +61,13 @@ namespace PingPong.Applications {
             this.optiTrack = optiTrack;
             this.checkFunction = checkFunction;
 
-            regB = new PIRegulator(0.002, 0.006, 0.44);
-            regC = new PIRegulator(0.002, 0.006, 900);
+            regB = new PIRegulator(0.008, 0.04, 0.44);
+            regC = new PIRegulator(0.008, 0.04, 900);
+            regZ = new PIRegulator(0.008, 0.04, height);
 
             prediction = new HitPrediction();
             prediction.Reset(180);
+            nextHeight = height;
         }
 
         ~PingApp2() {
@@ -210,8 +220,21 @@ namespace PingPong.Applications {
             data.PredictedTimeToHit = prediction.TimeToHit;
 
             if (prediction.IsReady) {
-                if (prediction.TimeToHit >= 0.2) {
-                    var paddleNormalVector = upVector - Normalize(prediction.Velocity);
+                if (prediction.TimeToHit >= 0.25) {
+
+                    //double speed = (Math.Sqrt(2.0 * 9.81 * (height - 180.0) * 1000) + prediction.Velocity[2] * 0.8) / (1 + 0.8);
+                    //speed = Math.Max(Math.Min(speed, 480), 400);
+                    double speed = 450.0;
+                    //speed += regZ.ComputeU(prevHeightMax);
+
+                    RobotVector robotTargetVelocity = new RobotVector(0, 0, speed);
+
+                    var fallDir = Vector<double>.Build.DenseOfArray(new double[] {
+                        prediction.Velocity[0] - robotTargetVelocity.X,
+                        prediction.Velocity[1] - robotTargetVelocity.Y,
+                        prediction.Velocity[2] - robotTargetVelocity.Z
+                    });
+                    var paddleNormalVector = upVector - Normalize(fallDir);
                     //Console.WriteLine("ballvel: " + prediction.Velocity.Normalize(1.0) + " Normal: " + paddleNormalVector);
 
                     double angleB = Math.Atan2(paddleNormalVector[0], paddleNormalVector[2]) * 180.0 / Math.PI - 0.89;
@@ -243,8 +266,6 @@ namespace PingPong.Applications {
                         robotActualPosition.C + (angleC - robotActualPosition.C) * dampCoeff
                     );
 
-                    RobotVector robotTargetVelocity = new RobotVector(0, 0, 450);
-
                     if (robot.Limits.CheckMovement(robotTargetPosition, robotTargetVelocity, prediction.TimeToHit)) {
                         RobotMovement movement1 = new RobotMovement(robotTargetPosition, robotTargetVelocity, prediction.TimeToHit);
                         RobotMovement movement2;
@@ -262,8 +283,11 @@ namespace PingPong.Applications {
                         robot.MoveTo(new RobotMovement[] { movement1, movement2 });
                     }
                 } else {
+                    height = nextHeight;
                     regB.Shift();
                     regC.Shift();
+                    regZ.Shift();
+                    //prevHeightMax = 1000.0;
                     weAreWaitingForBallToHit = true;
                     prediction.Reset(180);
                     elapsedTime = 0;

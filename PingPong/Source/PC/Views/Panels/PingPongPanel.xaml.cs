@@ -58,7 +58,9 @@ namespace PingPong {
                 try {
                     optiTrack.Initialize();
                     robot1.Initialize();
+                    //robot2.Initialize();
                     robot1.Initialized += (s, e) => robot1PingApp.Start();
+                    //robot1PingApp.Start();
 
                     startBtn.IsEnabled = false;
                 } catch (Exception ex) {
