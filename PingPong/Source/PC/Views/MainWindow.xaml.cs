@@ -41,14 +41,14 @@ namespace PingPong {
                 } catch (Exception) {
                 }
 
-                Robot robot = robot1Panel.Robot;
+                Robot robot1 = robot1Panel.Robot;
                 Robot robot2 = robot2Panel.Robot;
                 OptiTrackSystem optiTrack = optiTrackPanel.OptiTrack;
 
-                optiTrackPanel.Initialize(robot, robot2);
-                pingPongPanel.Initialize(robot, robot2, optiTrack);
+                optiTrackPanel.Initialize(robot1, robot2);
+                pingPongPanel.Initialize(robot1, robot2, optiTrack);
 
-                robot.ErrorOccured += (sender, args) => {
+                robot1.ErrorOccured += (sender, args) => {
                     robot1Panel.ForceFreezeCharts();
                     robot2Panel.ForceFreezeCharts();
                     optiTrackPanel.ForceFreezeCharts();
@@ -64,6 +64,24 @@ namespace PingPong {
                     pingPongPanel.ForceFreezeCharts();
 
                     ShowErrorDialog($"An exception was raised on the robot ({args.RobotIp}) thread.", args.Exception);
+                };
+
+                robot1.MovementChanged += (sender, args) => {
+                    RobotMovement[] movementsStack = new RobotMovement[args.MovementsStack.Length];
+
+                    for (int i = 0; i < args.MovementsStack.Length; i++) {
+                        RobotMovement movement = args.MovementsStack[i];
+                        RobotVector tPos = movement.TargetPosition;
+                        RobotVector tVel = movement.TargetVelocity;
+
+                        movementsStack[i] = new RobotMovement(
+                            targetPosition: new RobotVector(tPos.Y, tPos.X / 2.0, tPos.Z, robot2.HomePosition.ABC),
+                            targetVelocity: RobotVector.Zero,
+                            targetDuration: movement.TargetDuration
+                        );
+                    }
+
+                    robot2.MoveTo(movementsStack);
                 };
             };
 

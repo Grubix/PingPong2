@@ -19,7 +19,7 @@
         <oxy:Plot x:Name="chart" Grid.Row="1" PlotMargins="Auto,Auto,10,Auto" LegendItemSpacing="36" LegendFont="DejaVu Sans Mono" LegendFontSize="10.5" LegendPosition="TopRight" LegendBorder="#FFACACAC" LegendBackground="White" >
             <oxy:Plot.Axes>
                 <oxy:LinearAxis Position="Bottom" Minimum="0" Maximum="5000" IsManipulationEnabled="True" Title="Sample" IsZoomEnabled="False" IsPanEnabled="False" MaximumRange="15000" MajorGridlineStyle="Dash" />
-                <oxy:LinearAxis Position="Left" IsManipulationEnabled="False" MajorGridlineColor="#3F000000" MajorGridlineStyle="Dash" IsPanEnabled="False" IsZoomEnabled="False"/>
+                <oxy:LinearAxis Position="Left" IsManipulationEnabled="False" MajorGridlineColor="#3F000000" MajorGridlineStyle="Dash"/>
             </oxy:Plot.Axes>
         </oxy:Plot>
     </Grid>

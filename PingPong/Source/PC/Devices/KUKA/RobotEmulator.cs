@@ -229,7 +229,7 @@ namespace PingPong.KUKA {
             correctionBuffor.Add(correction);
             RobotVector currentCorrection = RobotVector.Zero;
 
-            if (correctionBuffor.Count == 8) {
+            if (correctionBuffor.Count == 10) { // 8 samples shift
                 currentCorrection = correctionBuffor[0];
                 correctionBuffor.RemoveAt(0);
             }
