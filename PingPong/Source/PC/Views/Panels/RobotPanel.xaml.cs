@@ -91,19 +91,25 @@ namespace PingPong {
                 emulator.Initialize();
                 Thread.Sleep(500);
 
-                RobotMovement movement1 = new RobotMovement(emulator.HomePosition + new RobotVector(50.223344, 0, 0), new RobotVector(200, 0, 0), 1.6433);
+                RobotMovement movement1 = new RobotMovement(emulator.HomePosition + new RobotVector(50, 0, 0), new RobotVector(-100, 0, 0), 1.6433);
                 RobotMovement movement2 = new RobotMovement(emulator.HomePosition + new RobotVector(0, 0, 0), new RobotVector(100, 0, 0), 1.533);
-                RobotMovement movement3 = new RobotMovement(emulator.HomePosition + new RobotVector(100, 0, 0), new RobotVector(150, 0, 0), 3.23231);
+                RobotMovement movement3 = new RobotMovement(emulator.HomePosition + new RobotVector(100, 0, 0), new RobotVector(0, 0, 0), 3.23231);
                 RobotMovement movement4 = new RobotMovement(emulator.HomePosition, RobotVector.Zero, 1.2221);
 
                 emulator.MoveTo(new RobotMovement[] {
-                    movement1, movement2, movement3, movement4
+                    movement1, movement2, movement3
                 });
 
                 Thread.Sleep(1200);
 
+                emulator.MoveTo(new RobotMovement[] {
+                    movement4, movement1
+                });
+
+                //Thread.Sleep(2000);
+
                 //emulator.MoveTo(new RobotMovement[] {
-                //    movement1, movement4
+                //    movement3, movement4
                 //});
 
                 //RobotMovement movement3 = new RobotMovement(emulator.HomePosition + new RobotVector(100, 300, 400), new RobotVector(0, 0, 0), 3);
@@ -125,12 +131,7 @@ namespace PingPong {
                 //emulator.ForceMoveTo()
             });
 
-            emulator.MovementChanged += (s, e) => {
-                Console.WriteLine(e.Position);
-            };
-
             emulator.FrameReceived += (s, e) => {
-
                 RobotVector actualPosition = emulator.Position;
                 RobotVector targetPosition = emulator.TargetPosition;
                 RobotVector theoreticalPosition = emulator.TheoreticalPosition;

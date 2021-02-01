@@ -49,19 +49,17 @@ namespace PingPong.KUKA {
                 k5 = 1.0 / (2.0 * T5) * (-T2 * a0 - 6.0 * T1 * (v0 + v1) + 12.0 * (x1 - x0));
             }
 
-            public double GetValueAt(double t, bool updateValues = true) {
+            public double GetValueAt(double t) {
                 double t1 = t;
                 double t2 = t1 * t1;
                 double t3 = t1 * t2;
                 double t4 = t1 * t3;
                 double t5 = t1 * t4;
 
-                if (updateValues) {
-                    X = xn;
-                    V = vn;
-                    A = an;
-                    J = jn;
-                }
+                X = xn;
+                V = vn;
+                A = an;
+                J = jn;
 
                 xn = k5 * t5 + k4 * t4 + k3 * t3 + k2 * t2 + k1 * t1 + k0;
                 vn = 5.0 * k5 * t4 + 4.0 * k4 * t3 + 3.0 * k3 * t2 + 2.0 * k2 * t1 + k1;
@@ -71,16 +69,16 @@ namespace PingPong.KUKA {
                 return xn;
             }
 
-            public void UpdateTheoreticalValues(double x1, double v1) {
+            public void Shift() {
                 X = xn;
                 V = vn;
-                A = an = 0;
-                J = jn = 0;
+                A = an;
+                J = jn;
             }
 
-            public void Update() {
-                X = xn;
-                V = vn;
+            public void Reset(double x1, double v1) {
+                X = x1;
+                V = v1;
                 A = an = 0;
                 J = jn = 0;
             }
@@ -184,16 +182,29 @@ namespace PingPong.KUKA {
 
             if (targetDurationChanged || targetPositionChanged || targetVelocityChanged) {
                 currentMovement = movement;
-                elapsedTime = 0.0;
+                elapsedTime = Ts;
                 IsTargetPositionReached = false;
 
-                polyX.UpdateCoefficients(Position.X, targetPosition.X, Velocity.X, targetVelocity.X, Acceleration.X, targetDuration);
-                polyY.UpdateCoefficients(Position.Y, targetPosition.Y, Velocity.Y, targetVelocity.Y, Acceleration.Y, targetDuration);
-                polyZ.UpdateCoefficients(Position.Z, targetPosition.Z, Velocity.Z, targetVelocity.Z, Acceleration.Z, targetDuration);
-                polyA.UpdateCoefficients(Position.A, targetPosition.A, Velocity.A, targetVelocity.A, Acceleration.A, targetDuration);
-                polyB.UpdateCoefficients(Position.B, targetPosition.B, Velocity.B, targetVelocity.B, Acceleration.B, targetDuration);
-                polyC.UpdateCoefficients(Position.C, targetPosition.C, Velocity.C, targetVelocity.C, Acceleration.C, targetDuration);
+                polyX.UpdateCoefficients(polyX.X, targetPosition.X, polyX.V, targetVelocity.X, polyX.A, targetDuration);
+                polyY.UpdateCoefficients(polyY.X, targetPosition.Y, polyY.V, targetVelocity.Y, polyY.A, targetDuration);
+                polyZ.UpdateCoefficients(polyZ.X, targetPosition.Z, polyZ.V, targetVelocity.Z, polyZ.A, targetDuration);
+                polyA.UpdateCoefficients(polyA.X, targetPosition.A, polyA.V, targetVelocity.A, polyA.A, targetDuration);
+                polyB.UpdateCoefficients(polyB.X, targetPosition.B, polyB.V, targetVelocity.B, polyB.A, targetDuration);
+                polyC.UpdateCoefficients(polyC.X, targetPosition.C, polyC.V, targetVelocity.C, polyC.A, targetDuration);
             }
+        }
+
+        private RobotVector GetVectorAt(double t) {
+            // Updates all polynominals (X = xn, V = Vn ...)
+
+            double X = polyX.GetValueAt(t);
+            double y = polyY.GetValueAt(t);
+            double Z = polyZ.GetValueAt(t);
+            double A = polyA.GetValueAt(t);
+            double B = polyB.GetValueAt(t);
+            double C = polyC.GetValueAt(t);
+
+            return new RobotVector(X, y, Z, A, B, C);
         }
 
         public void Initialize(RobotVector actualRobotPosition) {
@@ -207,11 +218,6 @@ namespace PingPong.KUKA {
             polyA.Initialize(actualRobotPosition.A);
             polyB.Initialize(actualRobotPosition.B);
             polyC.Initialize(actualRobotPosition.C);
-        }
-
-        public void SetMovement(RobotMovement movement) {
-            movementsStack.Clear();
-            UpdateCurrentMovement(movement);
         }
 
         public void SetMovements(RobotMovement[] movements) {
@@ -228,8 +234,6 @@ namespace PingPong.KUKA {
             UpdateCurrentMovement(movements[0]);
         }
 
-        private double diff;
-
         public RobotVector GetNextCorrection() {
             if (IsTargetPositionReached) {
                 return RobotVector.Zero;
@@ -238,65 +242,41 @@ namespace PingPong.KUKA {
             if (elapsedTime < currentMovement.TargetDuration) {
                 elapsedTime += Ts;
 
-                double nx, ny, nz, na, nb, nc;
-
                 if (elapsedTime >= currentMovement.TargetDuration) {
-                    nx = polyX.GetValueAt(currentMovement.TargetDuration);
-                    ny = polyY.GetValueAt(currentMovement.TargetDuration);
-                    nz = polyZ.GetValueAt(currentMovement.TargetDuration);
-                    na = polyA.GetValueAt(currentMovement.TargetDuration);
-                    nb = polyB.GetValueAt(currentMovement.TargetDuration);
-                    nc = polyC.GetValueAt(currentMovement.TargetDuration);
+                    if (movementsStack.Count != 0) {
+                        polyX.Shift();
+                        polyY.Shift();
+                        polyZ.Shift();
+                        polyA.Shift();
+                        polyB.Shift();
+                        polyC.Shift();
 
-                    diff = elapsedTime - currentMovement.TargetDuration - Ts;
+                        RobotVector tmpPosition = Position;
+
+                        UpdateCurrentMovement(movementsStack[0]);
+                        movementsStack.RemoveAt(0);
+                        elapsedTime = Ts;
+
+                        return GetVectorAt(Ts) - tmpPosition;
+                    } else {
+                        return GetVectorAt(currentMovement.TargetDuration) - Position;
+                    }
                 } else {
-                    nx = polyX.GetValueAt(elapsedTime);
-                    ny = polyY.GetValueAt(elapsedTime);
-                    nz = polyZ.GetValueAt(elapsedTime);
-                    na = polyA.GetValueAt(elapsedTime);
-                    nb = polyB.GetValueAt(elapsedTime);
-                    nc = polyC.GetValueAt(elapsedTime);
+                    return GetVectorAt(elapsedTime) - Position;
                 }
-
-                return new RobotVector(nx, ny, nz, na, nb, nc) - Position;
             } else {
-                RobotVector tartgetPosition = currentMovement.TargetPosition;
+                IsTargetPositionReached = true;
+                RobotVector targetPosition = currentMovement.TargetPosition;
                 RobotVector targetVelocity = currentMovement.TargetVelocity;
 
-                polyX.UpdateTheoreticalValues(tartgetPosition.X, targetVelocity.X);
-                polyY.UpdateTheoreticalValues(tartgetPosition.Y, targetVelocity.Y);
-                polyZ.UpdateTheoreticalValues(tartgetPosition.Z, targetVelocity.Z);
-                polyA.UpdateTheoreticalValues(tartgetPosition.A, targetVelocity.A);
-                polyB.UpdateTheoreticalValues(tartgetPosition.B, targetVelocity.B);
-                polyC.UpdateTheoreticalValues(tartgetPosition.C, targetVelocity.C);
+                polyX.Reset(targetPosition.X, targetVelocity.X);
+                polyY.Reset(targetPosition.Y, targetVelocity.Y);
+                polyZ.Reset(targetPosition.Z, targetVelocity.Z);
+                polyA.Reset(targetPosition.A, targetVelocity.A);
+                polyB.Reset(targetPosition.B, targetVelocity.B);
+                polyC.Reset(targetPosition.C, targetVelocity.C);
 
-                if (movementsStack.Count != 0) {
-                    //TODO: KONIECZNIE SPRAWDZENIE CZY RUCH SIE ZMIENIL - JAK PODA SIE DWA TE SAME KOREKCJA Z DUPY
-
-                    UpdateCurrentMovement(movementsStack[0]);
-                    movementsStack.RemoveAt(0);
-                    elapsedTime = diff;
-
-                    double nx = polyX.GetValueAt(elapsedTime);
-                    double ny = polyY.GetValueAt(elapsedTime);
-                    double nz = polyZ.GetValueAt(elapsedTime);
-                    double na = polyA.GetValueAt(elapsedTime);
-                    double nb = polyB.GetValueAt(elapsedTime);
-                    double nc = polyC.GetValueAt(elapsedTime);
-
-                    return new RobotVector(nx, ny, nz, na, nb, nc) - Position;
-                } else {
-                    IsTargetPositionReached = true;
-
-                    //polyX.UpdateTheoreticalValues(tPos.X, tVel.X);
-                    //polyY.UpdateTheoreticalValues(tPos.Y, tVel.Y);
-                    //polyZ.UpdateTheoreticalValues(tPos.Z, tVel.Z);
-                    //polyA.UpdateTheoreticalValues(tPos.A, tVel.A);
-                    //polyB.UpdateTheoreticalValues(tPos.B, tVel.B);
-                    //polyC.UpdateTheoreticalValues(tPos.C, tVel.C);
-
-                    return RobotVector.Zero;
-                }
+                return RobotVector.Zero;
             }
         }
 
