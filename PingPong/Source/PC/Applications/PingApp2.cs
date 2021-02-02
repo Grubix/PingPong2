@@ -61,7 +61,7 @@ namespace PingPong.Applications {
             this.optiTrack = optiTrack;
             this.checkFunction = checkFunction;
 
-            regB = new PIRegulator(0.008, 0.04, 0.44);
+            regB = new PIRegulator(0.008, 0.04, 0.0);
             regC = new PIRegulator(0.008, 0.04, 900);
             regZ = new PIRegulator(0.008, 0.04, height);
 

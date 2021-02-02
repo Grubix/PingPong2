@@ -137,14 +137,14 @@ namespace PingPong {
         }
 
         private void Connect(object sender, RoutedEventArgs e) {
-            OptiTrack.FrameReceived += UpdateOptiTrackBasePositionChart;
+            //OptiTrack.FrameReceived += UpdateOptiTrackBasePositionChart;
 
             if (robot1Transformation != null) {
-                OptiTrack.FrameReceived += UpdateRobot1BasePositionChart;
+                //OptiTrack.FrameReceived += UpdateRobot1BasePositionChart;
             }
 
             if (robot2Transformation != null) {
-                OptiTrack.FrameReceived += UpdateRobot2BasePositionChart;
+                //OptiTrack.FrameReceived += UpdateRobot2BasePositionChart;
             }
 
             try {

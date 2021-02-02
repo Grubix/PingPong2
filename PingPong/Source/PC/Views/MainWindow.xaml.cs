@@ -68,7 +68,7 @@ namespace PingPong {
 
                 // symetric movement of 2nd robot
 
-               /* robot.MovementChanged += (sender, args) => {
+                robot.MovementChanged += (sender, args) => {
                     RobotMovement[] movementsStack = new RobotMovement[args.MovementsStack.Length];
 
                     for (int i = 0; i < args.MovementsStack.Length; i++) {
@@ -84,7 +84,7 @@ namespace PingPong {
                     }
 
                         robot2.MoveTo(movementsStack);
-                };*/
+                };
 
 
 

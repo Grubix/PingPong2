@@ -59,9 +59,9 @@ namespace PingPong.Applications {
                 new double[] { 0.0, 0.0, 1.0 }
             );
             destBallPosition = Vector<double>.Build.DenseOfArray(
-                new double[] { 0.44, 850.57, 180.0 }
+                new double[] { 0.0, 850.57, 180.0 }
             );
-            regB = new PIRegulator(0.0, 0.001, 0.004, 0.44);
+            regB = new PIRegulator(0.0, 0.001, 0.004, 0.0);
             regC = new PIRegulator(0.001, 0.001, 0.004, 850.57);
         }
 
@@ -149,7 +149,7 @@ namespace PingPong.Applications {
                     regC.Shift();
 
                     robotMovedToHitPosition = false;
-                    robot.MoveTo(new RobotVector(0.44, 850.57, 170.71, 0.0, 0.0, -90.0), RobotVector.Zero, 1);
+                    robot.MoveTo(new RobotVector(0.0, 850.57, 170.71, 0.0, 0.0, -90.0), RobotVector.Zero, 1);
                     //Stop(); // comment if 194 is commented
 
                     //robot.FrameReceived -= ProcessRobotFrame;

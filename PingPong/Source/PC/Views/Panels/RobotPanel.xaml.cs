@@ -213,39 +213,39 @@ namespace PingPong {
                 });
             };
 
-            Robot.FrameReceived += (s, e) => {
-                RobotVector actualPosition = e.Position;
-                RobotVector targetPosition = Robot.TargetPosition;
-                RobotVector theoreticalPosition = Robot.TheoreticalPosition;
+            //Robot.FrameReceived += (s, e) => {
+            //    RobotVector actualPosition = e.Position;
+            //    RobotVector targetPosition = Robot.TargetPosition;
+            //    RobotVector theoreticalPosition = Robot.TheoreticalPosition;
 
-                positionChart.Update(new double[] {
-                    actualPosition.X, targetPosition.X, theoreticalPosition.X,
-                    actualPosition.Y, targetPosition.Y, theoreticalPosition.Y,
-                    actualPosition.Z, targetPosition.Z, theoreticalPosition.Z,
-                    actualPosition.A, targetPosition.A, theoreticalPosition.A,
-                    actualPosition.B, targetPosition.B, theoreticalPosition.B,
-                    actualPosition.C, targetPosition.C, theoreticalPosition.C,
-                });
+            //    positionChart.Update(new double[] {
+            //        actualPosition.X, targetPosition.X, theoreticalPosition.X,
+            //        actualPosition.Y, targetPosition.Y, theoreticalPosition.Y,
+            //        actualPosition.Z, targetPosition.Z, theoreticalPosition.Z,
+            //        actualPosition.A, targetPosition.A, theoreticalPosition.A,
+            //        actualPosition.B, targetPosition.B, theoreticalPosition.B,
+            //        actualPosition.C, targetPosition.C, theoreticalPosition.C,
+            //    });
 
-                Dispatcher.Invoke(() => {
-                    actualPositionX.Text = actualPosition.X.ToString("F3");
-                    actualPositionY.Text = actualPosition.Y.ToString("F3");
-                    actualPositionZ.Text = actualPosition.Z.ToString("F3");
-                    actualPositionA.Text = actualPosition.A.ToString("F3");
-                    actualPositionB.Text = actualPosition.B.ToString("F3");
-                    actualPositionC.Text = actualPosition.C.ToString("F3");
+            //    Dispatcher.Invoke(() => {
+            //        actualPositionX.Text = actualPosition.X.ToString("F3");
+            //        actualPositionY.Text = actualPosition.Y.ToString("F3");
+            //        actualPositionZ.Text = actualPosition.Z.ToString("F3");
+            //        actualPositionA.Text = actualPosition.A.ToString("F3");
+            //        actualPositionB.Text = actualPosition.B.ToString("F3");
+            //        actualPositionC.Text = actualPosition.C.ToString("F3");
 
-                    targetPositionX.Text = targetPosition.X.ToString("F3");
-                    targetPositionY.Text = targetPosition.Y.ToString("F3");
-                    targetPositionZ.Text = targetPosition.Z.ToString("F3");
-                    targetPositionA.Text = targetPosition.A.ToString("F3");
-                    targetPositionB.Text = targetPosition.B.ToString("F3");
-                    targetPositionC.Text = targetPosition.C.ToString("F3");
-                });
+            //        targetPositionX.Text = targetPosition.X.ToString("F3");
+            //        targetPositionY.Text = targetPosition.Y.ToString("F3");
+            //        targetPositionZ.Text = targetPosition.Z.ToString("F3");
+            //        targetPositionA.Text = targetPosition.A.ToString("F3");
+            //        targetPositionB.Text = targetPosition.B.ToString("F3");
+            //        targetPositionC.Text = targetPosition.C.ToString("F3");
+            //    });
 
-                velocityChart.Update(Robot.Velocity.ToArray());
-                accelerationChart.Update(Robot.Acceleration.ToArray());
-            };
+            //    velocityChart.Update(Robot.Velocity.ToArray());
+            //    accelerationChart.Update(Robot.Acceleration.ToArray());
+            //};
         }
 
         private void Initialize(object sender, RoutedEventArgs e) {
