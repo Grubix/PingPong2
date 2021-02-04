@@ -59,6 +59,7 @@ namespace PingPong {
                 startBtn.IsEnabled = true;
                 stopBtn.IsEnabled = false;
                 copyMovementsCheck.IsEnabled = true;
+                    //robot1PingApp.Start();
 
                 optiTrack.Uninitialize();
                 robot1.Uninitialize();
