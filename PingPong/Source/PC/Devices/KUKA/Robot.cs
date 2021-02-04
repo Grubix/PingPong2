@@ -199,6 +199,7 @@ namespace PingPong.KUKA {
             cts = new CancellationTokenSource();
             IsCancellationRequested = false;
             InputFrame receivedFrame = null;
+            isInitialized = true;
 
             // Connect with the robot
             try {
@@ -226,8 +227,6 @@ namespace PingPong.KUKA {
             };
 
             rsiAdapter.SendData(response);
-
-            isInitialized = true;
             Initialized?.Invoke(this, EventArgs.Empty);
 
             // Start loop for receiving and sending data
@@ -441,6 +440,10 @@ namespace PingPong.KUKA {
         }
 
         public void Uninitialize() {
+            if (!isInitialized) {
+                return;
+            }
+
             if (cts != null) {
                 cts.Cancel();
             }

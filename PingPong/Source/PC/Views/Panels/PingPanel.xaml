@@ -23,6 +23,88 @@
                 <Grid Grid.Column="0" Grid.Row="0">
                     <ScrollViewer UseLayoutRounding="False" VerticalScrollBarVisibility="Hidden">
                         <ItemsControl>
+                            <Expander Padding="0,5" IsExpanded="True">
+                                <Expander.Header>
+                                    <TextBlock Text="Ping app (Robot 1)" FontWeight="Bold"/>
+                                </Expander.Header>
+                                <StackPanel>
+                                    <Grid Margin="10,-5,0,0">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition/>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Content="Bounces counter" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left" Margin="0" FontWeight="SemiBold" />
+                                        <TextBox Grid.Column="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" IsReadOnly="True" MaxLines="1" Text="0" x:Name="bouncesCounter"/>
+                                    </Grid>
+                                    <Separator Margin="10,2,0,2"/>
+                                    <Separator Margin="10,0,0,2"/>
+                                    <Expander Padding="10,0,0,0" IsExpanded="True">
+                                        <Expander.Header>
+                                            <TextBlock Text="Target bounce height" FontWeight="SemiBold" />
+                                        </Expander.Header>
+                                        <Grid Margin="0,0,0,2">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition Width="60"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Content="Height [mm]" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right" Margin="0"/>
+                                            <TextBox Grid.Column="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" MaxLines="1" Text="0.0" x:Name="targetBounceHeight"/>
+                                            <Button Content="Set" Grid.Column="2" Grid.Row="0" Margin="5,0,0,0" Height="22" x:Name="setBounceHeightBtn"/>
+                                        </Grid>
+                                    </Expander>
+                                    <Separator Margin="10,2,0,2"/>
+                                    <Separator Margin="10,0,0,2"/>
+                                    <Expander Padding="10,0,0,0" IsExpanded="True">
+                                        <Expander.Header>
+                                            <TextBlock Text="X axis regulator tuning" FontWeight="SemiBold" />
+                                        </Expander.Header>
+                                        <Grid Margin="0,0,0,2">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition Width="60"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Content="Kp, Ki" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right" Margin="0"/>
+                                            <TextBox Grid.Column="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" MaxLines="1" Text="0.0" x:Name="xRegulatorP"/>
+                                            <TextBox Grid.Column="2" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" MaxLines="1" Text="0.0" x:Name="xRegulatorI"/>
+                                            <Button Content="Set" Grid.Column="3" Grid.Row="0" Margin="5,0,0,0" Height="22" x:Name="setXRegBtn"/>
+                                        </Grid>
+                                    </Expander>
+                                    <Separator Margin="10,2,0,2"/>
+                                    <Separator Margin="10,0,0,2"/>
+                                    <Expander Padding="10,0,0,0" IsExpanded="True">
+                                        <Expander.Header>
+                                            <TextBlock Text="Y axis regulator tuning" FontWeight="SemiBold" />
+                                        </Expander.Header>
+                                        <Grid Margin="0,0,0,2">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition/>
+                                                <ColumnDefinition Width="60"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label Content="Kp, Ki" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right" Margin="0"/>
+                                            <TextBox Grid.Column="1" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" MaxLines="1" Text="0.0" x:Name="yRegulatorP"/>
+                                            <TextBox Grid.Column="2" TextWrapping="Wrap" Height="22" Margin="5,0,0,0"  VerticalContentAlignment="Center" MaxLines="1" Text="0.0" x:Name="yRegulatorI"/>
+                                            <Button Content="Set" Grid.Column="3" Grid.Row="0" Margin="5,0,0,0" Height="22" x:Name="setYRegBtn"/>
+                                        </Grid>
+                                    </Expander>
+                                </StackPanel>
+                            </Expander>
                         </ItemsControl>
                     </ScrollViewer>
                 </Grid>
@@ -30,14 +112,16 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition/>
+                        <RowDefinition/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                     <Separator Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="-5,0,-5,5"/>
-                    <Button Content="Start" Grid.Column="0" Height="22" Margin="0,0,2.5,0" Grid.Row="1" IsEnabled="True" x:Name="startBtn"/>
-                    <Button Content="Stop" Grid.Column="1" Height="22" Margin="2.5,0,0,0" Grid.Row="1" IsEnabled="False" x:Name="stopBtn"/>
+                    <CheckBox Content="Copy movements to robot 2" Grid.ColumnSpan="2" Grid.Row="1" Margin="0,5,0,10" x:Name="copyMovementsCheck"/>
+                    <Button Content="Start" Grid.Column="0" Height="22" Margin="0,0,2.5,0" Grid.Row="2" IsEnabled="True" x:Name="startBtn"/>
+                    <Button Content="Stop" Grid.Column="1" Height="22" Margin="2.5,0,0,0" Grid.Row="2" IsEnabled="False" x:Name="stopBtn"/>
                 </Grid>
             </Grid>
         </Border>
@@ -54,7 +138,7 @@
                 <Button Content="Screenshot" Width="75" Height="22" Margin="5,0,0,0" x:Name="screenshotBtn" IsEnabled="False"/>
             </StackPanel>
             <TabControl Grid.Row="1" TabStripPlacement="Bottom" BorderBrush="#FFACACAC" Margin="0,5,0,0" Padding="0" x:Name="tabControl">
-                <TabItem Header="Ping app (robot1)">
+                <TabItem Header="Ping app (Robot 1)">
                     <local:LiveChart Margin="0" x:Name="robot1PingChart"/>
                 </TabItem>
             </TabControl>

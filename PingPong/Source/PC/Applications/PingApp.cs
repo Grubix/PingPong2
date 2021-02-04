@@ -28,6 +28,8 @@ namespace PingPong.Applications {
 
         private readonly PIRegulator regC;
 
+        private CancellationTokenSource cts;
+
         private bool isStarted;
 
         private bool waitingForBallToHit;
@@ -79,51 +81,66 @@ namespace PingPong.Applications {
                 throw new InvalidOperationException("Cos tam ze robot musi stac w miejscu w momencie startu");
             }
 
-            // waiting for ball to be visible
+            if (cts != null) {
+                cts.Cancel();
+            }
+
+            cts = new CancellationTokenSource();
             Task.Run(() => {
-                ManualResetEvent ballSpottedEvent = new ManualResetEvent(false);
-                Vector<double> translation = robot.OptiTrackTransformation.Translation;
+                try {
+                    Task.Run(() => {
+                        ManualResetEvent ballSpottedEvent = new ManualResetEvent(false);
+                        Vector<double> translation = robot.OptiTrackTransformation.Translation;
 
-                void checkBallVisiblity(object sender, OptiTrack.FrameReceivedEventArgs args) {
-                    var robotBaseBallPosition = robot.OptiTrackTransformation.Convert(args.BallPosition);
+                        void checkBallVisiblity(object sender, OptiTrack.FrameReceivedEventArgs args) {
+                            var robotBaseBallPosition = robot.OptiTrackTransformation.Convert(args.BallPosition);
 
-                    bool isBallVisible =
-                        args.BallPosition[0] != 0 &&
-                        args.BallPosition[1] != 0 &&
-                        args.BallPosition[2] != 0;
+                            bool isBallVisible =
+                                args.BallPosition[0] != 0 &&
+                                args.BallPosition[1] != 0 &&
+                                args.BallPosition[2] != 0;
 
-                    bool ballPositionChanged =
-                        args.BallPosition[0] != args.PrevBallPosition[0] ||
-                        args.BallPosition[1] != args.PrevBallPosition[1] ||
-                        args.BallPosition[2] != args.PrevBallPosition[2];
+                            bool ballPositionChanged =
+                                args.BallPosition[0] != args.PrevBallPosition[0] ||
+                                args.BallPosition[1] != args.PrevBallPosition[1] ||
+                                args.BallPosition[2] != args.PrevBallPosition[2];
 
-                    if (isBallVisible && ballPositionChanged && checkFunction.Invoke(robotBaseBallPosition)) {
-                        optiTrack.FrameReceived -= checkBallVisiblity;
-                        ballSpottedEvent.Set();
-                    }
+                            if (isBallVisible && ballPositionChanged && checkFunction.Invoke(robotBaseBallPosition)) {
+                                optiTrack.FrameReceived -= checkBallVisiblity;
+                                ballSpottedEvent.Set();
+                            }
+                        }
+
+                        // wait for ballSpottedEvent.Set() signal
+                        optiTrack.FrameReceived += checkBallVisiblity;
+                        ballSpottedEvent.WaitOne();
+
+                        // start application
+                        isStarted = true;
+                        optiTrack.FrameReceived += ProcessOptiTrackFrame;
+                        Started?.Invoke(this, EventArgs.Empty);
+                    }).Wait(cts.Token);
+                } catch (Exception) {
+                    return;
                 }
-
-                // wait for ballSpottedEvent.Set() signal
-                optiTrack.FrameReceived += checkBallVisiblity;
-                ballSpottedEvent.WaitOne();
-
-                // start application
-                isStarted = true;
-                optiTrack.FrameReceived += ProcessOptiTrackFrame;
-                Started?.Invoke(this, EventArgs.Empty);
             });
         }
 
         public void Stop() {
             if (isStarted) {
-                optiTrack.FrameReceived -= ProcessOptiTrackFrame;
                 isStarted = false;
 
                 Task.Run(() => {
                     robot.ForceMoveTo(robot.HomePosition, RobotVector.Zero, 3);
                     Stopped?.Invoke(this, EventArgs.Empty);
                 });
+            } else {
+                if (cts != null) {
+                    cts.Cancel();
+                }
             }
+
+            optiTrack.FrameReceived -= ProcessOptiTrackFrame;
         }
 
         private void ProcessOptiTrackFrame(object sender, OptiTrack.FrameReceivedEventArgs args) {

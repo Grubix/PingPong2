@@ -133,6 +133,8 @@ namespace PingPong {
                     homePositionB.Text = Robot.HomePosition.B.ToString("F3");
                     homePositionC.Text = Robot.HomePosition.C.ToString("F3");
                 });
+
+                Robot.FrameReceived += UpdateUI;
             };
 
             Robot.Uninitialized += (s, e) => {
@@ -143,8 +145,6 @@ namespace PingPong {
                     saveConfigBtn.IsEnabled = true;
                 });
             };
-
-            Robot.FrameReceived += UpdateUI;
         }
 
         private void UpdateUI(object sender, KUKA.FrameReceivedEventArgs args) {

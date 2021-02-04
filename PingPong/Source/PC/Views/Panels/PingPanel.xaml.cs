@@ -12,6 +12,12 @@ namespace PingPong {
 
         private PingApp robot1PingApp;
 
+        private Robot robot1;
+
+        private Robot robot2;
+
+        private OptiTrackSystem optiTrack;
+
         private LiveChart activeChart;
 
         private bool isPlotFrozen = false;
@@ -31,60 +37,57 @@ namespace PingPong {
                 throw new ArgumentException("Cos tam ze instancje robota musza byc rozne");
             }
 
+            this.robot1 = robot1;
+            this.robot2 = robot2;
+            this.optiTrack = optiTrack;
+
             robot1PingApp = new PingApp(robot1, optiTrack, (ballPosition) => {
                 return ballPosition[0] < 1000.0 && ballPosition[2] > 600.0;
             });
 
-            robot1PingApp.DataReady += (s, args) => {
-                robot1PingChart.Update(new double[] {
-                    args.PredictedTimeToHit,
-                    args.ActualBallPosition[0], args.PredictedBallPosition[0],
-                    args.ActualBallPosition[1], args.PredictedBallPosition[1],
-                    args.ActualBallPosition[2], args.PredictedBallPosition[2],
-                    args.ActualRobotPosition.X, args.ActualRobotPosition.Y, args.ActualRobotPosition.Z,
-                    args.ActualRobotPosition.A, args.ActualRobotPosition.B, args.ActualRobotPosition.C
-                });
-            };
+            robot1PingApp.DataReady += UpdateUI;
 
             robot1PingApp.Started += (s, e) => {
+                startBtn.IsEnabled = false;
                 stopBtn.IsEnabled = true;
-                Started.Invoke();
+                copyMovementsCheck.IsEnabled = false;
+
+                Started?.Invoke();
             };
 
             robot1PingApp.Stopped += (s, e) => {
                 startBtn.IsEnabled = true;
-                Stopped.Invoke();
+                stopBtn.IsEnabled = false;
+                copyMovementsCheck.IsEnabled = true;
+
+                optiTrack.Uninitialize();
+                robot1.Uninitialize();
+                robot2.Uninitialize();
+
+                Stopped?.Invoke();
             };
 
-            startBtn.Click += (s, e) => {
-                try {
-                    optiTrack.Initialize();
-                    robot1.Initialize();
-                    robot2.Initialize();
-
-                    //TODO: uzyc flagi do. odbicia lustrzanego
-                    robot1.Initialized += (sender, args) => {
-                        if (robot2.IsInitialized()) {
-                            robot1PingApp.Start();
-                        }
-                    };
-
-                    robot2.Initialized += (sender, args) => {
-                        if (robot1.IsInitialized()) {
-                            robot1PingApp.Start();
-                        }
-                    };
-
-                    startBtn.IsEnabled = false;
-                } catch (Exception ex) {
-                    MainWindow.ShowErrorDialog("Unable to start application.", ex);
+            robot1.Initialized += (s, e) => {
+                if ((bool)copyMovementsCheck.IsChecked) {
+                    if (robot2.IsInitialized()) {
+                        robot1PingApp.Start();
+                    }
+                } else {
+                    robot1PingApp.Start();
                 }
             };
 
-            stopBtn.Click += (s, e) => {
-                robot1PingApp.Stop();
-                stopBtn.IsEnabled = false;
+            robot2.Initialized += (s, e) => {
+                if ((bool)copyMovementsCheck.IsChecked) {
+                    if (robot1.IsInitialized()) {
+                        robot1PingApp.Start();
+                    }
+                }
             };
+        }
+
+        private void CopyMovements() {
+            //TODO:
         }
 
         public void DisableUIUpdates() {
@@ -134,6 +137,11 @@ namespace PingPong {
             resetZoomBtn.Click += ResetChartsZoom;
             screenshotBtn.Click += TakeChartScreenshot;
 
+            startBtn.Click += Start;
+            stopBtn.Click += Stop;
+
+            //TODO: settery
+
             activeChart = robot1PingChart;
             tabControl.SelectionChanged += (s, e) => {
                 activeChart = (LiveChart)tabControl.SelectedContent;
@@ -146,6 +154,37 @@ namespace PingPong {
                     TakeChartScreenshot(null, null);
                 }
             };
+        }
+
+        private void Start(object sender, RoutedEventArgs e) {
+            try {
+                if (!optiTrack.IsInitialized()) {
+                    optiTrack.Initialize();
+                }
+
+                if (!robot1.IsInitialized()) {
+                    robot1.Initialize();
+                }
+
+                if ((bool)copyMovementsCheck.IsChecked && !robot2.IsInitialized()) {
+                    robot2.Initialize();
+                }
+
+                robot1PingApp.Start();
+
+                startBtn.IsEnabled = false;
+                stopBtn.IsEnabled = true;
+                copyMovementsCheck.IsEnabled = false;
+            } catch (Exception ex) {
+                MainWindow.ShowErrorDialog("Cannot start application.", ex);
+            }
+        }
+
+        private void Stop(object sender, RoutedEventArgs e) {
+            robot1PingApp.Stop();
+            startBtn.IsEnabled = true;
+            stopBtn.IsEnabled = false;
+            copyMovementsCheck.IsEnabled = true;
         }
 
         private void FreezeCharts(object sender, RoutedEventArgs e) {

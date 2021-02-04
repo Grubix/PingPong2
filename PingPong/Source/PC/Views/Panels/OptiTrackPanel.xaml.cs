@@ -35,6 +35,16 @@ namespace PingPong {
                     connectBtn.IsEnabled = false;
                     disconnectBtn.IsEnabled = true;
                 });
+
+                OptiTrack.FrameReceived += UpdateOptiTrackUI;
+
+                if (robot1Transformation != null) {
+                    OptiTrack.FrameReceived += UpdateRobot1UI;
+                }
+
+                if (robot2Transformation != null) {
+                    OptiTrack.FrameReceived += UpdateRobot2UI;
+                }
             };
             OptiTrack.Uninitialized += (s, e) => {
                 Dispatcher.Invoke(() => {
@@ -142,16 +152,6 @@ namespace PingPong {
         }
 
         private void Connect(object sender, RoutedEventArgs e) {
-            OptiTrack.FrameReceived += UpdateOptiTrackUI;
-
-            if (robot1Transformation != null) {
-                OptiTrack.FrameReceived += UpdateRobot1UI;
-            }
-
-            if (robot2Transformation != null) {
-                OptiTrack.FrameReceived += UpdateRobot2UI;
-            }
-
             try {
                 OptiTrack.Initialize();
             } catch (InvalidOperationException ex) {
