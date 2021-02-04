@@ -200,7 +200,7 @@ namespace PingPong.Applications {
                 }
             }
             if (isMaxHeight) {
-                nextHeight = samplesBufferForMaxHeightDetection[4][2];
+                maxHeightReached = samplesBufferForMaxHeightDetection[4][2];
             }
 
             if (weAreWaitingForBallToHit) {
