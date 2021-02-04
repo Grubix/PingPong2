@@ -26,13 +26,15 @@ namespace PingPong.Applications {
 
         private readonly List<Vector<double>> samplesBuffer = new List<Vector<double>>();
 
+        private readonly List<Vector<double>> samplesBufferForMaxHeightDetection = new List<Vector<double>>();
+
         private readonly PIRegulator regB;
 
         private readonly PIRegulator regC;
 
         private readonly PIRegulator regZ;
 
-        private double prevHeightMax = 1000.0;
+        private double maxHeightReached = 1000.0;
 
         private double height = 1000;
 
@@ -186,15 +188,29 @@ namespace PingPong.Applications {
                 return;
             }
 
+            // maxHeightDetection
+            samplesBufferForMaxHeightDetection.Add(currentBallPosition);
+            if (samplesBufferForMaxHeightDetection.Count == bufferSize) {
+                samplesBuffer.RemoveAt(0);
+            }
+            bool isMaxHeight = true;
+            for (int i = 1; i < samplesBuffer.Count; i++) {
+                if (samplesBufferForMaxHeightDetection[i][2] >= samplesBuffer[i - 1][2]) {
+                    isMaxHeight = false;
+                }
+            }
+            if (isMaxHeight) {
+                nextHeight = samplesBufferForMaxHeightDetection[4][2];
+            }
+
             if (weAreWaitingForBallToHit) {
                 prediction.Reset(180);
                 elapsedTime = 0;
 
+                samplesBuffer.Add(currentBallPosition);
                 if (samplesBuffer.Count == bufferSize) {
-                    samplesBuffer.Add(currentBallPosition);
                     samplesBuffer.RemoveAt(0);
                 } else {
-                    samplesBuffer.Add(currentBallPosition);
                     DataReady?.Invoke(this, data);
                     return;
                 }
@@ -222,10 +238,15 @@ namespace PingPong.Applications {
             if (prediction.IsReady) {
                 if (prediction.TimeToHit >= 0.25) {
 
-                    //double speed = (Math.Sqrt(2.0 * 9.81 * (height - 180.0) * 1000) + prediction.Velocity[2] * 0.8) / (1 + 0.8);
+                    double speed = (Math.Sqrt(2.0 * 9.81 * (height - 180.0) * 1000) + prediction.Velocity[2] * 0.8) / (1 + 0.8);
                     //speed = Math.Max(Math.Min(speed, 480), 400);
-                    double speed = 450.0;
-                    //speed += regZ.ComputeU(prevHeightMax);
+                    //double speed = 450.0;
+                    speed += regZ.ComputeU(maxHeightReached);
+
+                    speed = Math.Max(Math.Min(speed, 600.0), 300.0);
+                    if (speed == 300.0 || speed == 600.0) {
+                        Console.WriteLine("Nasycenie predkosci!!! " + speed);
+                    }
 
                     RobotVector robotTargetVelocity = new RobotVector(0, 0, speed);
 

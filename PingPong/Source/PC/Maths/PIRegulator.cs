@@ -48,7 +48,7 @@
             }
             e0 = setPoint - feedback;
             u0 = ke0 * e0 + ke1 * e1 - ku1 * u1;
-            u0 = Kp * e0;
+            //u0 = Kp * e0;
 
             return u0;
         }
