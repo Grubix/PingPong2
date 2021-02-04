@@ -12,10 +12,6 @@ namespace PingPong {
 
         private bool isPlotFrozen;
 
-        private Robot robot1;
-
-        private Robot robot2;
-
         private Transformation robot1Transformation;
 
         private Transformation robot2Transformation;
@@ -33,8 +29,8 @@ namespace PingPong {
                 Dispatcher.Invoke(() => {
                     hostApp.Text = OptiTrack.ServerDescription.HostApp;
                     hostName.Text = OptiTrack.ServerDescription.HostComputerName;
-                    hostAdress.Text = OptiTrack.ServerDescription.HostComputerAddress.ToString(); //TODO:
-                    natnetVersion.Text = OptiTrack.ServerDescription.NatNetVersion.ToString(); //TODO:
+                    hostAdress.Text = OptiTrack.ServerDescription.HostComputerAddress.ToString();
+                    natnetVersion.Text = OptiTrack.ServerDescription.NatNetVersion.ToString();
 
                     connectBtn.IsEnabled = false;
                     disconnectBtn.IsEnabled = true;
@@ -69,9 +65,6 @@ namespace PingPong {
         }
 
         public void Initialize(Robot robot1, Robot robot2) {
-            this.robot1 = robot1;
-            this.robot2 = robot2;
-
             if (robot1.OptiTrackTransformation != null) {
                 robot1Transformation = robot1.OptiTrackTransformation;
             }
@@ -84,7 +77,19 @@ namespace PingPong {
             robot2.Initialized += (s, e) => robot2Transformation = robot2.OptiTrackTransformation;
         }
 
-        private void UpdateOptiTrackBasePositionChart(object sender, OptiTrack.FrameReceivedEventArgs args) {
+        public void DisableUIUpdates() {
+            OptiTrack.FrameReceived -= UpdateOptiTrackUI;
+            OptiTrack.FrameReceived -= UpdateRobot1UI;
+            OptiTrack.FrameReceived -= UpdateRobot2UI;
+        }
+
+        public void EnableUIUpdates() {
+            OptiTrack.FrameReceived += UpdateOptiTrackUI;
+            OptiTrack.FrameReceived += UpdateRobot1UI;
+            OptiTrack.FrameReceived += UpdateRobot2UI;
+        }
+
+        private void UpdateOptiTrackUI(object sender, OptiTrack.FrameReceivedEventArgs args) {
             positionChart.Update(args.BallPosition.ToArray());
             Dispatcher.Invoke(() => {
                 actualPositionX.Text = args.BallPosition[0].ToString("F3");
@@ -93,7 +98,7 @@ namespace PingPong {
             });
         }
 
-        private void UpdateRobot1BasePositionChart(object sender, OptiTrack.FrameReceivedEventArgs args) {
+        private void UpdateRobot1UI(object sender, OptiTrack.FrameReceivedEventArgs args) {
             var robot1BasePosition = robot1Transformation.Convert(args.BallPosition);
 
             robot1PositionChart.Update(new double[] {
@@ -106,7 +111,7 @@ namespace PingPong {
             });
         }
 
-        private void UpdateRobot2BasePositionChart(object sender, OptiTrack.FrameReceivedEventArgs args) {
+        private void UpdateRobot2UI(object sender, OptiTrack.FrameReceivedEventArgs args) {
             var robot2BasePosition = robot2Transformation.Convert(args.BallPosition);
             
             robot2PositionChart.Update(new double[] {
@@ -137,14 +142,14 @@ namespace PingPong {
         }
 
         private void Connect(object sender, RoutedEventArgs e) {
-            OptiTrack.FrameReceived += UpdateOptiTrackBasePositionChart;
+            OptiTrack.FrameReceived += UpdateOptiTrackUI;
 
             if (robot1Transformation != null) {
-                OptiTrack.FrameReceived += UpdateRobot1BasePositionChart;
+                OptiTrack.FrameReceived += UpdateRobot1UI;
             }
 
             if (robot2Transformation != null) {
-                OptiTrack.FrameReceived += UpdateRobot2BasePositionChart;
+                OptiTrack.FrameReceived += UpdateRobot2UI;
             }
 
             try {
@@ -157,9 +162,9 @@ namespace PingPong {
         private void Disconnect(object sender, RoutedEventArgs e) {
             OptiTrack.Uninitialize();
 
-            OptiTrack.FrameReceived -= UpdateOptiTrackBasePositionChart;
-            OptiTrack.FrameReceived -= UpdateRobot1BasePositionChart;
-            OptiTrack.FrameReceived -= UpdateRobot2BasePositionChart;
+            OptiTrack.FrameReceived -= UpdateOptiTrackUI;
+            OptiTrack.FrameReceived -= UpdateRobot1UI;
+            OptiTrack.FrameReceived -= UpdateRobot2UI;
         }
 
         private void FreezeCharts(object sender, RoutedEventArgs e) {
@@ -219,7 +224,7 @@ namespace PingPong {
         }
 
         private void TakeChartScreenshot(object sender, RoutedEventArgs e) {
-            if (!isPlotFrozen || robot1.IsInitialized() || robot2.IsInitialized()) {
+            if (!isPlotFrozen) {
                 return;
             }
 

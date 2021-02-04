@@ -16,13 +16,13 @@
 
         public double Ki { get; }
 
-        public double setPoint { get; }
+        public double SetPoint { get; }
 
         public PIRegulator(double kp, double ki, double setPoint, double Ts = 0.004) {
             Kp = kp;
             Ki = ki;
             this.Ts = Ts;
-            this.setPoint = setPoint;
+            this.SetPoint = setPoint;
             u1 = e1 = 0.0;
 
             CalculateCoeffs();
@@ -46,7 +46,7 @@
                 this.Ts = Ts;
                 CalculateCoeffs();
             }
-            e0 = setPoint - feedback;
+            e0 = SetPoint - feedback;
             u0 = ke0 * e0 + ke1 * e1 - ku1 * u1;
             u0 = Kp * e0;
 

@@ -46,6 +46,8 @@ namespace PingPong.KUKA {
             }
         }
 
+        #region Properties
+
         public RobotConfig Config {
             get {
                 return config;
@@ -160,7 +162,11 @@ namespace PingPong.KUKA {
                 }
             }
         }
-        
+
+        #endregion
+
+        #region Events
+
         public event EventHandler Initialized;
 
         public event EventHandler Uninitialized;
@@ -173,6 +179,8 @@ namespace PingPong.KUKA {
 
         public event EventHandler<MovementChangedEventArgs> MovementChanged;
 
+        #endregion
+
         public Robot() {
             rsiAdapter = new RSIAdapter();
             generator = new TrajectoryGenerator();
@@ -184,6 +192,8 @@ namespace PingPong.KUKA {
         public Robot(RobotConfig config) : this() {
             this.config = config;
         }
+
+        #region Communication methods
 
         private async Task Connect() {
             cts = new CancellationTokenSource();
@@ -303,6 +313,10 @@ namespace PingPong.KUKA {
             });
         }
 
+        #endregion
+
+        #region Movement methods
+
         public void MoveTo(RobotMovement[] movementsStack) {
             lock (forceMoveSyncLock) {
                 if (isForceMoveModeEnabled) {
@@ -392,6 +406,8 @@ namespace PingPong.KUKA {
         public void ForceShift(RobotVector deltaPosition, RobotVector targetVelocity, double targetDuration) {
             ForceMoveTo(Position + deltaPosition, targetVelocity, targetDuration);
         }
+
+        #endregion
 
         public void Initialize() {
             if (isInitialized) {

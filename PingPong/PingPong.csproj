@@ -140,7 +140,6 @@
     <Compile Include="Source\PC\Applications\HitPrediction.cs" />
     <Compile Include="Source\PC\Applications\IApplication.cs" />
     <Compile Include="Source\PC\Applications\PingApp.cs" />
-    <Compile Include="Source\PC\Applications\PingApp2.cs" />
     <Compile Include="Source\PC\Applications\PingPongApp.cs" />
     <Compile Include="Source\PC\Devices\IDevice.cs" />
     <Compile Include="Source\PC\Devices\KUKA\Events\ErrorOccuredEventArgs.cs" />
@@ -175,21 +174,24 @@
     <Compile Include="Source\PC\Views\Controls\LiveChart.xaml.cs">
       <DependentUpon>LiveChart.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Source\PC\Views\Controls\Panel.xaml.cs">
+      <DependentUpon>Panel.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Source\PC\Views\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Source\PC\Views\Panels\CalibrationWindow.xaml.cs">
+    <Compile Include="Source\PC\Views\Windows\CalibrationWindow.xaml.cs">
       <DependentUpon>CalibrationWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Source\PC\Views\Panels\ManualModeWindow.xaml.cs">
+    <Compile Include="Source\PC\Views\Windows\ManualModeWindow.xaml.cs">
       <DependentUpon>ManualModeWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Source\PC\Views\Panels\OptiTrackPanel.xaml.cs">
       <DependentUpon>OptiTrackPanel.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Source\PC\Views\Panels\PingPongPanel.xaml.cs">
-      <DependentUpon>PingPongPanel.xaml</DependentUpon>
+    <Compile Include="Source\PC\Views\Panels\PingPanel.xaml.cs">
+      <DependentUpon>PingPanel.xaml</DependentUpon>
     </Compile>
     <Compile Include="Source\PC\Views\Panels\RobotPanel.xaml.cs">
       <DependentUpon>RobotPanel.xaml</DependentUpon>
@@ -256,15 +258,19 @@
       <SubType>Designer</SubType>
       <Generator>XamlIntelliSenseFileGenerator</Generator>
     </Page>
+    <Page Include="Source\PC\Views\Controls\Panel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Source\PC\Views\MainWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>XamlIntelliSenseFileGenerator</Generator>
     </Page>
-    <Page Include="Source\PC\Views\Panels\CalibrationWindow.xaml">
+    <Page Include="Source\PC\Views\Windows\CalibrationWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>XamlIntelliSenseFileGenerator</Generator>
     </Page>
-    <Page Include="Source\PC\Views\Panels\ManualModeWindow.xaml">
+    <Page Include="Source\PC\Views\Windows\ManualModeWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>XamlIntelliSenseFileGenerator</Generator>
     </Page>
@@ -272,7 +278,7 @@
       <SubType>Designer</SubType>
       <Generator>XamlIntelliSenseFileGenerator</Generator>
     </Page>
-    <Page Include="Source\PC\Views\Panels\PingPongPanel.xaml">
+    <Page Include="Source\PC\Views\Panels\PingPanel.xaml">
       <SubType>Designer</SubType>
       <Generator>XamlIntelliSenseFileGenerator</Generator>
     </Page>

@@ -8,23 +8,19 @@ using PingPong.KUKA;
 using PingPong.OptiTrack;
 
 namespace PingPong {
-    public partial class PingPongPanel : UserControl {
+    public partial class PingPanel : UserControl {
 
-        private PingApp2 robot1PingApp;
-
-        private PingApp robot2PingApp; //TODO:
-
-        private PingPongApp pingPongApp; //TODO:
-
-        private Robot robot1;
-
-        private Robot robot2;
+        private PingApp robot1PingApp;
 
         private LiveChart activeChart;
 
         private bool isPlotFrozen = false;
 
-        public PingPongPanel() {
+        public event Action Started;
+
+        public event Action Stopped;
+
+        public PingPanel() {
             InitializeComponent();
             InitializeCharts();
             InitializeControls();
@@ -35,30 +31,49 @@ namespace PingPong {
                 throw new ArgumentException("Cos tam ze instancje robota musza byc rozne");
             }
 
-            this.robot1 = robot1;
-            this.robot2 = robot2;
-
-            robot1PingApp = new PingApp2(robot1, optiTrack, (ballPosition) => {
+            robot1PingApp = new PingApp(robot1, optiTrack, (ballPosition) => {
                 return ballPosition[0] < 1000.0 && ballPosition[2] > 600.0;
             });
 
             robot1PingApp.DataReady += (s, args) => {
                 robot1PingChart.Update(new double[] {
-                    args.PredictedTimeToHit, args.BallSetpointX, args.BallSetpointY, args.BallSetpointZ,
-                    args.ActualBallPosition[0], args.PredictedBallPosition[0], args.PredictedBallVelocity[0],
-                    args.ActualBallPosition[1], args.PredictedBallPosition[1], args.PredictedBallVelocity[1],
-                    args.ActualBallPosition[2], args.PredictedBallPosition[2], args.PredictedBallVelocity[2],
+                    args.PredictedTimeToHit,
+                    args.ActualBallPosition[0], args.PredictedBallPosition[0],
+                    args.ActualBallPosition[1], args.PredictedBallPosition[1],
+                    args.ActualBallPosition[2], args.PredictedBallPosition[2],
                     args.ActualRobotPosition.X, args.ActualRobotPosition.Y, args.ActualRobotPosition.Z,
                     args.ActualRobotPosition.A, args.ActualRobotPosition.B, args.ActualRobotPosition.C
                 });
             };
 
-            // AUTOMATYCZNA INICJALIZACJA OPTITRACKA, ROBOTA I PINGA
-            startBtn.Click += (bs, be) => {
+            robot1PingApp.Started += (s, e) => {
+                stopBtn.IsEnabled = true;
+                Started.Invoke();
+            };
+
+            robot1PingApp.Stopped += (s, e) => {
+                startBtn.IsEnabled = true;
+                Stopped.Invoke();
+            };
+
+            startBtn.Click += (s, e) => {
                 try {
                     optiTrack.Initialize();
                     robot1.Initialize();
-                    robot1.Initialized += (s, e) => robot1PingApp.Start();
+                    robot2.Initialize();
+
+                    //TODO: uzyc flagi do. odbicia lustrzanego
+                    robot1.Initialized += (sender, args) => {
+                        if (robot2.IsInitialized()) {
+                            robot1PingApp.Start();
+                        }
+                    };
+
+                    robot2.Initialized += (sender, args) => {
+                        if (robot1.IsInitialized()) {
+                            robot1PingApp.Start();
+                        }
+                    };
 
                     startBtn.IsEnabled = false;
                 } catch (Exception ex) {
@@ -66,49 +81,48 @@ namespace PingPong {
                 }
             };
 
-            //TODO: ODBICIE LUSTRZANE
-            //robot1.MovementChanged += (sender, args) => {
-            //    RobotMovement[] movementsStack = new RobotMovement[args.MovementsStack.Length];
+            stopBtn.Click += (s, e) => {
+                robot1PingApp.Stop();
+                stopBtn.IsEnabled = false;
+            };
+        }
 
-            //    for (int i = 0; i < args.MovementsStack.Length; i++) {
-            //        RobotMovement movement = args.MovementsStack[i];
-            //        RobotVector tPos = movement.TargetPosition;
-            //        RobotVector tVel = movement.TargetVelocity;
+        public void DisableUIUpdates() {
+            robot1PingApp.DataReady -= UpdateUI;
+        }
 
-            //        movementsStack[i] = new RobotMovement(
-            //            targetPosition: new RobotVector(tPos.Y, tPos.X, tPos.Z, robot2.HomePosition.ABC),
-            //            targetVelocity: new RobotVector(tVel.Y, tVel.X, tVel.Z, robot2.HomePosition.ABC),
-            //            targetDuration: movement.TargetDuration
-            //        );
-            //    }
+        public void EnableUIUpdates() {
+            robot1PingApp.DataReady += UpdateUI;
+        }
 
-            //    robot2.MoveTo(movementsStack);
-            //};
+        private void UpdateUI(object sender, PingDataReadyEventArgs args) {
+            robot1PingChart.Update(new double[] {
+                args.PredictedTimeToHit,
+                args.ActualBallPosition[0], args.PredictedBallPosition[0],
+                args.ActualBallPosition[1], args.PredictedBallPosition[1],
+                args.ActualBallPosition[2], args.PredictedBallPosition[2],
+                args.ActualRobotPosition.X, args.ActualRobotPosition.Y, args.ActualRobotPosition.Z,
+                args.ActualRobotPosition.A, args.ActualRobotPosition.B, args.ActualRobotPosition.C
+            });
         }
 
         private void InitializeCharts() {
-            robot1PingChart.Title = "Ping app (robot 1)";
+            robot1PingChart.Title = "Ping app";
 
-            robot1PingChart.AddSeries("Pred. time to hit [ms]", "T_Hpr", false);
-            robot1PingChart.AddSeries("Ball target position X [mm]", "X_Bsp", false);
-            robot1PingChart.AddSeries("Ball target position Y [mm]", "Y_Bsp", false);
-            robot1PingChart.AddSeries("Ball target hit height [mm]", "Z_Bsp", false, true);
+            robot1PingChart.AddSeries("Pred. time to hit [s]", "T_Hpr", false, true);
 
             robot1PingChart.AddSeries("Ball position X [mm]", "X_B", true);
-            robot1PingChart.AddSeries("Ball pred. position X [mm]", "X_Bpr", true);
-            robot1PingChart.AddSeries("Ball pred. velocity X [mm/s]", "V_XBpr", false, true);
+            robot1PingChart.AddSeries("Ball pred. position X [mm]", "X_Bpr", false, true);
 
             robot1PingChart.AddSeries("Ball position Y [mm]", "Y_B", true);
-            robot1PingChart.AddSeries("Ball pred. position Y [mm]", "Y_Bpr", true);
-            robot1PingChart.AddSeries("Ball pred. velocity Y [mm/s]", "V_YBpr", false, true);
+            robot1PingChart.AddSeries("Ball pred. position Y [mm]", "Y_Bpr", false, true);
 
             robot1PingChart.AddSeries("Ball position Z [mm]", "Z_B", true);
-            robot1PingChart.AddSeries("Ball pred. position Z [mm]", "Z_Bpr", true);
-            robot1PingChart.AddSeries("Ball pred. velocity Z [mm/s]", "V_ZBpr", false, true);
+            robot1PingChart.AddSeries("Ball pred. position Z [mm]", "Z_Bpr", false, true);
 
             robot1PingChart.AddSeries("Robot position X [mm]", "X_R", false);
             robot1PingChart.AddSeries("Robot position Y [mm]", "Y_R", false);
-            robot1PingChart.AddSeries("Robot position Z [mm]", "Z_R", false);
+            robot1PingChart.AddSeries("Robot position Z [mm]", "Z_R", true);
             robot1PingChart.AddSeries("Robot position A [deg]", "A_R", false);
             robot1PingChart.AddSeries("Robot position B [deg]", "B_R", false);
             robot1PingChart.AddSeries("Robot position C [deg]", "C_R", false);
@@ -137,8 +151,6 @@ namespace PingPong {
         private void FreezeCharts(object sender, RoutedEventArgs e) {
             if (isPlotFrozen) {
                 robot1PingChart.Unfreeze();
-                robot2PingChart.Unfreeze();
-                pingPongChart.Unfreeze();
 
                 isPlotFrozen = false;
                 freezeBtn.Content = "Freeze";
@@ -147,8 +159,6 @@ namespace PingPong {
                 screenshotBtn.IsEnabled = false;
             } else {
                 robot1PingChart.Freeze();
-                robot2PingChart.Freeze();
-                pingPongChart.Freeze();
 
                 isPlotFrozen = true;
                 freezeBtn.Content = "Unfreeze";
@@ -165,8 +175,6 @@ namespace PingPong {
                 isPlotFrozen = true;
 
                 robot1PingChart.Freeze();
-                robot2PingChart.Freeze();
-                pingPongChart.Freeze();
 
                 isPlotFrozen = true;
                 freezeBtn.Content = "Unfreeze";
@@ -180,18 +188,14 @@ namespace PingPong {
 
         private void FitChartsToData(object sender, RoutedEventArgs e) {
             robot1PingChart.FitToData();
-            robot2PingChart.FitToData();
-            pingPongChart.FitToData();
         }
 
         private void ResetChartsZoom(object sender, RoutedEventArgs e) {
             robot1PingChart.ResetZoom();
-            robot2PingChart.ResetZoom();
-            pingPongChart.ResetZoom();
         }
 
         private void TakeChartScreenshot(object sender, RoutedEventArgs e) {
-            if (!isPlotFrozen || robot1.IsInitialized() || robot2.IsInitialized()) {
+            if (!isPlotFrozen) {
                 return;
             }
 
