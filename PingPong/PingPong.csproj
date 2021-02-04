@@ -174,9 +174,6 @@
     <Compile Include="Source\PC\Views\Controls\LiveChart.xaml.cs">
       <DependentUpon>LiveChart.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Source\PC\Views\Controls\Panel.xaml.cs">
-      <DependentUpon>Panel.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Source\PC\Views\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -257,10 +254,6 @@
     <Page Include="Source\PC\Views\Controls\LiveChart.xaml">
       <SubType>Designer</SubType>
       <Generator>XamlIntelliSenseFileGenerator</Generator>
-    </Page>
-    <Page Include="Source\PC\Views\Controls\Panel.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Source\PC\Views\MainWindow.xaml">
       <SubType>Designer</SubType>

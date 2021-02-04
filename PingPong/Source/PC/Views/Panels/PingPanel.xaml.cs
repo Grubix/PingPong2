@@ -52,6 +52,14 @@ namespace PingPong {
                 stopBtn.IsEnabled = true;
                 copyMovementsCheck.IsEnabled = false;
 
+                setBounceHeightBtn.IsEnabled = true;
+                setXRegBtn.IsEnabled = true;
+                setYRegBtn.IsEnabled = true;
+
+                if ((bool)copyMovementsCheck.IsChecked) {
+                    robot2.MovementChanged += CopyMovements;
+                }
+
                 Started?.Invoke();
             };
 
@@ -59,7 +67,12 @@ namespace PingPong {
                 startBtn.IsEnabled = true;
                 stopBtn.IsEnabled = false;
                 copyMovementsCheck.IsEnabled = true;
-                    //robot1PingApp.Start();
+
+                setBounceHeightBtn.IsEnabled = false;
+                setXRegBtn.IsEnabled = false;
+                setYRegBtn.IsEnabled = false;
+
+                robot2.MovementChanged -= CopyMovements;
 
                 optiTrack.Uninitialize();
                 robot1.Uninitialize();
@@ -87,8 +100,22 @@ namespace PingPong {
             };
         }
 
-        private void CopyMovements() {
-            //TODO:
+        private void CopyMovements(object sender, MovementChangedEventArgs args) {
+            RobotMovement[] movementsStack = new RobotMovement[args.MovementsStack.Length];
+
+            for (int i = 0; i < args.MovementsStack.Length; i++) {
+                RobotMovement movement = args.MovementsStack[i];
+                RobotVector tPos = movement.TargetPosition;
+                RobotVector tVel = movement.TargetVelocity;
+
+                movementsStack[i] = new RobotMovement(
+                    targetPosition: new RobotVector(tPos.Y, tPos.X / 2.0, tPos.Z, robot2.HomePosition.ABC),
+                    targetVelocity: new RobotVector(0, 0, tVel.Z),
+                    targetDuration: movement.TargetDuration
+                );
+            }
+
+            robot2.MoveTo(movementsStack);
         }
 
         public void DisableUIUpdates() {
@@ -107,6 +134,11 @@ namespace PingPong {
                 args.ActualBallPosition[2], args.PredictedBallPosition[2],
                 args.ActualRobotPosition.X, args.ActualRobotPosition.Y, args.ActualRobotPosition.Z,
                 args.ActualRobotPosition.A, args.ActualRobotPosition.B, args.ActualRobotPosition.C
+            });
+
+            Dispatcher.Invoke(() => {
+                bouncesCounter.Text = args.BounceCounter.ToString();
+                lastBounceHeight.Text = args.LastBounceHeight.ToString("F3");
             });
         }
 
@@ -141,7 +173,17 @@ namespace PingPong {
             startBtn.Click += Start;
             stopBtn.Click += Stop;
 
-            //TODO: settery
+            setXRegBtn.Click += (s, e) => {
+                robot1PingApp.XAxisRegulatorParams = (double.Parse(xRegulatorP.Text), double.Parse(xRegulatorI.Text));
+            };
+
+            setYRegBtn.Click += (s, e) => {
+                robot1PingApp.YAxisRegulatorParams = (double.Parse(yRegulatorP.Text), double.Parse(yRegulatorI.Text));
+            };
+
+            setBounceHeightBtn.Click += (s, e) => {
+                robot1PingApp.TargetBounceHeigth = double.Parse(targetBounceHeight.Text);
+            };
 
             activeChart = robot1PingChart;
             tabControl.SelectionChanged += (s, e) => {
@@ -170,8 +212,6 @@ namespace PingPong {
                 if ((bool)copyMovementsCheck.IsChecked && !robot2.IsInitialized()) {
                     robot2.Initialize();
                 }
-
-                robot1PingApp.Start();
 
                 startBtn.IsEnabled = false;
                 stopBtn.IsEnabled = true;

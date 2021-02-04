@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 namespace PingPong.Applications {
     public class PingApp : IApplication<PingDataReadyEventArgs> {
 
+        private readonly object settingsSyncLock = new object();
+
         private readonly Robot robot;
 
         private readonly OptiTrackSystem optiTrack;
@@ -18,15 +20,13 @@ namespace PingPong.Applications {
 
         private readonly Func<Vector<double>, bool> checkFunction;
 
-        private readonly Vector<double> upVector = Vector<double>.Build.DenseOfArray(new double[] { 0, 0, 1 });
-
-        private readonly int bufferSize = 5;
-
         private readonly List<Vector<double>> samplesBuffer = new List<Vector<double>>();
 
         private readonly PIRegulator regB;
 
         private readonly PIRegulator regC;
+
+        private readonly PIRegulator regZ;
 
         private CancellationTokenSource cts;
 
@@ -34,9 +34,37 @@ namespace PingPong.Applications {
 
         private bool waitingForBallToHit;
 
-        private int counter = 0;
+        private int bouncesCounter;
 
         private double elapsedTime;
+
+        private double currentBounceHeight;
+
+        public (double Kp, double Ki) XAxisRegulatorParams {
+            set {
+                lock (settingsSyncLock) {
+                    regB.SetParams(value.Kp, value.Ki, regB.SetPoint);
+                }
+            }
+        }
+
+        public (double Kp, double Ki) YAxisRegulatorParams {
+            set {
+                lock (settingsSyncLock) {
+                    regC.SetParams(value.Kp, value.Ki, regC.SetPoint);
+                }
+            }
+        }
+
+        public double TargetBounceHeigth {
+            set {
+                lock (settingsSyncLock) {
+                    regZ.SetParams(regZ.Kp, regZ.Ki, value);
+                }
+            }
+        }
+
+        #region events
 
         public event EventHandler Started;
 
@@ -44,14 +72,18 @@ namespace PingPong.Applications {
 
         public event EventHandler<PingDataReadyEventArgs> DataReady;
 
+        #endregion
+
         public PingApp(Robot robot, OptiTrackSystem optiTrack, Func<Vector<double>, bool> checkFunction) {
             this.robot = robot;
             this.optiTrack = optiTrack;
             this.checkFunction = checkFunction;
 
-            regB = new PIRegulator(0.002, 0.006, 0.44);
-            regC = new PIRegulator(0.002, 0.006, 900);
+            regB = new PIRegulator(0.008, 0.04, 0.44);
+            regC = new PIRegulator(0.008, 0.04, 900);
+            regZ = new PIRegulator(0.008, 0.04, 1000);
 
+            currentBounceHeight = 1000;
             prediction = new HitPrediction();
             prediction.Reset(180);
         }
@@ -160,7 +192,8 @@ namespace PingPong.Applications {
                 ActualBallPosition = ballPosition,
                 ActualRobotPosition = robot.Position,
                 PredictedTimeToHit = prediction.TimeToHit,
-                BounceCounter = counter
+                BounceCounter = bouncesCounter,
+                LastBounceHeight = currentBounceHeight
             };
 
             bool positionChanged =
@@ -181,7 +214,7 @@ namespace PingPong.Applications {
                 prediction.Reset(180);
                 elapsedTime = 0;
 
-                if (samplesBuffer.Count == bufferSize) {
+                if (samplesBuffer.Count == 5) {
                     samplesBuffer.Add(ballPosition);
                     samplesBuffer.RemoveAt(0);
                 } else {
@@ -210,24 +243,55 @@ namespace PingPong.Applications {
             data.PredictedBallVelocity = prediction.Velocity;
             data.PredictedTimeToHit = prediction.TimeToHit;
 
+            samplesBuffer.Add(ballPosition);
+
+            if (samplesBuffer.Count == 5) {
+                samplesBuffer.RemoveAt(0);
+
+                bool bounceHeightFound = true;
+
+                for (int i = 1; i < samplesBuffer.Count; i++) {
+                    if (samplesBuffer[i][2] >= samplesBuffer[i - 1][2]) {
+                        bounceHeightFound = false;
+                        break;
+                    }
+                }
+
+                if (bounceHeightFound) {
+                    currentBounceHeight = samplesBuffer[0][2];
+                    data.LastBounceHeight = currentBounceHeight;
+                }
+            }
+
             if (prediction.IsReady) {
-                if (prediction.TimeToHit >= 0.2) {
+                if (prediction.TimeToHit >= 0.25) {
+                    var upVector = Vector<double>.Build.DenseOfArray(new double[] { 0, 0, 1 });
                     var paddleNormalVector = upVector - Normalize(prediction.Velocity);
 
                     double angleB = Math.Atan2(paddleNormalVector[0], paddleNormalVector[2]) * 180.0 / Math.PI - 0.89;
                     double angleC = -90.0 - Math.Atan2(paddleNormalVector[1], paddleNormalVector[2]) * 180.0 / Math.PI - 0.5;
+                    double speedZ = 450.0;
+                    //speed = (Math.Sqrt(2.0 * 9.81 * (regZ.SetPoint - 180.0) * 1000) + prediction.Velocity[2] * 0.8) / (1 + 0.8);
 
-                    angleB += regB.ComputeU(prediction.Position[0]);
-                    angleC -= regC.ComputeU(prediction.Position[1]);
+                    lock (settingsSyncLock) {
+                        angleB += regB.ComputeU(prediction.Position[0]);
+                        angleC -= regC.ComputeU(prediction.Position[1]);
+                        //speed += regZ.ComputeU(currentBounceHeight);
+                    }
+
+                    var fallDir = Vector<double>.Build.DenseOfArray(new double[] {
+                        prediction.Velocity[0] - 0,
+                        prediction.Velocity[1] - 0,
+                        prediction.Velocity[2] - speedZ
+                    });
+
                     angleB = Math.Min(Math.Max(angleB, -15.0), 15.0);
                     angleC = Math.Min(Math.Max(angleC, -100.0), -80.0);
+                    speedZ = Math.Min(Math.Max(speedZ, 450.0), 600.0); // DOBRZE TEN ZAKRES ?
 
-                    Console.WriteLine("B: " + angleB + " w tym reg: " + regB.ComputeU(prediction.Position[0]));
-                    Console.WriteLine("C: " + angleC + " w tym reg: " + regC.ComputeU(prediction.Position[1]));
-
-                    if (angleB == -15.0 || angleB == 15.0 || angleC == -100.0 || angleC == -80.0) {
-                        Console.WriteLine("NASYCENIE na kącie!!!!!!!!!");
-                    }
+                    //if (angleB == -15.0 || angleB == 15.0 || angleC == -100.0 || angleC == -80.0) {
+                    //    Console.WriteLine("NASYCENIE na kącie!!!!!!!!!");
+                    //}
 
                     double dampCoeff = 1;
 
@@ -245,13 +309,13 @@ namespace PingPong.Applications {
                         robotActualPosition.C + (angleC - robotActualPosition.C) * dampCoeff
                     );
 
-                    RobotVector robotTargetVelocity = new RobotVector(0, 0, 450);
+                    RobotVector robotTargetVelocity = new RobotVector(0, 0, speedZ);
 
                     if (robot.Limits.CheckMovement(robotTargetPosition, robotTargetVelocity, prediction.TimeToHit)) {
                         RobotMovement movement1 = new RobotMovement(robotTargetPosition, robotTargetVelocity, prediction.TimeToHit);
                         RobotMovement movement2;
 
-                        if (counter > 3) {
+                        if (bouncesCounter > 3) {
                             movement2 = new RobotMovement(
                                 new RobotVector(robotActualPosition.X, robotActualPosition.Y, prediction.TargetHitHeight - 10, robot.HomePosition.ABC),
                                 RobotVector.Zero,
@@ -266,10 +330,13 @@ namespace PingPong.Applications {
                 } else {
                     regB.Shift();
                     regC.Shift();
+                    regZ.Shift();
                     waitingForBallToHit = true;
                     prediction.Reset(180);
                     elapsedTime = 0;
-                    counter++;
+                    bouncesCounter++;
+
+                    data.BounceCounter = bouncesCounter;
                 }
             }
 

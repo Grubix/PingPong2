@@ -69,31 +69,6 @@ namespace PingPong {
                     ShowErrorDialog($"An exception was raised on the robot ({args.RobotIp}) thread.", args.Exception);
                 };
 
-                // symetric movement of 2nd robot
-
-               /* robot.MovementChanged += (sender, args) => {
-                    RobotMovement[] movementsStack = new RobotMovement[args.MovementsStack.Length];
-
-                    for (int i = 0; i < args.MovementsStack.Length; i++) {
-                        RobotMovement movement = args.MovementsStack[i];
-                        RobotVector tPos = movement.TargetPosition;
-                        RobotVector tVel = movement.TargetVelocity;
-
-                        movementsStack[i] = new RobotMovement(
-                            targetPosition: new RobotVector(tPos.Y, tPos.X / 2.0, tPos.Z, robot2.HomePosition.ABC),
-                            targetVelocity: new RobotVector(0, 0, tVel.Z),
-                            targetDuration: movement.TargetDuration
-                        );
-                    }
-
-                        robot2.MoveTo(movementsStack);
-                };*/
-
-
-
-
-
-
                 pingPanel.Started += () => {
                     robot1Panel.DisableUIUpdates();
                     robot2Panel.DisableUIUpdates();
