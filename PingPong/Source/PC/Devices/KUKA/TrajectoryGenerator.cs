@@ -270,6 +270,7 @@ namespace PingPong.KUKA {
                     return new RobotVector(nx, ny, nz, na, nb, nc) - Position;
                 } else {
                     IsTargetPositionReached = true;
+
                     return RobotVector.Zero;
                 }
             }

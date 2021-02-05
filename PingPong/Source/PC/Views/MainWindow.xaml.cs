@@ -1,4 +1,5 @@
-﻿using PingPong.KUKA;
+﻿using PingPong.Applications;
+using PingPong.KUKA;
 using PingPong.OptiTrack;
 using System;
 using System.Globalization;
@@ -15,7 +16,7 @@ namespace PingPong {
             InitializeComponent();
             mainWindowHanlde = this;
 
-            // Set timer resolution to 1ms (default is 15.6ms)
+            // Set timers resolution to 1ms (default resolution is 15.6ms)
             WinApi.TimeBeginPeriod(1);
 
             // Force change number separator to dot
@@ -34,25 +35,27 @@ namespace PingPong {
                 try {
                     robot1Panel.LoadConfig(Path.Combine(App.ConfigDir, "robot1.config.json"));
                 } catch (Exception) {
+                    // Ignore exception
                 }
 
                 try {
                     robot2Panel.LoadConfig(Path.Combine(App.ConfigDir, "robot2.config.json"));
                 } catch (Exception) {
+                    // Ignore exception
                 }
 
-                Robot robot = robot1Panel.Robot;
+                Robot robot1 = robot1Panel.Robot;
                 Robot robot2 = robot2Panel.Robot;
                 OptiTrackSystem optiTrack = optiTrackPanel.OptiTrack;
 
-                optiTrackPanel.Initialize(robot, robot2);
-                pingPongPanel.Initialize(robot, robot2, optiTrack);
+                optiTrackPanel.Initialize(robot1, robot2);
+                pingPanel.Initialize(robot1, robot2, optiTrack);
 
-                robot.ErrorOccured += (sender, args) => {
+                robot1.ErrorOccured += (sender, args) => {
                     robot1Panel.ForceFreezeCharts();
                     robot2Panel.ForceFreezeCharts();
                     optiTrackPanel.ForceFreezeCharts();
-                    pingPongPanel.ForceFreezeCharts();
+                    pingPanel.ForceFreezeCharts();
 
                     ShowErrorDialog($"An exception was raised on the robot ({args.RobotIp}) thread.", args.Exception);
                 };
@@ -61,38 +64,25 @@ namespace PingPong {
                     robot1Panel.ForceFreezeCharts();
                     robot2Panel.ForceFreezeCharts();
                     optiTrackPanel.ForceFreezeCharts();
-                    pingPongPanel.ForceFreezeCharts();
+                    pingPanel.ForceFreezeCharts();
 
                     ShowErrorDialog($"An exception was raised on the robot ({args.RobotIp}) thread.", args.Exception);
                 };
 
-                // symetric movement of 2nd robot
-
-                robot.MovementChanged += (sender, args) => {
-                    RobotMovement[] movementsStack = new RobotMovement[args.MovementsStack.Length];
-
-                    for (int i = 0; i < args.MovementsStack.Length; i++) {
-                        RobotMovement movement = args.MovementsStack[i];
-                        RobotVector tPos = movement.TargetPosition;
-                        RobotVector tVel = movement.TargetVelocity;
-
-                        movementsStack[i] = new RobotMovement(
-                            targetPosition: new RobotVector(tPos.Y, tPos.X / 2.0, tPos.Z, robot2.HomePosition.ABC),
-                            targetVelocity: new RobotVector(0, 0, tVel.Z),
-                            targetDuration: movement.TargetDuration
-                        );
-                    }
-
-                        robot2.MoveTo(movementsStack);
+                pingPanel.Started += () => {
+                    robot1Panel.DisableUIUpdates();
+                    robot2Panel.DisableUIUpdates();
+                    optiTrackPanel.DisableUIUpdates();
                 };
 
-
-
-
-
+                pingPanel.Stopped += () => {
+                    robot1Panel.EnableUIUpdates();
+                    robot2Panel.EnableUIUpdates();
+                    optiTrackPanel.EnableUIUpdates();
+                };
             };
 
-            // Shrink window if it is too wide or too high
+            // Shrink window if it's too wide or too high
             double windowWidth = Width;
             double windowHeight = Height;
 
@@ -116,7 +106,7 @@ namespace PingPong {
 
         public static void ShowErrorDialog(string errorMessage, Exception exception = null) {
             if (exception != null) {
-                errorMessage += $"\nOriginal error: \"{exception.Message}\"";
+                errorMessage += $"\nOriginal error: \"{exception}\"";
             }
 
             if (mainWindowHanlde != null) {

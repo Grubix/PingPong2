@@ -46,6 +46,8 @@ namespace PingPong.KUKA {
             }
         }
 
+        #region Properties
+
         public RobotConfig Config {
             get {
                 return config;
@@ -160,7 +162,11 @@ namespace PingPong.KUKA {
                 }
             }
         }
-        
+
+        #endregion
+
+        #region Events
+
         public event EventHandler Initialized;
 
         public event EventHandler Uninitialized;
@@ -172,6 +178,8 @@ namespace PingPong.KUKA {
         public event EventHandler<ErrorOccuredEventArgs> ErrorOccured;
 
         public event EventHandler<MovementChangedEventArgs> MovementChanged;
+
+        #endregion
 
         public Robot() {
             rsiAdapter = new RSIAdapter();
@@ -185,10 +193,13 @@ namespace PingPong.KUKA {
             this.config = config;
         }
 
+        #region Communication methods
+
         private async Task Connect() {
             cts = new CancellationTokenSource();
             IsCancellationRequested = false;
             InputFrame receivedFrame = null;
+            isInitialized = true;
 
             // Connect with the robot
             try {
@@ -216,8 +227,6 @@ namespace PingPong.KUKA {
             };
 
             rsiAdapter.SendData(response);
-
-            isInitialized = true;
             Initialized?.Invoke(this, EventArgs.Empty);
 
             // Start loop for receiving and sending data
@@ -302,6 +311,10 @@ namespace PingPong.KUKA {
                 TargetDuration = targetDuration
             });
         }
+
+        #endregion
+
+        #region Movement methods
 
         public void MoveTo(RobotMovement[] movementsStack) {
             lock (forceMoveSyncLock) {
@@ -393,6 +406,8 @@ namespace PingPong.KUKA {
             ForceMoveTo(Position + deltaPosition, targetVelocity, targetDuration);
         }
 
+        #endregion
+
         public void Initialize() {
             if (isInitialized) {
                 return;
@@ -425,6 +440,10 @@ namespace PingPong.KUKA {
         }
 
         public void Uninitialize() {
+            if (!isInitialized) {
+                return;
+            }
+
             if (cts != null) {
                 cts.Cancel();
             }

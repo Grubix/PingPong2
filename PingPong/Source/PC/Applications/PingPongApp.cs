@@ -20,5 +20,6 @@ namespace PingPong.Applications {
         public void Stop() {
             throw new NotImplementedException();
         }
+
     }
 }

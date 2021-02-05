@@ -3,7 +3,7 @@ using PingPong.KUKA;
 using System;
 
 namespace PingPong.Applications {
-    class PingDataReadyEventArgs : EventArgs {
+    public class PingDataReadyEventArgs : EventArgs {
 
         public Vector<double> PredictedBallPosition { get; set; }
 
@@ -15,11 +15,11 @@ namespace PingPong.Applications {
 
         public double PredictedTimeToHit { get; set; }
 
-        public double BallSetpointX { get; set; }
+        public double LastBounceHeight { get; set; }
 
-        public double BallSetpointY { get; set; }
+        public double TargetBounceHeight { get; set; }
 
-        public double BallSetpointZ { get; set; }
+        public int BounceCounter { get; set; }
 
     }
 }

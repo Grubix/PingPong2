@@ -10,22 +10,20 @@
 
         private double e0, e1;
 
-        private double Ts;
+        public double Ts { get; private set; } = 0.004;
 
-        public double Kp { get; }
+        public double Kp { get; private set; }
 
-        public double Ki { get; }
+        public double Ki { get; private set; }
 
-        public double setPoint { get; }
+        public double SetPoint { get; private set; }
 
-        public PIRegulator(double kp, double ki, double setPoint, double Ts = 0.004) {
-            Kp = kp;
-            Ki = ki;
-            this.Ts = Ts;
-            this.setPoint = setPoint;
-            u1 = e1 = 0.0;
+        public PIRegulator() {
 
-            CalculateCoeffs();
+        }
+
+        public PIRegulator(double kp, double ki, double setPoint) {
+            SetParams(kp, ki, setPoint);
         }
 
         private void CalculateCoeffs() {
@@ -41,14 +39,23 @@
             ke1 = b1 / a0;
         }
 
-        public double ComputeU(double feedback, double Ts = -1) {
-            if (Ts != -1) {
-                this.Ts = Ts;
+        public void SetParams(double kp, double ki, double setPoint) {
+            Kp = kp;
+            Ki = ki;
+            SetPoint = setPoint;
+            //u1 = e1 = 0.0; //TODO: TO TU TAK POWINNO BYC ?
+
+            CalculateCoeffs();
+        }
+
+        public double ComputeU(double feedback, double ts = -1) {
+            if (ts != -1) {
+                Ts = ts;
                 CalculateCoeffs();
             }
-            e0 = setPoint - feedback;
+            e0 = SetPoint - feedback;
             u0 = ke0 * e0 + ke1 * e1 - ku1 * u1;
-            u0 = Kp * e0;
+            //u0 = Kp * e0;
 
             return u0;
         }
@@ -57,5 +64,6 @@
             e1 = e0;
             u1 = u0;
         }
+
     }
 }

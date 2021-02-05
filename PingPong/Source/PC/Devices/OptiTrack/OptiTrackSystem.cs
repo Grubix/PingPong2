@@ -1,4 +1,5 @@
-﻿using NatNetML;
+﻿using MathNet.Numerics.LinearAlgebra;
+using NatNetML;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -12,6 +13,8 @@ namespace PingPong.OptiTrack {
 
         private double frameTimestamp;
 
+        private Vector<double> ballPosition;
+
         public event EventHandler Initialized;
 
         public event EventHandler Uninitialized;
@@ -23,16 +26,20 @@ namespace PingPong.OptiTrack {
         public OptiTrackSystem(int connectionType = 0) {
             natNetClient = new NatNetClientML(connectionType);
             ServerDescription = new ServerDescription();
+            ballPosition = Vector<double>.Build.Dense(3);
         }
 
         private void ProcessFrame(FrameOfMocapData data, NatNetClientML client) {
             double frameDeltaTime = data.fTimestamp - frameTimestamp;
             frameTimestamp = data.fTimestamp;
 
+            var receivedFrame = new InputFrame(data, frameDeltaTime);
             var args = new FrameReceivedEventArgs {
-                ReceivedFrame = new InputFrame(data, frameDeltaTime)
+                ReceivedFrame = receivedFrame,
+                PrevBallPosition = ballPosition
             };
 
+            ballPosition = receivedFrame.BallPosition;
             FrameReceived?.Invoke(this, args);
         }
 

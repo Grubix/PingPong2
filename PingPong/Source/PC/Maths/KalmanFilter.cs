@@ -16,13 +16,13 @@ namespace PingPong.Maths {
         public Vector<double> CorrectedState { get; private set; }
 
         public KalmanFilter(KalmanModel model) {
-            Matrix<double> F = model.F;
-            Matrix<double> B = model.B;
-            Matrix<double> H = model.H;
-            Matrix<double> Q = model.Q;
-            Matrix<double> R = model.R;
-
             //TODO: sprawdzenie wymiarow macierzy modelu
+            //Matrix<double> F = model.F;
+            //Matrix<double> B = model.B;
+            //Matrix<double> H = model.H;
+            //Matrix<double> Q = model.Q;
+            //Matrix<double> R = model.R;
+
             //if (F.RowCount != F.ColumnCount) {
             //    //TODO: Err A -> kwadrat
             //}

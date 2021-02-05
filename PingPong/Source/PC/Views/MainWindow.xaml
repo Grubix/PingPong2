@@ -22,8 +22,8 @@
         <TabItem Header="OptiTrack">
             <local:OptiTrackPanel x:Name="optiTrackPanel"/>
         </TabItem>
-        <TabItem Header="PingPong app">
-            <local:PingPongPanel x:Name="pingPongPanel"/>
+        <TabItem Header="Ping app">
+            <local:PingPanel x:Name="pingPanel"/>
         </TabItem>
     </TabControl>
 </Window>
