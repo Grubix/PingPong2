@@ -45,18 +45,26 @@ namespace PingPong {
                 return ballPosition[0] < 1000.0 && ballPosition[2] > 600.0;
             });
 
+            bool checkboxChecked = false;
+
+            copyMovementsCheck.Checked += (s, e) => {
+                checkboxChecked = (bool)copyMovementsCheck.IsChecked;
+            };
+
             robot1PingApp.DataReady += UpdateUI;
 
             robot1PingApp.Started += (s, e) => {
-                startBtn.IsEnabled = false;
-                stopBtn.IsEnabled = true;
-                copyMovementsCheck.IsEnabled = false;
+                Dispatcher.Invoke(() => {
+                    startBtn.IsEnabled = false;
+                    stopBtn.IsEnabled = true;
+                    copyMovementsCheck.IsEnabled = false;
 
-                setBounceHeightBtn.IsEnabled = true;
-                setXRegBtn.IsEnabled = true;
-                setYRegBtn.IsEnabled = true;
+                    setBounceHeightBtn.IsEnabled = true;
+                    setXRegBtn.IsEnabled = true;
+                    setYRegBtn.IsEnabled = true;
+                });
 
-                if ((bool)copyMovementsCheck.IsChecked) {
+                if (checkboxChecked) {
                     robot2.MovementChanged += CopyMovements;
                 }
 
@@ -64,13 +72,15 @@ namespace PingPong {
             };
 
             robot1PingApp.Stopped += (s, e) => {
-                startBtn.IsEnabled = true;
-                stopBtn.IsEnabled = false;
-                copyMovementsCheck.IsEnabled = true;
+                Dispatcher.Invoke(() => {
+                    startBtn.IsEnabled = true;
+                    stopBtn.IsEnabled = false;
+                    copyMovementsCheck.IsEnabled = true;
 
-                setBounceHeightBtn.IsEnabled = false;
-                setXRegBtn.IsEnabled = false;
-                setYRegBtn.IsEnabled = false;
+                    setBounceHeightBtn.IsEnabled = false;
+                    setXRegBtn.IsEnabled = false;
+                    setYRegBtn.IsEnabled = false;
+                });
 
                 robot2.MovementChanged -= CopyMovements;
 
@@ -81,20 +91,27 @@ namespace PingPong {
                 Stopped?.Invoke();
             };
 
+            bool startBtnEnabled = false;
+            startBtn.Click += (s, e) => startBtnEnabled = startBtn.IsEnabled;
+
             robot1.Initialized += (s, e) => {
-                if ((bool)copyMovementsCheck.IsChecked) {
-                    if (robot2.IsInitialized()) {
+                if (!startBtnEnabled) {
+                    if (checkboxChecked) {
+                        if (robot2.IsInitialized()) {
+                            robot1PingApp.Start();
+                        }
+                    } else {
                         robot1PingApp.Start();
                     }
-                } else {
-                    robot1PingApp.Start();
                 }
             };
 
             robot2.Initialized += (s, e) => {
-                if ((bool)copyMovementsCheck.IsChecked) {
-                    if (robot1.IsInitialized()) {
-                        robot1PingApp.Start();
+                if (!startBtnEnabled) {
+                    if (checkboxChecked) {
+                        if (robot1.IsInitialized()) {
+                            robot1PingApp.Start();
+                        }
                     }
                 }
             };
@@ -128,7 +145,7 @@ namespace PingPong {
 
         private void UpdateUI(object sender, PingDataReadyEventArgs args) {
             robot1PingChart.Update(new double[] {
-                args.PredictedTimeToHit,
+                args.PredictedTimeToHit, args.TargetBounceHeight,
                 args.ActualBallPosition[0], args.PredictedBallPosition[0],
                 args.ActualBallPosition[1], args.PredictedBallPosition[1],
                 args.ActualBallPosition[2], args.PredictedBallPosition[2],
@@ -145,7 +162,8 @@ namespace PingPong {
         private void InitializeCharts() {
             robot1PingChart.Title = "Ping app";
 
-            robot1PingChart.AddSeries("Pred. time to hit [s]", "T_Hpr", false, true);
+            robot1PingChart.AddSeries("Pred. time to hit [s]", "T_Hpr", false);
+            robot1PingChart.AddSeries("Target bounce height", "B_H", false, true);
 
             robot1PingChart.AddSeries("Ball position X [mm]", "X_B", true);
             robot1PingChart.AddSeries("Ball pred. position X [mm]", "X_Bpr", false, true);

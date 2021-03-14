@@ -56,10 +56,12 @@ namespace PingPong.Applications {
             }
         }
 
+        private double targetBounceHeight = 1000;
+
         public double TargetBounceHeigth {
             set {
                 lock (settingsSyncLock) {
-                    regZ.SetParams(regZ.Kp, regZ.Ki, value);
+                    targetBounceHeight = value;
                 }
             }
         }
@@ -193,7 +195,8 @@ namespace PingPong.Applications {
                 ActualRobotPosition = robot.Position,
                 PredictedTimeToHit = prediction.TimeToHit,
                 BounceCounter = bouncesCounter,
-                LastBounceHeight = currentBounceHeight
+                LastBounceHeight = currentBounceHeight,
+                TargetBounceHeight = targetBounceHeight
             };
 
             bool positionChanged =
@@ -227,7 +230,7 @@ namespace PingPong.Applications {
                     if (samplesBuffer[i][2] <= samplesBuffer[i - 1][2]) {
                         DataReady?.Invoke(this, data);
                         return;
-                    }
+                    }   
                 }
 
                 samplesBuffer.Clear();

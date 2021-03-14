@@ -17,6 +17,8 @@ namespace PingPong.Applications {
 
         public double LastBounceHeight { get; set; }
 
+        public double TargetBounceHeight { get; set; }
+
         public int BounceCounter { get; set; }
 
     }
